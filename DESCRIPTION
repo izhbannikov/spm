@@ -1,0 +1,10 @@
+Package: spm
+Type: Package
+Title: Stochastic Process Modeling (SPM)
+Version: 1.0
+Date: 2015-06-18
+Author: I. Y. Zhbannikov
+Maintainer: Who to complain to <zhbannikov.ilya@gmail.com>
+Description: Stochastic Process Modeling
+License: GPL
+Depends: deSolve
