@@ -1,5 +1,5 @@
 simdata <-
-function(N=10, aH=-0.5, f1H=80, fH=80, bH=10, QH=1e-05, mu0H=2e-05, thetaH=0.08,m0=80, nj=10, step=0.05, trange=c(65,80), yrange = c(60,100), sd0=4) {
+function(N=10, aH=-0.05, f1H=80, fH=80, bH=10, QH=1e-05, mu0H=2e-05, thetaH=0.08,m0=80, nj=10, step=0.05, trange=c(65,80), yrange = c(60,100), sd0=4) {
   trapezoid <- function(fun, a, b, n=100,t) {
     h <- (b-a)/n
     x <- seq(a,b,by=h)
@@ -19,15 +19,15 @@ function(N=10, aH=-0.5, f1H=80, fH=80, bH=10, QH=1e-05, mu0H=2e-05, thetaH=0.08,
   }
   
   myfunc <- function(t, y, parms) {
-    dy1 <- aH*(y[1] - f1H) - 2*y[2]*Q(t)*(y[1] - fH)
+    dy1 <- -1*aH*(y[1] - f1H) + 2*y[2]*Q(t)*(y[1] - fH)
     dy2 <- 2*aH*y[2] + bH^2 - 2*y[2]^2*Q(t)
     list(c(dy1, dy2))
   }
   
-  mu <- function(t,idx) {
-    mu <- mu0(t) + Q(t)*(m[idx] - fH)^2 + Q(t)*gamma[idx]
-    mu
-  }
+  #mu <- function(t,idx) {
+  #  mu <- mu0(t) + Q(t)*(m[idx] - fH)^2 + Q(t)*gamma[idx]
+  #  mu
+  #}
   
   new_person <- T
   data <- matrix(nrow=1,ncol=5,0)
@@ -52,11 +52,19 @@ function(N=10, aH=-0.5, f1H=80, fH=80, bH=10, QH=1e-05, mu0H=2e-05, thetaH=0.08,
       gamma <- out[,3]
       #print(m)
       #print(gamma)
-      S <- exp(-1*trapezoid(mu, 1,2,n=1,t2))
+      
+      mu <- c(0,0)
+      mu[1] <- mu0(t1) + Q(t1)*(m[1] - fH)^2 + Q(t1)*gamma[1]
+      mu[2] <- mu0(t2) + Q(t2)*(m[2] - fH)^2 + Q(t2)*gamma[2]
+      s <- (sum(mu)/2)*(t2-t1)
+      
+      S <- exp(-1*s)
+    
+      #S <- exp(-1*trapezoid(mu, 1,2,n=1,t2))
       #print(S)
       
       xi <- 0
-      if (S < runif(1,0,1)) {
+      if (S < runif(1,0.95,1)) {
         xi <- 0
       } else {
         xi <- 1
@@ -83,8 +91,16 @@ function(N=10, aH=-0.5, f1H=80, fH=80, bH=10, QH=1e-05, mu0H=2e-05, thetaH=0.08,
       out <- euler(times = c(t1,t2), y = c(y1, 0), func = myfunc, parms = NULL)
       m <- out[,2]
       gamma <- out[,3]
-      S <- exp(-1*trapezoid(mu, 1,2,n=1,t2))
       
+      mu <- c(0,0)
+      mu[1] <- mu0(t1) + Q(t1)*(m[1] - fH)^2 + Q(t1)*gamma[1]
+      mu[2] <- mu0(t2) + Q(t2)*(m[2] - fH)^2 + Q(t2)*gamma[2]
+      s <- (sum(mu)/2)*(t2-t1)
+      
+      S <- exp(-1*s)
+      
+      #S <- exp(-1*trapezoid(mu, 1,2,n=1,t2))
+      #print(S)
       xi <- 0
       if (S < runif(1,0,1)) {
         xi <- 0
