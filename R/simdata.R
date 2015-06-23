@@ -219,5 +219,6 @@ function(N=10, aH=-0.05, f1H=80, fH=80, bH=5, QH=2e-07, mu0H=2e-05, thetaH=0.08,
   
   # One last step:
   data <- data[2:dim(data)[1],]
+  colnames(data) <- c("id","xi","t1","t2","y1","y2")
   data
 }
