@@ -1,5 +1,21 @@
 simdata <-
-function(N=10, aH=-0.05, f1H=80, fH=80, bH=5, QH=2e-07, mu0H=2e-05, thetaH=0.08,m0=80, nj=10, step=0.05, trange=c(65,80), yrange = c(60,100), sd0=4) {
+function(N=10, aH=-0.05, f1H=80, fH=80, bH=5, QH=2e-07, mu0H=2e-05, thetaH=0.08,m0=80, nj=10, step=0.05, trange=c(65,80), yrange = c(60,100), sd0=4, suvt=0.995) {
+  
+  #N=1
+  #aH=-0.05 
+  #f1H=80
+  #fH=80 
+  #bH=5 
+  #QH=2e-07 
+  #mu0H=2e-05 
+  #thetaH=0.08
+  #m0=80
+  #nj=10 
+  #step=0.05 
+  #trange=c(65,80) 
+  #yrange = c(60,100) 
+  #sd0=4
+  #suvt=0.995
   
   Q <- function(t) {
     Q <- QH#*exp(thetaH*t)
@@ -25,8 +41,9 @@ function(N=10, aH=-0.05, f1H=80, fH=80, bH=5, QH=2e-07, mu0H=2e-05, thetaH=0.08,
   }
   
   new_person <- T
-  data <- matrix(nrow=1,ncol=5,0)
+  data <- matrix(nrow=1,ncol=6,0)
   record <- 1
+  id <- 1
   for(i in 1:N) {
     if(new_person == T) {
       t1 <- runif(1,trange[1], trange[2])
@@ -90,7 +107,7 @@ function(N=10, aH=-0.05, f1H=80, fH=80, bH=5, QH=2e-07, mu0H=2e-05, thetaH=0.08,
       #print(S)
       
       xi <- 0
-      if (S < runif(1,0.996,1)) {
+      if (S < runif(1,suvt,1)) {
         xi <- 0
       } else {
         xi <- 1
@@ -104,8 +121,12 @@ function(N=10, aH=-0.05, f1H=80, fH=80, bH=5, QH=2e-07, mu0H=2e-05, thetaH=0.08,
         new_person <- T
       }
       
-      data <- rbind(data, c(xi, t1, t2, y1, y2))
+      data <- rbind(data, c(id, xi, t1, t2, y1, y2))
       record <- record + 1
+      
+      if(new_person == T) {
+        id <- id + 1
+      }
     } 
     
     jj <- 1
@@ -164,7 +185,7 @@ function(N=10, aH=-0.05, f1H=80, fH=80, bH=5, QH=2e-07, mu0H=2e-05, thetaH=0.08,
       #print(S)
       
       xi <- 0
-      if (S < runif(1,0.996,1)) {
+      if (S < runif(1,suvt,1)) {
         xi <- 0
       } else {
         xi <- 1
@@ -179,14 +200,19 @@ function(N=10, aH=-0.05, f1H=80, fH=80, bH=5, QH=2e-07, mu0H=2e-05, thetaH=0.08,
       }
       
       if(runif(1,0,1) < 0.95) {
-        data <- rbind(data, c(xi, data[record,3], t2, data[record,5], y2))
+        data <- rbind(data, c(id, xi, data[record,4], t2, data[record,6], y2))
         record <- record + 1
       }
       
       jj <- jj + 1
-      if(jj == nj) {
+      if(jj == (nj+1)) {
         new_person <- T
       }
+      
+      if(new_person == T) {
+        id <- id + 1
+      }
+      
     }
     
   }
