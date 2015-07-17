@@ -1,10 +1,8 @@
 # Test spm
 source("~/Projects/spm/R/spmND.R")
-
-#source("Z:/iz12/Projects/spm/rscripts/simdata2-ND.R")
-
+source("~/Projects/spm/R/simdata.R")
+# Reading a database:
 sasdat <- read.sas7bdat("~/Projects/spm/data/fhsm1mortality.sas7bdat", debug=FALSE)
-#sasdat <- read.sas7bdat("~/Dropbox/spm/fhsm1mortality.sas7bdat", debug=FALSE)
 dat <- sasdat[,1] #pid
 dat <- cbind(dat, sasdat[,5]) #sta
 dat <- cbind(dat, sasdat[,3]) #tt1
@@ -30,7 +28,7 @@ dat <- cbind(dat, sasdat[,6]) #pp
 dat[2:dim(dat)[1],13] <- dat[1:(dim(dat)[1]-1),13]
 dat <- cbind(dat, sasdat[,6]) #pp
 
-
+# Estimating averages:
 averages = matrix(nrow=1,ncol=5)
 averages[1,1] = dat[1,5]
 averages[1,2] = dat[1,7]
@@ -38,6 +36,7 @@ averages[1,3] = dat[1,9]
 averages[1,4] = dat[1,11]
 averages[1,5] = dat[1,13]
 
+# Database should be in appropriate format:
 pid=dat[1,1]
 starttime = c(dat[1,3])
 for(i in 1:dim(dat)[1]) {
@@ -56,14 +55,8 @@ for(i in 1:dim(dat)[1]) {
   }
 }
 
-avg_dbp=mean(averages[,1])
-avg_dbp
-avg_gluc=mean(averages[,2],na.rm=T)
-avg_gluc
-mean(averages[,3],na.rm=T)
-mean(averages[,4],na.rm=T)
-mean(averages[,5],na.rm=T)
-tstart <- mean(starttime)
-
 #dat <- simdata2_ND(N=500,ystart=c(avg_dbp,avg_gluc,230, ),tstart=tstart, data_names = c())
-spm(dat, 5)
+ans <- spm(dat, 5)
+ystart <- c(mean(averages[,1], na.rm=T),mean(averages[,2],na.rm=T),mean(averages[,3],na.rm=T), mean(averages[,4],na.rm=T), mean(averages[,5],na.rm=T))
+simd <- simdata(u=ans$u, R=ans$R, epsilon=ans$eps, mu0=ans$mu0, b=ans$b, Q=ans$Q, theta=ans$theta, ystart=ystart, tstart=mean(starttime))
+head(simd)

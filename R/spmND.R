@@ -1,13 +1,11 @@
 library(stats)
 library(sas7bdat)
 
-
 spm <- function(dat,k=2, theta_range=seq(0.078,0.082,by=0.0001)) {
   options(digits=10)
   
   # Logistic regression:
   total_cols <- (1 + k + (k*(k+1))/2) + 2
-  #total_cols <- (1 + k + k*k) + 2
   result <- matrix(nrow=0, ncol=total_cols,0)
   for(theta in theta_range) {
     newdat <- dat[,2] # Outcome
@@ -39,8 +37,6 @@ spm <- function(dat,k=2, theta_range=seq(0.078,0.082,by=0.0001)) {
     colnames(newdat) <- cnames
     
     res <- glm(reg_formula , data=as.data.frame(newdat)) # -1 means no intercept
-    #print(theta)
-    #print(summary(res))
     coef <- res$coefficients 
     result <- rbind(result, c(theta, coef, logLik(res)[1]))
   }
