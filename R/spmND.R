@@ -1,6 +1,3 @@
-library(stats)
-library(sas7bdat)
-
 spm <- function(dat,k=2, theta_range=seq(0.078,0.082,by=0.0001)) {
   options(digits=10)
   

@@ -1,5 +1,9 @@
 exportPattern("^[[:alpha:]]+")
-
-# functions
-export(
- simdata)
+# Import required packages:
+import(stats)
+import(sas7bdat)
+import(mice) 
+#Export R-functions:
+export(simdata)
+export(prepare_data)
+export(spm)
