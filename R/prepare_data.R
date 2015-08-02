@@ -1,5 +1,6 @@
 # Preparing data for stochastic process model
-prepare_data <- function(interval=1, col.status="IndicatorDeath", col.id="ID", col.age="Age", col.age.next="AgeNext", covariates=c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height") ) {
+prepare_data <- function(longdat, interval=1, col.status="IndicatorDeath", col.id="ID", col.age="Age", col.age.next="AgeNext", covariates=c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height") ) {
+  longdat.nonan <- longdat
   
   fill_last <- function(x) {
     na_idx <- which(is.na(x))
@@ -69,5 +70,46 @@ prepare_data <- function(interval=1, col.status="IndicatorDeath", col.id="ID", c
   print("Filing missing values with multiple imputations:")
   tmp_ans=mice(ans)
   ans_final = complete(tmp_ans)
-  ans_final
+  
+  print("Making final table...")
+  ndim <- length(covariates)
+  averages = matrix(nrow=1,ncol=length(covariates))
+  
+  dat <- ans_final[,1] #pid
+  dat <- cbind(dat, ans_final[,2]) #sta (outcome)
+  dat <- cbind(dat, ans_final[,3]) #tt1 (t1)
+  dat <- cbind(dat, ans_final[,4]) #tt3 (t2)
+  
+  
+  j <- 0
+  i <- 0
+  for(i in 0:(length(covariates)-1)) {
+    dat <- cbind(dat, ans_final[,(5+i)]) 
+    dat[2:dim(dat)[1],(5+j)] <- dat[1:(dim(dat)[1]-1),(5+j)]
+    dat <- cbind(dat, ans_final[,(5+i)]) 
+    averages[1,(i+1)] = dat[1,(5+j)]
+    j <- j + 2
+  }
+  # Database should be in appropriate format:
+  pid=dat[1,1]
+  starttime = c(dat[1,3])
+  for(i in 1:dim(dat)[1]) {
+    if(dat[i,1] != pid) {
+      avg <- c()
+      for(ii in 0:(ndim-1)) {
+        dat[(i+2),(5+ii)] = dat[(i+1),(6+ii)]
+        avg <- c(avg, dat[i,(5+ii)])
+        ii <- ii + 2
+      }
+      averages <- rbind(averages,avg)
+      pid = dat[i,1]
+      starttime <- c(starttime, dat[i,3])
+    }
+    if(dat[i,2] > 1) {
+      dat[i,2] <- 1
+    }
+  }
+  
+  
+  dat
 }
