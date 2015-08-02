@@ -1,5 +1,5 @@
 # Preparing data for stochastic process model
-prepare_data <- function(longdat, interval=1, col.status="IndicatorDeath", col.id="ID", col.age="Age", col.age.next="AgeNext", covariates=c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height") ) {
+prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height") ) {
   longdat.nonan <- longdat
   
   fill_last <- function(x) {
@@ -22,6 +22,7 @@ prepare_data <- function(longdat, interval=1, col.status="IndicatorDeath", col.i
   par <- matrix(nrow=0, ncol=length(covariates))
   
   splitted <- split(longdat.nonan, longdat.nonan[[col.id]])
+  vitstat.splitted <- split(vitstat, vitstat[[col.id]])
   
   for(iii in 1:length(splitted)) {
     print(iii)
@@ -31,12 +32,12 @@ prepare_data <- function(longdat, interval=1, col.status="IndicatorDeath", col.i
     t1.approx <- matrix(ncol=4, nrow=nrows)
     t1.approx[,1] <- id
     t1.approx[,2] <- 0
-    t1.approx[nrows,2] <- splitted[[iii]][[col.status]][length(splitted[[iii]][[col.status]])] #Last value
+    t1.approx[nrows,2] <- vitstat.splitted[[iii]][[col.status]][1] #Last value
     t1.approx[,3] <- seq(splitted[[iii]][[col.age]][1], splitted[[iii]][[col.age]][length(splitted[[iii]][[col.age]])], by=dt)
     if(nrows > 1) {
-      t1.approx[,4] <- c(t1.approx[,3][2:nrows], splitted[[iii]][[col.age.next]][length(splitted[[iii]][[col.age.next]])])
+      t1.approx[,4] <- c(t1.approx[,3][2:nrows], vitstat.splitted[[iii]][[col.age.event]][1])
     } else {
-      t1.approx[,4] <- splitted[[iii]][[col.age.next]][1]
+      t1.approx[,4] <- vitstat.splitted[[iii]][[col.age.event]][1]
     }
     
     tt <- rbind(tt,t1.approx)
@@ -111,5 +112,5 @@ prepare_data <- function(longdat, interval=1, col.status="IndicatorDeath", col.i
   }
   
   
-  dat
+  list(ans,dat)
 }
