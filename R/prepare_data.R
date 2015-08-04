@@ -66,11 +66,12 @@ prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.
   ans=cbind(tt,par)
   colnames(ans) <- c("ID", "CASE", "T1", "T3", covariates)
   ans <- ans[rowSums(is.na(ans[,5:dim(ans)[2]]))!=length(covariates),]
-  #ans <- ans[which(is.na(ans)==F,arr.ind=TRUE)[,1],]
   
   print("Filing missing values with multiple imputations:")
-  tmp_ans=mice(ans)
-  ans_final = complete(tmp_ans)
+  
+  tmp_ans <- mice(ans[,5:dim(ans)[2]])
+  ans1 <- complete(tmp_ans)
+  ans_final <- cbind(ans[,1:4], ans1)
   
   print("Making final table...")
   ndim <- length(covariates)
