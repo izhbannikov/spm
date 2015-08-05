@@ -1,6 +1,26 @@
 # Preparing data for stochastic process model
-prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height") ) {
-  longdat.nonan <- longdat
+prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height"), verbose=T) {
+  
+  # Parsing input parameters in order to check for errors:
+  if( !(col.status %in% colnames(vitstat)) ) {
+    stop(paste("Status column",col.status, "not found in vitstat table. Aborting."))
+  }
+  if( !(col.id %in% colnames(vitstat) || col.id %in% colnames(longdat)) ) {
+    stop(paste("ID column",col.id, "not found in vitstat and/or longdat tables. Aborting."))
+  }
+  if( !(col.age %in% colnames(longdat)) ) {
+    stop(paste("Age column",col.age, "not found in longdat table. Aborting."))
+  }
+  if( !(col.age.event %in% colnames(vitstat)) ) {
+    stop(paste("Event column",col.age.event, "not found in vitstat table. Aborting."))
+  }
+  for(c in covariates) {
+    if( !(c %in% colnames(longdat)) ) {
+      stop(paste("Covariate",c, "not found. Aborting."))
+    }
+  }
+  
+  #-----------Done parsing imput parameters---------------------#
   
   fill_last <- function(x) {
     na_idx <- which(is.na(x))
@@ -21,11 +41,13 @@ prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.
   tt <- matrix(nrow=0, ncol=4)
   par <- matrix(nrow=0, ncol=length(covariates))
   
-  splitted <- split(longdat.nonan, longdat.nonan[[col.id]])
+  splitted <- split(longdat, longdat[[col.id]])
   vitstat.splitted <- split(vitstat, vitstat[[col.id]])
   
   for(iii in 1:length(splitted)) {
-    print(iii)
+    if(verbose)
+      print(iii)
+    
     id <- splitted[[iii]][[col.id]][1]
     nrows <- (tail(splitted[[iii]][[col.age]], n=1) - splitted[[iii]][[col.age]][1])/dt + 1
     # Perform approximation:
@@ -67,13 +89,15 @@ prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.
   colnames(ans) <- c("ID", "CASE", "T1", "T3", covariates)
   ans <- ans[rowSums(is.na(ans[,5:dim(ans)[2]]))!=length(covariates),]
   
-  print("Filing missing values with multiple imputations:")
+  if(verbose)
+    print("Filing missing values with multiple imputations:")
   
-  tmp_ans <- mice(ans[,5:dim(ans)[2]])
+  tmp_ans <- mice(ans[,5:dim(ans)[2]], printFlag=ifelse(verbose, T, F))
   ans1 <- complete(tmp_ans)
   ans_final <- cbind(ans[,1:4], ans1)
   
-  print("Making final table...")
+  if(verbose)
+    print("Making final table...")
   ndim <- length(covariates)
   averages = matrix(nrow=1,ncol=length(covariates))
   
