@@ -45,56 +45,60 @@ prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.
   vitstat.splitted <- split(vitstat, vitstat[[col.id]])
   
   for(iii in 1:length(splitted)) {
-    if(verbose)
-      print(iii)
+    if(!is.na(vitstat.splitted[[iii]][[col.age.event]]) & !is.na(vitstat.splitted[[iii]][[col.status]]) ) {
+      if(verbose)
+        print(iii)
     
-    id <- splitted[[iii]][[col.id]][1]
-    nrows <- (tail(splitted[[iii]][[col.age]], n=1) - splitted[[iii]][[col.age]][1])/dt + 1
-    # Perform approximation:
-    t1.approx <- matrix(ncol=4, nrow=nrows)
-    t1.approx[,1] <- id
-    t1.approx[,2] <- 0
-    t1.approx[nrows,2] <- vitstat.splitted[[iii]][[col.status]][1] #Last value
-    t1.approx[,3] <- seq(splitted[[iii]][[col.age]][1], splitted[[iii]][[col.age]][length(splitted[[iii]][[col.age]])], by=dt)
-    if(nrows > 1) {
-      t1.approx[,4] <- c(t1.approx[,3][2:nrows], vitstat.splitted[[iii]][[col.age.event]][1])
-    } else {
-      t1.approx[,4] <- vitstat.splitted[[iii]][[col.age.event]][1]
-    }
-    
-    tt <- rbind(tt,t1.approx)
-    par1.approx <- matrix(ncol=length(covariates), nrow=nrows, NA)
-    
-    j <- 1
-    for(name in covariates) {
-      name <- covariates[j]
-      if ( (length(splitted[[iii]][[name]]) > 1) & (length(which(!is.na(splitted[[iii]][[name]]))) > 0) ) {
-        if(length(which(!is.na(splitted[[iii]][[name]]))) == 1) {
-          splitted[[iii]][[name]] <- fill_last(splitted[[iii]][[name]])
-        }
-        # Fill NAs by linear approximation with approx():
-        nn <- length(splitted[[iii]][[name]])
-        splitted[[iii]][[name]] <- approx(splitted[[iii]][[name]],n=nn)$y
-        par1.approx[,j] <-  approx(splitted[[iii]][[name]], n=nrows)$y
+      id <- splitted[[iii]][[col.id]][1]
+      nrows <- (tail(splitted[[iii]][[col.age]], n=1) - splitted[[iii]][[col.age]][1])/dt + 1
+      # Perform approximation:
+      t1.approx <- matrix(ncol=4, nrow=nrows)
+      t1.approx[,1] <- id
+      t1.approx[,2] <- 0
+      t1.approx[nrows,2] <- vitstat.splitted[[iii]][[col.status]][1] #Last value
+      t1.approx[,3] <- seq(splitted[[iii]][[col.age]][1], splitted[[iii]][[col.age]][length(splitted[[iii]][[col.age]])], by=dt)
+      if(nrows > 1) {
+        t1.approx[,4] <- c(t1.approx[,3][2:nrows], vitstat.splitted[[iii]][[col.age.event]][1])
+      } else {
+        t1.approx[,4] <- vitstat.splitted[[iii]][[col.age.event]][1]
       }
-      
-      j <- j + 1
-      
-    }
-    par <- rbind(par,par1.approx)
     
+      tt <- rbind(tt,t1.approx)
+      par1.approx <- matrix(ncol=length(covariates), nrow=nrows, NA)
+    
+      j <- 1
+      for(name in covariates) {
+        name <- covariates[j]
+        if ( (length(splitted[[iii]][[name]]) > 1) & (length(which(!is.na(splitted[[iii]][[name]]))) > 0) ) {
+          if(length(which(!is.na(splitted[[iii]][[name]]))) == 1) {
+            splitted[[iii]][[name]] <- fill_last(splitted[[iii]][[name]])
+          }
+          # Fill NAs by linear approximation with approx():
+          nn <- length(splitted[[iii]][[name]])
+          splitted[[iii]][[name]] <- approx(splitted[[iii]][[name]],n=nn)$y
+          par1.approx[,j] <-  approx(splitted[[iii]][[name]], n=nrows)$y
+        }
+      
+        j <- j + 1
+      
+      }
+      par <- rbind(par,par1.approx)
+    }
   }
   
   ans=cbind(tt,par)
   colnames(ans) <- c("ID", "CASE", "T1", "T3", covariates)
   ans <- ans[rowSums(is.na(ans[,5:dim(ans)[2]]))!=length(covariates),]
   
-  if(verbose)
-    print("Filing missing values with multiple imputations:")
+  ans_final <- ans
+  if(length(which(is.na(ans[,5:dim(ans)[2]]) == T)) > 0) {
+    if(verbose)
+      print("Filing missing values with multiple imputations:")
   
-  tmp_ans <- mice(ans[,5:dim(ans)[2]], printFlag=ifelse(verbose, T, F))
-  ans1 <- complete(tmp_ans)
-  ans_final <- cbind(ans[,1:4], ans1)
+    tmp_ans <- mice(ans[,5:dim(ans)[2]], printFlag=ifelse(verbose, T, F))
+    ans1 <- complete(tmp_ans)
+    ans_final <- cbind(ans[,1:4], ans1)
+  }
   
   if(verbose)
     print("Making final table...")
