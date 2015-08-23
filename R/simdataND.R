@@ -12,7 +12,7 @@ simdata <- function(N=100, # Number of individuals
                         dt=1, 
                         nj=85, 
                         tmax=105,
-                        k=5) {
+                        k=1) {
   
   
   u<-matrix(u,nrow=k,ncol=1,byrow=T)

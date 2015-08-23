@@ -63,25 +63,6 @@ RcppExport SEXP complik(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SE
     double thetaH  = as<double>(thetah);
     //Actual data set
     Rcpp::NumericMatrix dd = Rcpp::NumericMatrix(dat);   
-    /*double **data = NULL;
-    
-    try 
-    {
-        data = new double*[N];
-    } 
-    catch (bad_alloc& ba) 
-    {
-        cerr << "bad_alloc caught: " << ba.what() << endl;
-    }
-    
-    for (int i=0; i<N; i++) {  
-        for (int j=0; j<M; j++) {  
-          data[i] = new double[M];
-          data[i][j] = dd(i,j);
-          std::cout << data[i][j] << " ";
-        }
-        std::cout << "\n";
-    } */
     
     /*End of data loading*/
     double *out, *k1ar, *yfin, *ytmp, *k2ar, *k3ar, *k4ar;
@@ -94,9 +75,7 @@ RcppExport SEXP complik(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SE
     k4ar = new double[2];
       
     double L; // Likelihood
-    //std::cout << data[0][1] << "\n";
     for(int i=0; i<N; i++) {
-      //std::cout << i << std::endl;
       //Solving differential equations on intervals:
       double t1 = dd(i,1); 
       double t2 = dd(i,2);
@@ -108,7 +87,6 @@ RcppExport SEXP complik(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SE
     
       //Integration:
       double s = h/3*(-1)*mu(t1,y1,0, fH, f1H, mu0H, thetaH, QH);
-      //std::cout << s << " " << t1 << " " << y1 << " " << fH << " " << f1H << " " << mu0H << " " << thetaH << " " << QH  << std::endl;
       double t = t1;
       out[0] = y1;
       out[1] = 0;
