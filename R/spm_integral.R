@@ -33,8 +33,8 @@ spm_integral <- function(dat,parameters) {
   # Optimization:
   result <- optim(par = parameters, 
                 fn=LL, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, maxit=10000), 
-                method="L-BFGS-B", lower = c(-0.1,0,2e-15,0.5,0,2e-15, 0)) 
-                #upper = c(0,100,1e-5,10,100,0.5, 1))
+                method="L-BFGS-B", lower = c(-0.1,0,2e-15,0.5,0,2e-15, 0), 
+                upper = c(0,100,1e-5,10,100,0.5, 1))
 
   result
 }
