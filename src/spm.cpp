@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <map>
+#include <math.h>  
 #include <Rcpp.h>
 
 using namespace Rcpp;
@@ -25,7 +25,7 @@ double mu(double t, double y1, double gamma1, double fH, double f1H, double mu0H
   hf1H = f1H-y1;  
   
   mu0Ht = mu0H*exp(thetaH*t);
-  mu = mu0Ht + pow(hfH,2)*QH + QH*gamma1;
+  mu = mu0Ht + pow(hfH,2.00)*QH + QH*gamma1;
   
   return mu;
 }
@@ -33,10 +33,10 @@ double mu(double t, double y1, double gamma1, double fH, double f1H, double mu0H
 //Calculating m (y[1]) & gamma(y[2]):
 double* func1(double t, double *y, double fH, double f1H, double aH, double bH, double QH) {
   double hfH, hf1H, dy1, dy2;
-  hfH = fH-y[1];
-  hf1H = f1H-y[1];
-  dy1 = -1.0*aH*hf1H + 2.0*y[2]*Q(t, QH)*hfH;
-  dy2 = 2.0*aH*y[2] + bH - 2.0*pow(y[2],2)*Q(t, QH); //dy2 <- 2*aH*y[2] + bH^2 - 2*y[2]^2*Q(t);
+  hfH = fH-y[0];
+  hf1H = f1H-y[0];
+  dy1 = -1.00*aH*hf1H + 2.00*y[1]*Q(t, QH)*hfH;
+  dy2 = 2.00*aH*y[1] + bH - 2.00*pow(y[1],2.00)*Q(t, QH); //dy2 <- 2*aH*y[2] + bH^2 - 2*y[2]^2*Q(t);
   double *res = new double[2];
   res[0] = dy1;
   res[1] = dy2;
@@ -53,7 +53,7 @@ double Q(double t, double QH) {
 RcppExport SEXP complik(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SEXP bh, SEXP fh, SEXP mu0h, SEXP thetah) {
     
     long N = as<long>(n); //Number of rows
-    long M = as<long>(m); // Number of columns
+    //long M = as<long>(m); // Number of columns
     double aH = as<double>(ah);
     double f1H = as<double>(f1h);
     double QH = as<double>(qh);
@@ -75,6 +75,7 @@ RcppExport SEXP complik(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SE
     k4ar = new double[2];
       
     double L; // Likelihood
+    L = 0;
     for(int i=0; i<N; i++) {
       //Solving differential equations on intervals:
       double t1 = dd(i,1); 
@@ -82,15 +83,15 @@ RcppExport SEXP complik(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SE
       double y1 = dd(i,3);
       double y2 = dd(i,4);
   
-      int  nsteps = 2;
+      double  nsteps = 2.00;
       double h=(t2-t1)/nsteps;
     
       //Integration:
-      double s = h/3*(-1)*mu(t1,y1,0, fH, f1H, mu0H, thetaH, QH);
+      double s = h/3.00*(-1.00)*mu(t1,y1,0.00, fH, f1H, mu0H, thetaH, QH);
       double t = t1;
       out[0] = y1;
-      out[1] = 0;
-      int ifactor;
+      out[1] = 0.00;
+      double ifactor;
       
       for(int j = 0; j < nsteps; j++) {
          //Runge-Kutta method:
@@ -119,31 +120,34 @@ RcppExport SEXP complik(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SE
          t = t + h;
       
         //Integration:
-        if (j == nsteps) {
-          ifactor = 1;
+        if (j == nsteps-1) {
+          ifactor = 1.00;
         } else {
-          if ((j % 2) == 0) {
-            ifactor = 2;
+          if (((j % 2) == 0) && (j != 0)) {
+            ifactor = 2.00;
           } else {
-            ifactor = 4;
+            ifactor = 4.00;
           }
         }
-        s = s + ifactor*h/3.00*(-1)*mu(t,y1,0, fH, f1H, mu0H, thetaH, QH);
-      
+        //cout << ifactor << "\n";
+        s = s + ifactor*h/3.00*(-1.00)*mu(t,out[0],out[1], fH, f1H, mu0H, thetaH, QH);
+        
       }
-      //std::cout << s << "\n";
       
-      double m2 = out[1];
-      double gamma2 = out[2];
+      double m2 = out[0];
+      double gamma2 = out[1];
       double pi = 3.141592654;
     
       if(dd(i,0) == 0) { 
-        double exp = -0.5*log(2*pi*gamma2)-pow((m2-y2),2)/2/gamma2;
+        double exp = -0.50*log(2.00*pi*gamma2)-pow((m2-y2),2.00)/2.00/gamma2;
         L = L + s + exp;
+        //cout << exp << "\n";
       } else {
-        double logprobi = log(1 - exp(-1*mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH)));
+        double logprobi = log(1.00 - exp(-1.00*mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH)));
         L = L + s + logprobi;
+        //cout << s << " " << logprobi << " " << m2 << " " << gamma2 << "\n";
       }
+      //break;
     }
     //std::cout << L << "\n";
     return(Rcpp::wrap(L));
