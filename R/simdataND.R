@@ -7,7 +7,7 @@ simdata <- function(N=100, # Number of individuals
                         b, 
                         Q, 
                         theta, 
-                        tstart=45, 
+                        tstart=30, 
                         ystart, 
                         dt=1, 
                         nj=85, 
@@ -28,8 +28,14 @@ simdata <- function(N=100, # Number of individuals
   data <- matrix(nrow=0, ncol=(4+length(data_names)))
   colnames(data) <- c("id", "xi", "t1", "t2", data_names)
   
+  q <- function(t,Q) {
+    res <- Q %*% exp(theta*t)
+    res
+  }
+  
   mu <- function(t,y) {
-    mu <- ( mu0 + t(y) %*% b +t(y) %*% Q %*% y )*exp(theta*t)
+    #mu <- ( mu0 + t(y) %*% b +t(y) %*% Q %*% y )*exp(theta*t)
+    mu <- ( mu0 + t(y) %*% b +t(y) %*% q(t,Q) %*% y )*exp(theta*t)
     mu
   }
   
