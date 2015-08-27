@@ -4,11 +4,11 @@ library(stats)
 spm_integral <- function(dat,parameters) {
   
   res_prev <- NULL
-  pars_prev <- parameters
+  pars_prev <<- parameters
   iteration <- 0
-  lower_bound <- c(-1,0,1e-15,0,0,0, 0)
-  upper_bound <- c(0,100,1e-3,10,100,1, 1)
   
+  lower_bound <<- c(-1,0,1e-15,0,0,0, 0)
+  upper_bound <<- c(0, Inf, 1e-13, Inf, Inf, Inf, 0.1) #c(0,100,1e-3,10,100,1, 1)
   
   
   maxlik <- function(dat, par) {
@@ -39,18 +39,22 @@ spm_integral <- function(dat,parameters) {
     for(i in length(par)) {
       if(par[i] <= lower_bound[i]) {
         lower_bound[i] <<- lower_bound[i] - parameters[i]/3
+        cat("Lower bound\n")
+        cat(lower_bound)
       } else if(par[i] >= upper_bound[i]) {
         upper_bound[i] <<- upper_bound[i] + parameters[i]/3
+        cat("Upper bound\n")
+        cat(upper_bound)
       }
     }
     
-    if(is.nan(res)) {
-      res <- res_prev
-      parameters <<- pars_prev
-    } else {
-      res_prev <<- res
-      pars_prev <<- par
-    }
+    #if(is.nan(res)) {
+    #  res <- maxlik(dat, pars_prev)
+    ##  parameters <<- pars_prev
+    #} else {
+    #  res_prev <<- res
+    #  pars_prev <<- par
+    #}
     res
   }
 
@@ -58,7 +62,7 @@ spm_integral <- function(dat,parameters) {
   
   # Optimization:
   result <- optim(par = pars_prev, 
-                fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-15), 
+                fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16, ndeps=c(1e-8,1e-3,1e-12,1e-3,1e-3,1e-8,1e-8)), 
                 method="L-BFGS-B", lower = lower_bound, upper = upper_bound)
 
   result
