@@ -89,7 +89,7 @@ prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.
   ans=cbind(tt,par)
   colnames(ans) <- c("ID", "CASE", "T1", "T3", covariates)
   #print(head(ans))
-  ans <- ans[rowSums( matrix(is.na(ans[,5:dim(ans)[2]]),byrow=T)) !=length(covariates),]
+  ans <- ans[rowSums( matrix(is.na(ans[,5:dim(ans)[2]]), ncol=length(covariates),byrow=T)) !=length(covariates),]
   
   ans_final <- ans
   if(length(which(is.na(ans[,5:dim(ans)[2]]) == T)) > 0) {
