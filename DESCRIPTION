@@ -7,4 +7,6 @@ Author: I. Y. Zhbannikov
 Maintainer: Who to complain to <zhbannikov.ilya@gmail.com>
 Description: Stochastic Process Modeling
 License: GPL
-Depends: deSolve,mice,sas7bdat
+Imports: Rcpp (>= 0.11.1), RcppArmadillo (>= 0.4.200.0)
+LinkingTo: Rcpp, RcppArmadillo
+Depends: deSolve,mice,sas7bdat,RcppArmadillo

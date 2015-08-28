@@ -1,10 +1,13 @@
+
 /*******************************R-callable function***************************************/
 #include <stdio.h>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <math.h>  
-#include <Rcpp.h>
+//#include <Rcpp.h>
+#include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
 
 using namespace Rcpp;
 using namespace std;
@@ -13,82 +16,152 @@ using namespace std;
 /*=====END OF GLOBAL VARIABLES===========*/
 
 /*============FUNCTION DEFINITIONS*/
-/*
-double mu(double t, double y1, double gamma1, double fH, double f1H, double mu0H, double thetaH, double QH, double *par);
-double* func1(double t, double *y, double fH, double f1H, double aH, double bH, double QH, double theta);
-double Q(double t, double QH, double theta);
+
+double mu(double t, arma::mat y1, arma::mat gamma1, arma::mat fH, arma::mat f1H, double mu0H, double thetaH, arma::mat QH);
+//double* func1(double t, double *y, double fH, double f1H, double aH, double bH, double QH, double theta);
+arma::mat Q(double t, arma::mat QH, double theta);
+
+// Matrix operations:
+Rcpp::NumericMatrix add(Rcpp::NumericMatrix a, Rcpp::NumericMatrix b);
+Rcpp::NumericMatrix muliplyByConstant(double constant, Rcpp::NumericMatrix a);
+Rcpp::NumericMatrix multiplyMatrices(Rcpp::NumericMatrix a, Rcpp::NumericMatrix b);
+Rcpp::NumericMatrix powerMatrix(Rcpp::NumericMatrix a, int p);
+
 //=========END OF FUNCTION DEFINITIONS
 
-double mu(double t, double y1, double gamma1, double fH, double f1H, double mu0H, double thetaH, double QH) {
-  double hfH, hf1H, mu0Ht,  mu;
-    
-  hfH = fH-y1;
-  hf1H = f1H-y1;  
+Rcpp::NumericMatrix add(Rcpp::NumericMatrix a, Rcpp::NumericMatrix b) {
+  if(a.ncol() != b.ncol() || a.nrow() != b.nrow()) {
+    std::cout << "Error: not conformable arrays.\n";
+    return R_NaReal;
+  } 
   
-  mu0Ht = mu0H*exp(thetaH*t);
-  mu = mu0Ht + pow(hfH,2.00)*QH + QH*gamma1;
-  
-  return mu;
+  Rcpp::NumericMatrix c(a.nrow(),a.ncol());
+  for(int i=0; i<a.nrow(); i++) {
+    for(int j=0; j<a.ncol(); j++) {
+      c(i,j) = a(i,j) + b(i,j);
+    }
+  }
+  return c;
 }
 
+Rcpp::NumericMatrix muliplyByConstant(double constant, Rcpp::NumericMatrix a) {
+  Rcpp::NumericMatrix c(a.nrow(),a.ncol());
+  for(int i=0; i<a.nrow(); i++) {
+    for(int j=0; j<a.ncol(); j++) {
+      c(i,j) = constant*a(i,j);
+    }
+  }
+  return c;
+}
+
+Rcpp::NumericMatrix multiplyMatrices(Rcpp::NumericMatrix a, Rcpp::NumericMatrix b) {
+  /*Function to multiply matrices*/
+  if(a.ncol() != b.nrow()) {
+    std::cout << "Error: not conformable arrays.\n";
+    return R_NaReal;
+  }
+  
+  Rcpp::NumericMatrix c(a.nrow(),b.ncol());
+  for(int i=0; i<a.nrow(); i++) {
+    for(int j=0; j<b.ncol(); j++) {
+      for(int k=0; k<a.ncol(); k++) {
+        c(i,j) += a(i,k) * b(k,j);
+      }
+    }
+  }
+  return c;
+}
+
+Rcpp::NumericMatrix powerMatrix(Rcpp::NumericMatrix a, int p) {
+  Rcpp::NumericMatrix c(a.nrow(),a.ncol());
+  for(int i=0; i<a.nrow(); i++) {
+    for(int j=0; j<a.ncol(); j++) {
+      c(i,j) = pow(a(i,j),p);
+    }
+  }
+  return c;
+}
+
+
+
+double mu(double t, arma::mat y1, arma::mat gamma1, arma::mat fH, arma::mat f1H, double mu0H, double thetaH, arma::mat QH) {
+  arma::mat hfH;
+  arma::mat hf1H;
+  double mu0Ht;
+  arma::mat mu;
+    
+  hfH = fH - y1; //fH-y1;  
+  hf1H = f1H - y1; //f1H-y1;  
+  
+  mu0Ht = mu0H*exp(thetaH*t);
+  mu = mu0Ht + hfH.t()*QH*hfH + QH*gamma1;
+  
+  return mu(1,1);
+}
+
+/*
 //Calculating m (y[1]) & gamma(y[2]):
-double* func1(double t, double *y, double fH, double f1H, double aH, double bH, double QH, double theta) {
-  double hfH, hf1H, dy1, dy2;
-  hfH = fH-y[0];
-  hf1H = f1H-y[0];
-  dy1 = -1.00*aH*hf1H + 2.00*y[1]*Q(t, QH, theta)*hfH;
-  dy2 = 2.00*aH*y[1] + bH - 2.00*pow(y[1],2.00)*Q(t, QH, theta); //dy2 <- 2*aH*y[2] + bH^2 - 2*y[2]^2*Q(t);
+double func1(double t, arma::mat y, arma::mat gamma, arma::mat fH, arma::mat f1H, arma::mat aH, arma::mat bH, arma::mat QH, double theta) {
+  arma::mat hfH, hf1H, dy1, dy2;
+  hfH = fH-y;
+  hf1H = f1H-y;
+  dy1 = -1.00*aH*hf1H + 2.00*gamma*Q(t, QH, theta)*hfH;
+  dy2 = aH*gamma + gamma*aH.t() + bH*bH.t() - 2.00*gamma.t()*Q(t, QH, theta)*gamma; //dy2 <- 2*aH*y[2] + bH^2 - 2*y[2]^2*Q(t);
   double *res = new double[2];
   res[0] = dy1;
   res[1] = dy2;
   
   return res;
 }
+*/
 
-double Q(double t, double QH, double theta) {
-  double Q;
+arma::mat Q(double t, arma::mat QH, double theta) {
+  arma::mat Q;
   Q = QH*exp(theta*t);
   return Q;
 }
-*/
-RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SEXP bh, SEXP fh, SEXP mu0h, SEXP thetah) {
-    /*
-    long N = as<long>(n); //Dimensions
-    double aH = as<double>(ah);
-    double f1H = as<double>(f1h);
-    double QH = as<double>(qh);
-    double bH = as<double>(bh);
-    double fH = as<double>(fh);
+
+
+RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SEXP bh, SEXP fh, SEXP mu0h, SEXP thetah, SEXP k) {
+    
+    long N = as<long>(n); // Number of rows
+    long M = as<long>(m); // Number of columns
+    arma::mat aH = as<arma::mat>(ah);
+    arma::mat f1H = as<arma::mat>(f1h);
+    arma::mat QH = as<arma::mat>(qh);
+    arma::mat bH = as<arma::mat>(bh);
+    arma::mat fH = as<arma::mat>(fh);
     double mu0H = as<double>(mu0h); 
     double thetaH  = as<double>(thetah);
+    int dim = as<int>(k);
     //Actual data set
-    Rcpp::NumericMatrix dd = Rcpp::NumericMatrix(dat);  
+    arma::mat dd = as<arma::mat>(dat);  
     double L; // Likelihood
     
     //End of data loading
-    double *out, *k1ar, *yfin, *ytmp, *k2ar, *k3ar, *k4ar;
-    out = new double[2];
-    k1ar = new double[2];
-    yfin = new double[2];
-    ytmp = new double[2];
-    k2ar = new double[2];
-    k3ar = new double[2];
-    k4ar = new double[2];
-      
-    
+    arma::mat out, k1ar, yfin, ytmp, k2ar, k3ar, k4ar;
+    /*
     L = 0;
     for(int i=0; i<N; i++) {
       //Solving differential equations on intervals:
       double t1 = dd(i,1); 
       double t2 = dd(i,2);
-      double y1 = dd(i,3);
-      double y2 = dd(i,4);
-  
+      //double y1 = dd(i,3);
+      //double y2 = dd(i,4);
+      arma::mat y1(dim,1); 
+      arma::mat y2(dim,1);
+      Rcpp::NumericMatrix gamma1(dim,1);
+      for(int ii=0; ii<M; ii+=2) {
+        y1(ii,1) = dd(i,ii+3);
+        y2(ii,1) = dd(i,ii+3);
+        gamma1(ii,1) = 0;
+      }
+      
       double  nsteps = 2.00;
       double h=(t2-t1)/nsteps;
-    
+      
       //Integration:
-      double s = h/3.00*(-1.00)*mu(t1,y1,0.00, fH, f1H, mu0H, thetaH, QH);
+      double s = h/3.00*(-1.00)*mu(t1, y1, gamma1, fH, f1H, mu0H, thetaH, QH);
       double t = t1;
       out[0] = y1;
       out[1] = 0.00;
@@ -155,3 +228,35 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
     */
     return(Rcpp::wrap(""));
 }
+
+RcppExport SEXP testMatrixMultiply(SEXP aa, SEXP bb) {
+  Rcpp::NumericMatrix a = Rcpp::NumericMatrix(aa);
+  Rcpp::NumericMatrix b = Rcpp::NumericMatrix(bb);
+  
+  return(Rcpp::wrap(multiplyMatrices(a, b)));
+}
+
+RcppExport SEXP testMatrixAdd(SEXP aa, SEXP bb) {
+  Rcpp::NumericMatrix a = Rcpp::NumericMatrix(aa);
+  Rcpp::NumericMatrix b = Rcpp::NumericMatrix(bb);
+  
+  return(Rcpp::wrap(add(a, b)));
+}
+
+RcppExport SEXP testMatrixMultiplyByConst(SEXP aa, SEXP bb) {
+  double constant = as<double>(aa);
+  Rcpp::NumericMatrix a = Rcpp::NumericMatrix(bb);
+  
+  return(Rcpp::wrap(muliplyByConstant(constant, a)));
+}
+
+RcppExport SEXP testPowerMatrix(SEXP aa, SEXP pp) {
+  double p = as<double>(pp);
+  Rcpp::NumericMatrix a = Rcpp::NumericMatrix(aa);
+  
+  return(Rcpp::wrap(powerMatrix(a,p)));
+}
+
+
+
+
