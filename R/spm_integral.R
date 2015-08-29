@@ -59,7 +59,7 @@ spm_integral <- function(dat,parameters) {
   }
   
   
-  
+  maxlik(as.matrix(dat), pars_prev)
   # Optimization:
   result <- optim(par = pars_prev, 
                   fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16, ndeps=c(1e-12,1e-12,1e-16,1e-12,1e-12,1e-12,1e-12)), 

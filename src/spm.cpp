@@ -36,7 +36,8 @@ double* func1(double t, double *y, double fH, double f1H, double aH, double bH, 
   hfH = fH-y[0];
   hf1H = f1H-y[0];
   dy1 = -1.00*aH*hf1H + 2.00*y[1]*Q(t, QH, theta)*hfH;
-  dy2 = 2.00*aH*y[1] + bH - 2.00*pow(y[1],2.00)*Q(t, QH, theta); //dy2 <- 2*aH*y[2] + bH^2 - 2*y[2]^2*Q(t);
+  //dy2 = 2.00*aH*y[1] + bH - 2.00*pow(y[1],2.00)*Q(t, QH, theta); //dy2 <- 2*aH*y[2] + bH^2 - 2*y[2]^2*Q(t);
+  dy2 = 2.00*aH*y[1] + pow(bH,2) - 2.00*pow(y[1],2.00)*Q(t, QH, theta); //dy2 <- 2*aH*y[2] + bH^2 - 2*y[2]^2*Q(t);
   double *res = new double[2];
   res[0] = dy1;
   res[1] = dy2;
@@ -88,6 +89,7 @@ RcppExport SEXP complik(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SE
     
       //Integration:
       double s = h/3.00*(-1.00)*mu(t1,y1,0.00, fH, f1H, mu0H, thetaH, QH);
+      //cout << s << endl;
       double t = t1;
       out[0] = y1;
       out[1] = 0.00;
