@@ -1,5 +1,39 @@
 # Preparing data for stochastic process model
-prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height"), verbose=T) {
+#'Output values include:
+#'1). Database, prepared for (slow) continuous optimization (with integral).
+#'2). Database, prepared for (quick) discrete optimization (which is used for parameter estimations)
+#'
+#'Main function of this file is prepare_data(...)
+#'
+#'
+#'
+#'
+
+fill_last <- function(x) {
+  na_idx <- which(is.na(x))
+  unique_elements <- unique(x[-na_idx])
+  set_diff <- unique_elements[length(unique_elements)]
+  x[na_idx] <- set_diff
+  x
+}
+
+approx2p <- function(t1, y1, t2, y2, t) {
+  # 2-point linear interpolation:
+  y <- y1 + (t - t1)/(t2 - t1)*(y2 -y1)
+  y
+}
+
+prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.next="AgeNext", col.age.event="LSmort", covariates=c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height"), verbose=T) {
+  #longdat = longdat.nonan
+  #vitstat = vitstat.nonan 
+  #interval=1
+  #col.status="IsDead"
+  #col.id="ID"
+  #col.age="Age"
+  #col.age.event="LSmort"
+  #col.age.next="AgeNext"
+  #covariates=c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height")
+  #verbose=T
   
   # Parsing input parameters in order to check for errors:
   if( !(col.status %in% colnames(vitstat)) ) {
@@ -21,34 +55,107 @@ prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.
   }
   
   #-----------Done parsing imput parameters---------------------#
+  # Prepare data for continuous optimisation:
+  data_cont <- prepare_data_cont(longdat, vitstat, interval, col.status, col.id, col.age, col.age.event, covariates, verbose)
   
-  fill_last <- function(x) {
-    na_idx <- which(is.na(x))
-    unique_elements <- unique(x[-na_idx])
-    set_diff <- unique_elements[length(unique_elements)]
-    x[na_idx] <- set_diff
-    x
+  # Prepare data for fast discrete optimization:
+  data_discr <- prepare_data_discr(longdat, vitstat, interval, col.status, col.id, col.age, col.age.event, covariates, verbose)
+  
+  list(data_cont, data_discr)
+}
+
+prepare_data_cont <- function(longdat, vitstat, interval, col.status, col.id, col.age, col.age.event, covariates, verbose) {
+  # Split records by ID:
+  splitted <- split(longdat, longdat[[col.id]])
+  vitstat.splitted <- split(vitstat, vitstat[[col.id]])
+  
+  for(iii in length(splitted)) {
+    nrows <- length(splitted[[iii]][[col.id]])
+    id <- splitted[[iii]][[col.id]]
+    case <- rep(0, nrows)
+    case[nrows] <- vitstat.splitted[[iii]][[col.status]]
+    t1 <- splitted[[iii]][[col.age]]
+    t2 <- splitted[[iii]][[col.age.next]]
+    t2[nrows] <- vitstat.splitted[[iii]][[col.age.event]] # May not be necessary
+   
+    prep.dat <- cbind(id, case, t1, t2)
+  
+    for(name in covariates) {
+      prep.dat <- cbind(prep.dat, splitted[[iii]][[name]])
+    }
+  
+    prep.dat <- prep.dat[rowSums( matrix(is.na(prep.dat[,5:dim(prep.dat)[2]]), ncol=length(covariates),byrow=T)) !=length(covariates),]
+    colnames(prep.dat) <- c("ID", "CASE", "T1", "T3", covariates)
+  
+    if(length(which(is.na(prep.dat[,5:dim(prep.dat)[2]]) == T)) > 0) {
+      if(verbose)
+        cat("Filing missing values with multiple imputations:\n")
+    
+      tmp_ans <- mice(prep.dat[,5:dim(prep.dat)[2]], printFlag=ifelse(verbose, T, F))
+      ans1 <- complete(tmp_ans)
+      ans_final <- cbind(prep.dat[,1:4], ans1)
+    }
+  
+    if(verbose)
+      cat("Making final table...\n")
+    ndim <- length(covariates)
+    averages = matrix(nrow=1,ncol=length(covariates))
+  
+    dat <- ans_final[,1] #pid
+    dat <- cbind(dat, ans_final[,2]) #sta (outcome)
+    dat <- cbind(dat, ans_final[,3]) #tt1 (t1)
+    dat <- cbind(dat, ans_final[,4]) #tt3 (t2)
+  
+    j <- 0
+    i <- 0
+    for(i in 0:(length(covariates)-1)) {
+      dat <- cbind(dat, ans_final[,(5+i)]) 
+      dat[2:dim(dat)[1],(5+j)] <- dat[1:(dim(dat)[1]-1),(5+j)]
+      dat <- cbind(dat, ans_final[,(5+i)]) 
+      averages[1,(i+1)] = dat[1,(5+j)]
+      j <- j + 2
+    }
+    
+    # Database should be in appropriate format:
+    pid=dat[1,1]
+    starttime = c(dat[1,3])
+    for(i in 1:dim(dat)[1]) {
+      if(dat[i,1] != pid) {
+        avg <- c()
+        for(ii in 0:(ndim-1)) {
+          dat[(i+2),(5+ii)] = dat[(i+1),(6+ii)]
+          avg <- c(avg, dat[i,(5+ii)])
+          ii <- ii + 2
+        }
+        averages <- rbind(averages,avg)
+        pid = dat[i,1]
+        starttime <- c(starttime, dat[i,3])
+      }
+      if(dat[i,2] > 1) {
+        dat[i,2] <- 1
+      }
+    }
   }
   
-  approx2p <- function(t1, y1, t2, y2, t) {
-    # 2-point linear interpolation:
-    y <- y1 + (t - t1)/(t2 - t1)*(y2 -y1)
-    y
-  }
-  
+  dat
+}
+
+prepare_data_discr <- function(longdat, vitstat, interval, col.status, col.id, col.age, col.age.event, covariates, verbose) {
   # Interpolation
   dt <- interval
   tt <- matrix(nrow=0, ncol=4)
   par <- matrix(nrow=0, ncol=length(covariates))
   
+  # Split records by ID:
   splitted <- split(longdat, longdat[[col.id]])
   vitstat.splitted <- split(vitstat, vitstat[[col.id]])
+  
   
   for(iii in 1:length(splitted)) {
     if(!is.na(vitstat.splitted[[iii]][[col.age.event]]) & !is.na(vitstat.splitted[[iii]][[col.status]]) ) {
       if(verbose)
         print(iii)
-    
+      
       id <- splitted[[iii]][[col.id]][1]
       nrows <- (tail(splitted[[iii]][[col.age]], n=1) - splitted[[iii]][[col.age]][1])/dt + 1
       # Perform approximation:
@@ -62,10 +169,10 @@ prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.
       } else {
         t1.approx[,4] <- vitstat.splitted[[iii]][[col.age.event]][1]
       }
-    
+      
       tt <- rbind(tt,t1.approx)
       par1.approx <- matrix(ncol=length(covariates), nrow=nrows, NA)
-    
+      
       j <- 1
       for(name in covariates) {
         name <- covariates[j]
@@ -78,9 +185,9 @@ prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.
           splitted[[iii]][[name]] <- approx(splitted[[iii]][[name]],n=nn)$y
           par1.approx[,j] <-  approx(splitted[[iii]][[name]], n=nrows)$y
         }
-      
+        
         j <- j + 1
-      
+        
       }
       par <- rbind(par,par1.approx)
     }
@@ -88,21 +195,21 @@ prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.
   
   ans=cbind(tt,par)
   colnames(ans) <- c("ID", "CASE", "T1", "T3", covariates)
-  #print(head(ans))
+  
   ans <- ans[rowSums( matrix(is.na(ans[,5:dim(ans)[2]]), ncol=length(covariates),byrow=T)) !=length(covariates),]
   
   ans_final <- ans
   if(length(which(is.na(ans[,5:dim(ans)[2]]) == T)) > 0) {
     if(verbose)
-      print("Filing missing values with multiple imputations:")
-  
+      cat("Filing missing values with multiple imputations:\n")
+    
     tmp_ans <- mice(ans[,5:dim(ans)[2]], printFlag=ifelse(verbose, T, F))
     ans1 <- complete(tmp_ans)
     ans_final <- cbind(ans[,1:4], ans1)
   }
   
   if(verbose)
-    print("Making final table...")
+    cat("Making final table...\n")
   ndim <- length(covariates)
   averages = matrix(nrow=1,ncol=length(covariates))
   
@@ -140,7 +247,6 @@ prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.
       dat[i,2] <- 1
     }
   }
-  
-  
-  list(ans,dat)
+  dat
 }
+
