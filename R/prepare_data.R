@@ -24,16 +24,6 @@ approx2p <- function(t1, y1, t2, y2, t) {
 }
 
 prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.next="AgeNext", col.age.event="LSmort", covariates=c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height"), verbose=T) {
-  #longdat = longdat.nonan
-  #vitstat = vitstat.nonan 
-  #interval=1
-  #col.status="IsDead"
-  #col.id="ID"
-  #col.age="Age"
-  #col.age.event="LSmort"
-  #col.age.next="AgeNext"
-  #covariates=c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height")
-  #verbose=T
   
   # Parsing input parameters in order to check for errors:
   if( !(col.status %in% colnames(vitstat)) ) {
@@ -56,7 +46,7 @@ prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.
   
   #-----------Done parsing imput parameters---------------------#
   # Prepare data for continuous optimisation:
-  data_cont <- prepare_data_cont(longdat, vitstat, interval, col.status, col.id, col.age, col.age.event, covariates, verbose)
+  data_cont <- prepare_data_cont(longdat, vitstat, interval, col.status, col.id, col.age, col.age.next, col.age.event, covariates, verbose)
   
   # Prepare data for fast discrete optimization:
   data_discr <- prepare_data_discr(longdat, vitstat, interval, col.status, col.id, col.age, col.age.event, covariates, verbose)
@@ -64,7 +54,7 @@ prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.
   list(data_cont, data_discr)
 }
 
-prepare_data_cont <- function(longdat, vitstat, interval, col.status, col.id, col.age, col.age.event, covariates, verbose) {
+prepare_data_cont <- function(longdat, vitstat, interval, col.status, col.id, col.age, col.age.next, col.age.event, covariates, verbose) {
   # Split records by ID:
   splitted <- split(longdat, longdat[[col.id]])
   vitstat.splitted <- split(vitstat, vitstat[[col.id]])
