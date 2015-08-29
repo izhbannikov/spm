@@ -6,55 +6,72 @@ spm_integral_MD <- function(dat,parameters) {
   res_prev <- NULL
   pars_prev <<- parameters[1:(length(parameters)-1)]
   iteration <- 0
-  #
-  #lower_bound <<- c(-1,-1,-1,-1,
-  #                  0,0,
-  #                  1e-15, 1e-15, 1e-15, 1e-15,
-  #                  0,0,
-  #                  0,0,
-  #                  0, 
-  #                  0)
-  #upper_bound <<- c(0, 0, 0, 0,
-  #                  Inf, Inf,
-  #                  1e-10, 1e-10, 1e-10, 1e-10, 
-  #                  Inf, Inf,
-  #                  Inf, Inf, 
-  #                  Inf, 
-  #                  0.1) #c(0,100,1e-3,10,100,1, 1)
-  
-  lower_bound <<- c(-1,0,1e-15,0,0,0, 0)
-  upper_bound <<- c(0, Inf, 1e-6, Inf, Inf, Inf, 0.1) #c(0,100,1e-3,10,100,1, 1)
-  
-  
-  
   kk <- parameters[length(parameters)]
+  #print(length(parameters))
+  #print(parameters)
+  lower_bound <<- c(rep(-1, kk^2),
+                    rep(0,kk),
+                    rep(1e-15, kk^2),
+                    rep(0,kk),
+                    rep(0,kk),
+                    0, 
+                    0)
+  upper_bound <<- c(rep(0,kk^2),
+                    rep(Inf,kk),
+                    rep(1e-6,kk^2), 
+                    rep(Inf,kk),
+                    rep(Inf,kk),
+                    1, 
+                    0.1)
+  
+  ndeps <<- c(rep(1e-12,kk^2),
+              rep(1e-12,kk),
+              rep(1e-16,kk^2),
+              rep(1e-12,kk),
+              rep(1e-12,kk),
+              1e-12,
+              1e-12)
+  
+  #lower_bound <<- c(-1,0,1e-15,0,0,0, 0)
+  #upper_bound <<- c(0, Inf, 1e-6, Inf, Inf, Inf, 0.1) #c(0,100,1e-3,10,100,1, 1)
+  
+  
+  
+  
   maxlik <- function(dat, par) {
     start=1
     end=kk^2
     a=matrix(par[start:end],ncol=kk, byrow=F)
+    print(a)
     start=end+1
     end=start+kk-1
     f1 <- matrix(par[start:end],ncol=kk, byrow=F)
+    print(f1)
     start=end+1
     end=start+kk^2-1
     Q <- matrix(par[start:end],ncol=kk, byrow=F)
+    print(Q)
     start=end+1
     end=start+kk-1
     b <- matrix(par[start:end],nrow=kk)
+    print(b)
     start=end+1
     end=start+kk-1
     f <- matrix(par[start:end],ncol=kk, byrow=F)
+    print(f)
     start=end+1
     end=start
     mu0 <- par[start:end]
+    print(mu0)
     start=end+1
     end=start
     theta <- par[start:end]
-    k <- kk
+    print(theta)
+    
     
     dims <- dim(dat)
     #print(dims)
-    res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k)
+    res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, kk)
     
     cat("L=",res,"\n")
     cat("Iter:", iteration, 
@@ -91,14 +108,12 @@ spm_integral_MD <- function(dat,parameters) {
     res
   }
 
-  #maxlik(as.matrix(dat), pars_prev)
   # Optimization:
+  #print(pars_prev)
+  #print(ndeps)
   result <- optim(par = pars_prev, 
-                fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16, ndeps=c(1e-12,1e-12,1e-16,1e-12,1e-12,1e-12,1e-12)), 
+                fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16, ndeps=ndeps), 
                 method="L-BFGS-B", lower = lower_bound, upper = upper_bound)
-  #result <- optim(par = pars_prev, 
-  #                fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16), 
-  #                method="L-BFGS-B", lower = lower_bound, upper = upper_bound)
   
   result
 }

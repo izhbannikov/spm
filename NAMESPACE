@@ -6,7 +6,7 @@ import(mice)
 #Export R-functions:
 export(simdata)
 export(prepare_data)
-export(spm)
+export(spm_quick_MD)
 export(spm_integral)
 export(testMatrixMultiply)
 export(testMatrixAdd)

@@ -76,7 +76,8 @@ prepare_data_cont <- function(longdat, vitstat, interval, col.status, col.id, co
   
     prep.dat <- prep.dat[rowSums( matrix(is.na(prep.dat[,5:dim(prep.dat)[2]]), ncol=length(covariates),byrow=T)) !=length(covariates),]
     colnames(prep.dat) <- c("ID", "CASE", "T1", "T3", covariates)
-  
+    
+    ans_final <- prep.dat
     if(length(which(is.na(prep.dat[,5:dim(prep.dat)[2]]) == T)) > 0) {
       if(verbose)
         cat("Filing missing values with multiple imputations:\n")

@@ -1,4 +1,9 @@
-spm <- function(dat,k=2, theta_range=seq(0.078,0.082,by=0.0001)) {
+#'Discrete optimization
+#'It is way much faster that continuous (but less precise) and used mainly in 
+#'estimation of starting point.
+#'
+
+spm_quick_MD <- function(dat,k=2, theta_range=seq(0.078,0.082,by=0.0001)) {
   options(digits=10)
   
   # Logistic regression:
@@ -99,8 +104,7 @@ spm <- function(dat,k=2, theta_range=seq(0.078,0.082,by=0.0001)) {
   eps <- parameters_lsq[,(2+k)]
   names(eps) <- NULL
   
-  pars <- list(theta, mu0, b, Q, u, R, eps)
-  names(pars) <- c("theta", "mu0", "b", "Q", "u", "R", "eps")
+  pars <- list(theta=theta, mu0=mu0, b=b, Q=Q, u=u, R=R, eps=eps)
   pars
 }
 
