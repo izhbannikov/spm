@@ -93,6 +93,9 @@ spm_quick_MD <- function(dat,k=2, theta_range=seq(0.078,0.082,by=0.0001)) {
   }
   for(i in 1:k) {
     for(j in i:k) {
+      #if(j != i) {
+      #  Q[j,i] <- Q[i,j]/2
+      #}
       Q[j,i] <- Q[i,j]
     }
   }

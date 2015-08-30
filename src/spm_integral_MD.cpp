@@ -149,7 +149,6 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
     arma::mat y1(dim,1);
     arma::mat y2(dim,1);
     arma::mat gamma1(dim,dim);
-    gamma1.zeros();
     
     L = 0;
     for(int i=0; i<N; i++) {
@@ -168,11 +167,14 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
       double h=(t2-t1)/nsteps;
       
       //Integration:
+      gamma1.zeros(); // set gamma1 to zero matrix
       double s = h/3.00*(-1.00)*mu(t1, y1, gamma1, fH, f1H, mu0H, thetaH, QH);
       //cout << s << endl;
       double t = t1;
       out[0] = y1;
       out[1] = gamma1;
+      //cout << "y1:\n" << out[0] << "\n";
+      //cout << "gamma1\n" << out[1] << "\n";
       double ifactor;
       
       for(int j = 0; j < nsteps; j++) {
@@ -182,22 +184,44 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
          yfin[1] = out[1] + h/6.00*k1ar[1];
          ytmp[0] = out[0] + h/2.00*k1ar[0];
          ytmp[1] = out[1] + h/2.00*k1ar[1];
+         //cout << "k1ar_1:\n" << k1ar[0] << "\n";
+         //cout << "k1ar_2\n" << k1ar[1] << "\n";
+         //cout << "yfin_11:\n" << yfin[0] << "\n";
+         //cout << "yfin_12\n" << yfin[1] << "\n";
+         //cout << "ytmp_11:\n" << ytmp[0] << "\n";
+         //cout << "ytmp_12\n" << ytmp[1] << "\n";
          
          func1(k2ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
          yfin[0] = yfin[0] + h/3.00*k2ar[0];
          yfin[1] = yfin[1] + h/3.00*k2ar[1];
          ytmp[0] = out[0] + h/2.00*k2ar[0];
          ytmp[1] = out[1] + h/2.00*k2ar[1];
+         //cout << "k2ar_1:\n" << k2ar[0] << "\n";
+         //cout << "k2ar_2\n" << k2ar[1] << "\n";
+         //cout << "yfin_21:\n" << yfin[0] << "\n";
+         //cout << "yfin_22\n" << yfin[1] << "\n";
+         //cout << "ytmp_11:\n" << ytmp[0] << "\n";
+         //cout << "ytmp_12\n" << ytmp[1] << "\n";
+         
          
          func1(k3ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
          yfin[0] = yfin[0] + h/3.00*k3ar[0];
          yfin[1] = yfin[1] + h/3.00*k3ar[1];
          ytmp[0] = out[0] + h*k3ar[0];
          ytmp[1] = out[1] + h*k3ar[1];
+         //cout << "k3ar_1:\n" << k3ar[0] << "\n";
+         //cout << "k3ar_2\n" << k3ar[1] << "\n";
+         //cout << "yfin_31:\n" << yfin[0] << "\n";
+         //cout << "yfin_32\n" << yfin[1] << "\n";
+         //cout << "ytmp_21:\n" << ytmp[0] << "\n";
+         //cout << "ytmp_22\n" << ytmp[1] << "\n";
+         
         
          func1(k4ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
          out[0] = yfin[0] + h/6.00*k4ar[0];
          out[1] = yfin[1] + h/6.00*k4ar[1];
+         //cout << "m_:\n" << out[0] << "\n";
+         //cout << "gamma_\n" << out[1] << "\n";
          
          t = t + h;
       
@@ -221,14 +245,20 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
       double pi = 3.141592654;
     
       if(dd(i,0) == 0) { 
-        arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*gamma2.i()*(m2-y2);
+        //cout << "i:\n" << i << "\nt1:\n" << t1 << "\nt2:\n" << t2 << "\ny1:\n" << y1 << "\ny2:\n" << y2 << "\n";
+        //cout << "QH:\n" << QH << ", det: " << det(QH) << "\ngamma:\n" << gamma2 << ", get: " << det(gamma2) << "\nm:" << m2 << "\n" << y2 << "\nL:" << L << "\n";
+        //cout << "QH:\n" << QH << "\n" << "gamma:\n" << gamma2 << "\nm:" << m2 << "\n" << y2 << "\nL:" << L << "\n";
+        arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*pinv(gamma2,0.0000000000000001)*(m2-y2);
         L += s + exp(0,0);
-        //cout << exp << "\n";
+        if((det(gamma2) < 0) && (det(QH) > 0))
+          break;
       } else {
+        //cout << "??\n";
         double logprobi = log(1.00 - exp(-1.00*mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH)));
         L += s + logprobi;
         //cout << s << " " << logprobi << " " << m2 << " " << gamma2 << "\n";
       }
+      
       
     }
     

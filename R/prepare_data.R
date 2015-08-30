@@ -56,10 +56,11 @@ prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.
 
 prepare_data_cont <- function(longdat, vitstat, interval, col.status, col.id, col.age, col.age.next, col.age.event, covariates, verbose) {
   # Split records by ID:
+  prep.dat <- matrix(ncol=(4+length(covariates)),nrow=0)
   splitted <- split(longdat, longdat[[col.id]])
   vitstat.splitted <- split(vitstat, vitstat[[col.id]])
   
-  for(iii in length(splitted)) {
+  for(iii in 1:length(splitted)) {
     nrows <- length(splitted[[iii]][[col.id]])
     id <- splitted[[iii]][[col.id]]
     case <- rep(0, nrows)
@@ -68,22 +69,28 @@ prepare_data_cont <- function(longdat, vitstat, interval, col.status, col.id, co
     t2 <- splitted[[iii]][[col.age.next]]
     t2[nrows] <- vitstat.splitted[[iii]][[col.age.event]] # May not be necessary
    
-    prep.dat <- cbind(id, case, t1, t2)
-  
+    tmp.frame <- cbind(id, case, t1, t2)
+    
     for(name in covariates) {
-      prep.dat <- cbind(prep.dat, splitted[[iii]][[name]])
+      tmp.frame <- cbind(tmp.frame, splitted[[iii]][[name]])
     }
+    prep.dat <- rbind(prep.dat, tmp.frame)
+  }
   
-    prep.dat <- prep.dat[rowSums( matrix(is.na(prep.dat[,5:dim(prep.dat)[2]]), ncol=length(covariates),byrow=T)) !=length(covariates),]
-    colnames(prep.dat) <- c("ID", "CASE", "T1", "T3", covariates)
+  
+  prep.dat <- prep.dat[rowSums( matrix(is.na(prep.dat[,5:dim(prep.dat)[2]]), ncol=length(covariates),byrow=T)) !=length(covariates),]
+  prep.dat <- prep.dat[which(is.na(prep.dat[,4])==F),]
+  colnames(prep.dat) <- c("ID", "CASE", "T1", "T3", covariates)
     
     ans_final <- prep.dat
     if(length(which(is.na(prep.dat[,5:dim(prep.dat)[2]]) == T)) > 0) {
       if(verbose)
         cat("Filing missing values with multiple imputations:\n")
     
-      tmp_ans <- mice(prep.dat[,5:dim(prep.dat)[2]], printFlag=ifelse(verbose, T, F))
+      #tmp_ans <- mice(prep.dat[,4:dim(prep.dat)[2]], printFlag=ifelse(verbose, T, F),m = 2)
+      tmp_ans <- mice(prep.dat[,5:dim(prep.dat)[2]], printFlag=ifelse(verbose, T, F),m = 2, maxit=2)
       ans1 <- complete(tmp_ans)
+      #ans_final <- cbind(prep.dat[,1:3], ans1)
       ans_final <- cbind(prep.dat[,1:4], ans1)
     }
   
@@ -126,7 +133,7 @@ prepare_data_cont <- function(longdat, vitstat, interval, col.status, col.id, co
         dat[i,2] <- 1
       }
     }
-  }
+  
   
   dat
 }
@@ -194,7 +201,7 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status, col.id, c
     if(verbose)
       cat("Filing missing values with multiple imputations:\n")
     
-    tmp_ans <- mice(ans[,5:dim(ans)[2]], printFlag=ifelse(verbose, T, F))
+    tmp_ans <- mice(ans[,5:dim(ans)[2]], printFlag=ifelse(verbose, T, F), m = 2, maxit = 2)
     ans1 <- complete(tmp_ans)
     ans_final <- cbind(ans[,1:4], ans1)
   }

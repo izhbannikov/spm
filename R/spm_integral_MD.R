@@ -9,64 +9,67 @@ spm_integral_MD <- function(dat,parameters) {
   kk <- parameters[length(parameters)]
   #print(length(parameters))
   #print(parameters)
-  lower_bound <<- c(rep(-1, kk^2),
+  lower_bound <- c(rep(-0.5, kk^2),
                     rep(0,kk),
-                    rep(1e-15, kk^2),
+                    unlist(lapply((kk^2+kk+1):(2*kk^2+kk), function(n) {x=ifelse(pars_prev[n] >= 0, 1e-12, -1e-7)})), #rep(1e-15, kk^2),
+                    rep(1e-5,kk),
                     rep(0,kk),
-                    rep(0,kk),
-                    0, 
-                    0)
-  upper_bound <<- c(rep(0,kk^2),
+                    1e-8, 
+                    1e-8)
+  upper_bound <- c(rep(1e-8,kk^2),
                     rep(Inf,kk),
-                    rep(1e-6,kk^2), 
-                    rep(Inf,kk),
+                   unlist(lapply((kk^2+kk+1):(2*kk^2+kk), function(n) {x=ifelse(pars_prev[n] >= 0, 1e-7, -1e-12)})), #rep(1e-6,kk^2), 
+                    rep(12,kk),
                     rep(Inf,kk),
                     1, 
                     0.1)
   
-  ndeps <<- c(rep(1e-12,kk^2),
+  ndeps <- c(rep(1e-12,kk^2),
               rep(1e-12,kk),
               rep(1e-16,kk^2),
               rep(1e-12,kk),
               rep(1e-12,kk),
               1e-12,
-              1e-12)
-  
-  #lower_bound <<- c(-1,0,1e-15,0,0,0, 0)
-  #upper_bound <<- c(0, Inf, 1e-6, Inf, Inf, Inf, 0.1) #c(0,100,1e-3,10,100,1, 1)
-  
-  
+              1e-8)
   
   
   maxlik <- function(dat, par) {
+    
+    # Adjusting lower and upper bounds:
+    #for(i in length(par)) {
+    #  if(par[i] <= lower_bound[i]) {
+    #    lower_bound[i] <<- lower_bound[i] - parameters[i]/3
+    #    cat("Lower bound\n")
+    #    cat(lower_bound)
+    #  } else if(par[i] >= upper_bound[i]) {
+    #    upper_bound[i] <<- upper_bound[i] + parameters[i]/3
+    #    cat("Upper bound\n")
+    #    cat(upper_bound)
+    #  }
+    #}
+    
+    print(par)
     start=1
     end=kk^2
     a=matrix(par[start:end],ncol=kk, byrow=F)
-    print(a)
     start=end+1
     end=start+kk-1
     f1 <- matrix(par[start:end],ncol=kk, byrow=F)
-    print(f1)
     start=end+1
     end=start+kk^2-1
     Q <- matrix(par[start:end],ncol=kk, byrow=F)
-    print(Q)
     start=end+1
     end=start+kk-1
     b <- matrix(par[start:end],nrow=kk)
-    print(b)
     start=end+1
     end=start+kk-1
     f <- matrix(par[start:end],ncol=kk, byrow=F)
-    print(f)
     start=end+1
     end=start
     mu0 <- par[start:end]
-    print(mu0)
     start=end+1
     end=start
     theta <- par[start:end]
-    print(theta)
     
     
     dims <- dim(dat)
@@ -85,18 +88,7 @@ spm_integral_MD <- function(dat,parameters) {
     
     iteration <<- iteration + 1
   
-    # Adjusting lower and upper bounds:
-    #for(i in length(par)) {
-    #  if(par[i] <= lower_bound[i]) {
-    #    lower_bound[i] <<- lower_bound[i] - parameters[i]/3
-    #    cat("Lower bound\n")
-    #    cat(lower_bound)
-    #  } else if(par[i] >= upper_bound[i]) {
-    #    upper_bound[i] <<- upper_bound[i] + parameters[i]/3
-    #    cat("Upper bound\n")
-    #    cat(upper_bound)
-    #  }
-    #}
+    
     
     #if(is.nan(res)) {
     #  res <- maxlik(dat, pars_prev)
