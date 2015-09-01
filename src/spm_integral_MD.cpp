@@ -198,8 +198,8 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
       if(dd(i,0) == 0) { 
         
         //cout << "QH:\n" << QH << "\n" << "gamma:\n" << gamma2 << "\nm:" << m2 << "\n" << y2 << "\nL:" << L << "\n";
-        //arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*pinv(gamma2,0.000000000000001)*(m2-y2);
-        arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*inv(gamma2)*(m2-y2);
+        arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*pinv(gamma2,0.000000000001)*(m2-y2);
+        //arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*inv(gamma2)*(m2-y2);
         L += s + exp(0,0);
         //cout << exp << endl;
         if((det(gamma2) < 0) && (det(QH) > 0)) {
