@@ -120,10 +120,9 @@ prepare_data_cont <- function(longdat, vitstat, interval, col.status, col.id, co
     for(i in 1:dim(dat)[1]) {
       if(dat[i,1] != pid) {
         avg <- c()
-        for(ii in 0:(ndim-1)) {
+        for(ii in seq(0,(ndim-1),2)) {
           dat[(i+2),(5+ii)] = dat[(i+1),(6+ii)]
           avg <- c(avg, dat[i,(5+ii)])
-          ii <- ii + 2
         }
         averages <- rbind(averages,avg)
         pid = dat[i,1]
