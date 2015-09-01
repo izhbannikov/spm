@@ -22,13 +22,13 @@ spm_integral_MD <- function(dat,parameters) {
                     1, 
                     0.1)
   
-  ndeps <- c(rep(1e-12,kk^2),
-              rep(1e-12,kk),
+  ndeps <- c(rep(1e-8,kk^2),
+              rep(1e-4,kk),
               rep(1e-16,kk^2),
-              rep(1e-12,kk),
-              rep(1e-12,kk),
-              1e-12,
-              1e-8)
+              rep(1e-4,kk),
+              rep(1e-4,kk),
+              1e-8,
+              1e-6)
   
   
   maxlik <- function(dat, par) {
