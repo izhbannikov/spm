@@ -7,20 +7,49 @@ spm_integral_MD <- function(dat,parameters) {
   pars_prev <<- parameters[1:(length(parameters)-1)]
   iteration <- 0
   kk <- parameters[length(parameters)]
-  lower_bound <- c(unlist(lapply(1:kk^2, function(n){pars_prev[n] - 0.01*pars_prev[n]})),
-                   unlist(lapply(1:kk, function(n){pars_prev[n] - 0.01*pars_prev[n]})),
-                   unlist(lapply((kk^2+kk+1):(2*kk^2+kk), function(n) {x=ifelse(pars_prev[n] >= 0, 1e-12, -1e-7)})), #rep(1e-15, kk^2),
-                   unlist(lapply(1:kk, function(n){pars_prev[n] - 0.01*pars_prev[n]})),
-                   unlist(lapply(1:kk, function(n){pars_prev[n] - 0.01*pars_prev[n]})),
-                   unlist(lapply(1:1, function(n){pars_prev[n] - 0.01*pars_prev[n]})), 
-                   unlist(lapply(1:1, function(n){pars_prev[n] - 0.01*pars_prev[n]})))
-  upper_bound <- c(unlist(lapply(1:kk^2, function(n){pars_prev[n] + 0.01*pars_prev[n]})),
-                    rep(Inf,kk),
-                   unlist(lapply((kk^2+kk+1):(2*kk^2+kk), function(n) {x=ifelse(pars_prev[n] >= 0, 1e-6, -1e-12)})), #rep(1e-6,kk^2), 
-                    rep(12,kk),
-                    rep(Inf,kk),
-                    1, 
-                    0.1)
+  
+  setBoundaries <- function() {
+    # Lower and upper boundaries:
+    lower_bound <- c()
+    upper_bound <- c()
+    #
+    start=1
+    end=kk^2
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] <= 0, 5*pars_prev[n], -5*pars_prev[n]) })))
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 5*pars_prev[n], -5*pars_prev[n]) })))
+    #
+    start=end+1
+    end=start+kk-1
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] <= 0, 5*pars_prev[n], -5*pars_prev[n]) })))
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 5*pars_prev[n], -5*pars_prev[n]) })))
+    #
+    start=end+1
+    end=start+kk^2-1
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n) {x=ifelse(pars_prev[n] >= 0, 1e-12, -1e-7)})) )
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {x=ifelse(pars_prev[n] >= 0, 1e-6, -1e-12)})))
+    #
+    start=end+1
+    end=start+kk-1
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] <= 0, 5*pars_prev[n], -5*pars_prev[n]) })) )
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 5*pars_prev[n], -5*pars_prev[n]) })))
+    #
+    start=end+1
+    end=start+kk-1
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] <= 0, 5*pars_prev[n], -5*pars_prev[n]) })) )
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 5*pars_prev[n], -5*pars_prev[n]) })))
+    # mu0
+    start=end+1
+    end=start
+    lower_bound <- c(lower_bound, 1e-8 )
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 5*pars_prev[n], -5*pars_prev[n]) })))
+    # theta
+    start=end+1
+    end=start
+    lower_bound <- c(lower_bound, 1e-5 )
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 5*pars_prev[n], -5*pars_prev[n]) })))
+    
+    res=list(lower_bound=lower_bound, upper_bound=upper_bound)
+  }
   
   ndeps <- c(rep(1e-8,kk^2),
               rep(1e-4,kk),
@@ -86,10 +115,11 @@ spm_integral_MD <- function(dat,parameters) {
     res
   }
 
+  bounds <- setBoundaries()
   # Optimization:
   result <- optim(par = pars_prev, 
                 fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16, ndeps=ndeps), 
-                method="L-BFGS-B", lower = lower_bound, upper = upper_bound)
+                method="L-BFGS-B", lower = bounds$lower_bound, upper = bounds$upper_bound)
   
   result
 }
