@@ -46,7 +46,7 @@ spm_integral_MD <- function(dat,parameters) {
     start=end+1
     end=start
     lower_bound <- c(lower_bound, 1e-5 )
-    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 2*pars_prev[n], -2*pars_prev[n]) })))
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, pars_prev[n], -1*pars_prev[n]) })))
     
     res=list(lower_bound=lower_bound, upper_bound=upper_bound)
   }
