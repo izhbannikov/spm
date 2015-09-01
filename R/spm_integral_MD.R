@@ -7,9 +7,7 @@ spm_integral_MD <- function(dat,parameters) {
   pars_prev <<- parameters[1:(length(parameters)-1)]
   iteration <- 0
   kk <- parameters[length(parameters)]
-  #print(length(parameters))
-  #print(parameters)
-  lower_bound <- c(rep(-0.5, kk^2),
+  lower_bound <- c(rep(-1, kk^2),
                     rep(0,kk),
                     unlist(lapply((kk^2+kk+1):(2*kk^2+kk), function(n) {x=ifelse(pars_prev[n] >= 0, 1e-12, -1e-7)})), #rep(1e-15, kk^2),
                     rep(1e-5,kk),
@@ -18,7 +16,7 @@ spm_integral_MD <- function(dat,parameters) {
                     1e-8)
   upper_bound <- c(rep(1e-8,kk^2),
                     rep(Inf,kk),
-                   unlist(lapply((kk^2+kk+1):(2*kk^2+kk), function(n) {x=ifelse(pars_prev[n] >= 0, 1e-7, -1e-12)})), #rep(1e-6,kk^2), 
+                   unlist(lapply((kk^2+kk+1):(2*kk^2+kk), function(n) {x=ifelse(pars_prev[n] >= 0, 1e-6, -1e-12)})), #rep(1e-6,kk^2), 
                     rep(12,kk),
                     rep(Inf,kk),
                     1, 
@@ -48,7 +46,6 @@ spm_integral_MD <- function(dat,parameters) {
     #  }
     #}
     
-    print(par)
     start=1
     end=kk^2
     a=matrix(par[start:end],ncol=kk, byrow=F)
@@ -71,9 +68,7 @@ spm_integral_MD <- function(dat,parameters) {
     end=start
     theta <- par[start:end]
     
-    
     dims <- dim(dat)
-    #print(dims)
     res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, kk)
     
     cat("L=",res,"\n")
@@ -88,21 +83,10 @@ spm_integral_MD <- function(dat,parameters) {
     
     iteration <<- iteration + 1
   
-    
-    
-    #if(is.nan(res)) {
-    #  res <- maxlik(dat, pars_prev)
-    ##  parameters <<- pars_prev
-    #} else {
-    #  res_prev <<- res
-    #  pars_prev <<- par
-    #}
     res
   }
 
   # Optimization:
-  #print(pars_prev)
-  #print(ndeps)
   result <- optim(par = pars_prev, 
                 fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16, ndeps=ndeps), 
                 method="L-BFGS-B", lower = lower_bound, upper = upper_bound)

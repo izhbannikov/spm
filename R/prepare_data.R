@@ -134,7 +134,15 @@ prepare_data_cont <- function(longdat, vitstat, interval, col.status, col.id, co
       }
     }
   
-  
+  # Finalyzing:
+  dat <- dat[which(dat[,3] != dat[,4]),] # t1 must be different from t3
+  dat <- dat[which(dat[,3] < dat[,4]),] # t1 must be less than t3
+  # t1 must be equal t3 on previous step, if status = 0 and id is the same
+  for(i in 2:dim(dat)[1]) {
+    if((dat[i,3] != dat[(i-1),4]) & (dat[i,2] == 0) & (dat[i,1] == dat[(i-1),1])) {
+      dat[i,3] <- dat[(i-1),4]
+    }
+  }
   dat
 }
 

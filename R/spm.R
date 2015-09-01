@@ -8,6 +8,8 @@ spm <- function(dat,k=2) {
   # - k - number of dimensions
   # 
   # Step 1: estimation of starting point with quick discrete optimization:
+  #dat=ans
+  #k=2
   pars=spm_quick_MD(dat=dat[[2]],k=k)
   cat("Starting parameters:\n")
   print(pars)
@@ -15,8 +17,16 @@ spm <- function(dat,k=2) {
   data <- dat[[1]][,2:dim(dat[[1]])[2]]
   #data <- dat[[2]][,2:dim(dat[[2]])[2]]
   QH = pars$Q
+  if(det(QH) < 0) {
+    cat("Error: determinant of Q < 0\n")
+    cat("Q:\n")
+    print(QH)
+    cat("Det(Q):\n")
+    print(det(QH))
+    stop()
+  }
   aH = pars$R - 1
-  bH = as.matrix(pars$eps, nrow=1)
+  bH = as.matrix(pars$eps, nrow=1) #bH = as.matrix(sqrt(pars$eps), nrow=1)
   f1H = (-1)*pars$u %*% solve(aH)
   fH = -0.5 * pars$b %*% solve(QH)
   mu0H = pars$mu0 - fH %*% QH %*% t(fH)
