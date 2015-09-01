@@ -3,3 +3,5 @@ R/.DS_Store
 R/.Rhistory
 src/*.o
 src/*.so
+inst/data/longdat.csv
+inst/data/vitstat.csv
