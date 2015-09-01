@@ -116,17 +116,12 @@ prepare_data_cont <- function(longdat, vitstat, interval, col.status, col.id, co
     
     # Database should be in appropriate format:
     pid=dat[1,1]
-    starttime = c(dat[1,3])
-    for(i in 1:dim(dat)[1]) {
+    for(i in 1:(dim(dat)[1]-1)) {
       if(dat[i,1] != pid) {
-        avg <- c()
         for(ii in seq(0,(ndim-1),2)) {
-          dat[(i+2),(5+ii)] = dat[(i+1),(6+ii)]
-          avg <- c(avg, dat[i,(5+ii)])
+          dat[(i+1),(5+ii)] = dat[i,(6+ii)]
         }
-        averages <- rbind(averages,avg)
         pid = dat[i,1]
-        starttime <- c(starttime, dat[i,3])
       }
       if(dat[i,2] > 1) {
         dat[i,2] <- 1
@@ -233,25 +228,21 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status, col.id, c
     averages[1,(i+1)] = dat[1,(5+j)]
     j <- j + 2
   }
+  
   # Database should be in appropriate format:
   pid=dat[1,1]
-  starttime = c(dat[1,3])
-  for(i in 1:dim(dat)[1]) {
+  for(i in 1:(dim(dat)[1]-1)) {
     if(dat[i,1] != pid) {
-      avg <- c()
-      for(ii in 0:(ndim-1)) {
-        dat[(i+2),(5+ii)] = dat[(i+1),(6+ii)]
-        avg <- c(avg, dat[i,(5+ii)])
-        ii <- ii + 2
+      for(ii in seq(0,(ndim-1),2)) {
+        dat[(i+1),(5+ii)] = dat[i,(6+ii)]
       }
-      averages <- rbind(averages,avg)
       pid = dat[i,1]
-      starttime <- c(starttime, dat[i,3])
     }
     if(dat[i,2] > 1) {
       dat[i,2] <- 1
     }
   }
+  
   dat
 }
 
