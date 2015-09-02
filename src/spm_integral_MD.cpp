@@ -120,12 +120,9 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
       //Integration:
       gamma1.zeros(); // set gamma1 to zero matrix
       double s = h/3.00*(-1.00)*mu(t1, y1, gamma1, fH, f1H, mu0H, thetaH, QH);
-      //cout << s << endl;
       double t = t1;
       out[0] = y1;
       out[1] = gamma1;
-      //cout << "y1:\n" << out[0] << "\n";
-      //cout << "gamma1\n" << out[1] << "\n";
       double ifactor;
       
       for(int j = 0; j < nsteps; j++) {
@@ -135,44 +132,34 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
          yfin[1] = out[1] + h/6.00*k1ar[1];
          ytmp[0] = out[0] + h/2.00*k1ar[0];
          ytmp[1] = out[1] + h/2.00*k1ar[1];
-         /*cout << "k1ar_1:\n" << k1ar[0] << "\n";
-         cout << "k1ar_2\n" << k1ar[1] << "\n";
-         cout << "yfin_11:\n" << yfin[0] << "\n";
-         cout << "yfin_12\n" << yfin[1] << "\n";
-         cout << "ytmp_11:\n" << ytmp[0] << "\n";
-         cout << "ytmp_12\n" << ytmp[1] << "\n";*/
+         if(isnan(yfin[1](0,0))) {
+           cout << "k1ar:\n" << k1ar << "\nytmp:\n" << ytmp << "\n"; 
+         }
          
          func1(k2ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
          yfin[0] = yfin[0] + h/3.00*k2ar[0];
          yfin[1] = yfin[1] + h/3.00*k2ar[1];
          ytmp[0] = out[0] + h/2.00*k2ar[0];
          ytmp[1] = out[1] + h/2.00*k2ar[1];
-         /*cout << "k2ar_1:\n" << k2ar[0] << "\n";
-         cout << "k2ar_2\n" << k2ar[1] << "\n";
-         cout << "yfin_21:\n" << yfin[0] << "\n";
-         cout << "yfin_22\n" << yfin[1] << "\n";
-         cout << "ytmp_11:\n" << ytmp[0] << "\n";
-         cout << "ytmp_12\n" << ytmp[1] << "\n";*/
-         
+         if(isnan(yfin[1](0,0))) {
+           cout << "k2ar:\n" << k2ar << "\nytmp:\n" << ytmp << "\n"; 
+         }
          
          func1(k3ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
          yfin[0] = yfin[0] + h/3.00*k3ar[0];
          yfin[1] = yfin[1] + h/3.00*k3ar[1];
          ytmp[0] = out[0] + h*k3ar[0];
          ytmp[1] = out[1] + h*k3ar[1];
-         /*cout << "k3ar_1:\n" << k3ar[0] << "\n";
-         cout << "k3ar_2\n" << k3ar[1] << "\n";
-         cout << "yfin_31:\n" << yfin[0] << "\n";
-         cout << "yfin_32\n" << yfin[1] << "\n";
-         cout << "ytmp_21:\n" << ytmp[0] << "\n";
-         cout << "ytmp_22\n" << ytmp[1] << "\n";*/
+         if(isnan(yfin[1](0,0))) {
+           cout << "k3ar:\n" << k3ar << "\nytmp:\n" << ytmp << "\n"; 
+         }
          
-        
          func1(k4ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
          out[0] = yfin[0] + h/6.00*k4ar[0];
          out[1] = yfin[1] + h/6.00*k4ar[1];
-         /*cout << "m_:\n" << out[0] << "\n";
-         cout << "gamma_\n" << out[1] << "\n";*/
+         if(isnan(out[1](0,0))) {
+           cout << "k4ar:\n" << k4ar << "\nytmp:\n" << ytmp << "\n"; 
+         }
          
          t = t + h;
       
