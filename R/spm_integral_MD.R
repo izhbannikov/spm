@@ -45,8 +45,8 @@ spm_integral_MD <- function(dat,parameters) {
     # theta
     start=end+1
     end=start
-    lower_bound <- c(lower_bound, 1e-5 )
-    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, pars_prev[n], -1*pars_prev[n]) })))
+    lower_bound <- c(lower_bound, 1e-6 )
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 0.1*pars_prev[n], -0.1*pars_prev[n]) })))
     
     res=list(lower_bound=lower_bound, upper_bound=upper_bound)
   }
