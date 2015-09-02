@@ -112,7 +112,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
       
       double tdiff = t2-t1;
       if(tdiff > 2) {
-        nsteps = 10*tdiff;
+        nsteps = 20*tdiff;
       }
       
       double h = tdiff/nsteps;
