@@ -2,13 +2,6 @@ library(stats)
 
 
 spm_integral_MD <- function(dat,parameters) {
-  opt_pars <- NULL
-  a <- NULL
-  f1 <- NULL
-  f1 <- NULL 
-  b <- NULL
-  mu0 <- NULL
-  theta <- NULL
   bounds <- NULL
   res_prev <- NULL
   pars_prev <<- parameters[1:(length(parameters)-1)]
@@ -71,25 +64,25 @@ spm_integral_MD <- function(dat,parameters) {
     
     start=1
     end=kk^2
-    a <<- matrix(par[start:end],ncol=kk, byrow=F)
+    a <- matrix(par[start:end],ncol=kk, byrow=F)
     start=end+1
     end=start+kk-1
-    f1 <<- matrix(par[start:end],ncol=kk, byrow=F)
+    f1 <- matrix(par[start:end],ncol=kk, byrow=F)
     start=end+1
     end=start+kk^2-1
-    Q <<- matrix(par[start:end],ncol=kk, byrow=F)
+    Q <- matrix(par[start:end],ncol=kk, byrow=F)
     start=end+1
     end=start+kk-1
-    b <<- matrix(par[start:end],nrow=kk)
+    b <- matrix(par[start:end],nrow=kk)
     start=end+1
     end=start+kk-1
-    f <<- matrix(par[start:end],ncol=kk, byrow=F)
+    f <- matrix(par[start:end],ncol=kk, byrow=F)
     start=end+1
     end=start
-    mu0 <<- par[start:end]
+    mu0 <- par[start:end]
     start=end+1
     end=start
-    theta <<- par[start:end]
+    theta <- par[start:end]
     
     opt_pars <- list(a=a, f1=f1, Q=Q, f=f, b=b, mu0=mu0, theta=theta)
     for(i in 1:length(opt_pars)) {
