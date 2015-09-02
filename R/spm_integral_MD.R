@@ -87,7 +87,7 @@ spm_integral_MD <- function(dat,parameters) {
     
     opt_pars <- list(a=a, f1=f1, Q=Q, f=f, b=b, mu0=mu0, theta=theta)
     for(i in 1:length(opt_pars)) {
-      if(length(setdiff(opt_pars[[i]],bounds$lower_bound[i])) == 0 || length(setdiff(opt_pars[[i]] %in% bounds$upper_bound[i])) == 0) {
+      if(length(setdiff(opt_pars[[i]],bounds$lower_bound[i])) == 0 || length(setdiff(opt_pars[[i]], bounds$upper_bound[i])) == 0) {
         print(opt_pars[[i]])
         stop("Optimization stopped.")
       }
