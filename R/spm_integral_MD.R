@@ -12,27 +12,27 @@ spm_integral_MD <- function(dat,parameters) {
     # Lower and upper boundaries:
     lower_bound <- c()
     upper_bound <- c()
-    #
+    # aH
     start=1
     end=kk^2
-    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] <= 0, 2*pars_prev[n], -2*pars_prev[n]) })))
-    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 0.5*pars_prev[n], -0.5*pars_prev[n]) })))
-    #
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){res=-1.5})))
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){res=0})))
+    # f1H
     start=end+1
     end=start+kk-1
-    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] <= 0, 0.5*pars_prev[n], -0.5*pars_prev[n]) })))
-    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 0.5*pars_prev[n], -0.5*pars_prev[n]) })))
-    #
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] <= 0, 0.25*pars_prev[n], -0.25*pars_prev[n]) })))
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 0.25*pars_prev[n], -0.25*pars_prev[n]) })))
+    # QH
     start=end+1
     end=start+kk^2-1
     lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n) {x=ifelse(pars_prev[n] >= 0, 1e-12, -1e-7)})) )
     upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {x=ifelse(pars_prev[n] >= 0, 1e-7, -1e-12)})))
-    #
+    # fH
     start=end+1
     end=start+kk-1
-    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] <= 0, 0.5*pars_prev[n], -0.5*pars_prev[n]) })) )
-    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 0.5*pars_prev[n], -0.5*pars_prev[n]) })))
-    #
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] <= 0, 0.25*pars_prev[n], -0.25*pars_prev[n]) })) )
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 0.25*pars_prev[n], -0.25*pars_prev[n]) })))
+    # bH
     start=end+1
     end=start+kk-1
     lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] <= 0, 0.5*pars_prev[n], -0.5*pars_prev[n]) })) )
@@ -46,18 +46,18 @@ spm_integral_MD <- function(dat,parameters) {
     start=end+1
     end=start
     lower_bound <- c(lower_bound, 1e-6 )
-    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 0.1*pars_prev[n], -0.1*pars_prev[n]) })))
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, pars_prev[n], -1*pars_prev[n]) })))
     
     res=list(lower_bound=lower_bound, upper_bound=upper_bound)
   }
   
-  ndeps <- c(rep(1e-8,kk^2),
-              rep(1e-4,kk),
+  ndeps <- c(rep(1e-6,kk^2),
+              rep(1e-3,kk),
               rep(1e-16,kk^2),
-              rep(1e-4,kk),
-              rep(1e-4,kk),
-              1e-8,
-              1e-6)
+              rep(1e-3,kk),
+              rep(1e-3,kk),
+              1e-6,
+              1e-4)
   
   
   maxlik <- function(dat, par) {
