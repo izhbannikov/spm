@@ -25,8 +25,8 @@ spm_integral_MD <- function(dat,parameters) {
     # QH
     start=end+1
     end=start+kk^2-1
-    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n) {x=ifelse(pars_prev[n] >= 0, 1e-9, -1e-7)})) )
-    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {x=ifelse(pars_prev[n] >= 0, 1e-7, -1e-9)})))
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n) {x=ifelse(pars_prev[n] >= 0, runif(1,0,1e-9), -1*runif(1,0,1e-7))})) )
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {x=ifelse(pars_prev[n] >= 0, runif(1,0,1e-7), -1*runif(1,0,1e-9))})))
     # fH
     start=end+1
     end=start+kk-1
