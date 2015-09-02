@@ -96,7 +96,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
     arma::mat gamma1(dim,dim);
     
     L = 0;
-    double  nsteps = 10;
+    double  nsteps = 5;
       
     for(int i=0; i<N; i++) {
       //Solving differential equations on intervals:
@@ -112,7 +112,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
       
       double tdiff = t2-t1;
       if(tdiff > 2) {
-        nsteps = 10*tdiff;
+        nsteps = 5*tdiff;
       }
       
       double h = tdiff/nsteps;
