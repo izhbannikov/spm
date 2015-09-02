@@ -15,8 +15,8 @@ spm_integral_MD <- function(dat,parameters) {
     # aH
     start=1
     end=kk^2
-    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){res=-1.5})))
-    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){res=0})))
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){res=-1})))
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){res=-1e-12})))
     # f1H
     start=end+1
     end=start+kk-1
