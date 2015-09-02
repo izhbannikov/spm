@@ -3,7 +3,12 @@ library(stats)
 
 spm_integral_MD <- function(dat,parameters) {
   opt_pars <- NULL
-  a <- f1 <- Q <- f1 <- b <- mu0 <- theta <- NULL
+  a <- NULL
+  f1 <- NULL
+  f1 <- NULL 
+  b <- NULL
+  mu0 <- NULL
+  theta <- NULL
   bounds <- NULL
   res_prev <- NULL
   pars_prev <<- parameters[1:(length(parameters)-1)]
@@ -88,10 +93,10 @@ spm_integral_MD <- function(dat,parameters) {
     
     opt_pars <- list(a=a, f1=f1, Q=Q, f=f, b=b, mu0=mu0, theta=theta)
     for(i in 1:length(opt_pars)) {
-      #if((length(setdiff(opt_pars[[i]],bounds$lower_bound[i])) == 0) || (length(setdiff(opt_pars[[i]], bounds$upper_bound[i])) == 0)) {
-      #  print(opt_pars[[i]])
-      #  stop("Optimization stopped.")
-      #}
+      if((length(setdiff(opt_pars[[i]],bounds$lower_bound[i])) == 0) || (length(setdiff(opt_pars[[i]], bounds$upper_bound[i])) == 0)) {
+        print(opt_pars[[i]])
+        stop("Optimization stopped.")
+      }
     }
     
     dims <- dim(dat)
