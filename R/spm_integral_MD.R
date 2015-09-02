@@ -20,8 +20,8 @@ spm_integral_MD <- function(dat,parameters) {
     #
     start=end+1
     end=start+kk-1
-    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] <= 0, 5*pars_prev[n], -5*pars_prev[n]) })))
-    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 5*pars_prev[n], -5*pars_prev[n]) })))
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] <= 0, 0.5*pars_prev[n], -0.5*pars_prev[n]) })))
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 0.5*pars_prev[n], -0.5*pars_prev[n]) })))
     #
     start=end+1
     end=start+kk^2-1
@@ -30,13 +30,13 @@ spm_integral_MD <- function(dat,parameters) {
     #
     start=end+1
     end=start+kk-1
-    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] <= 0, 5*pars_prev[n], -5*pars_prev[n]) })) )
-    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 5*pars_prev[n], -5*pars_prev[n]) })))
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] <= 0, 0.5*pars_prev[n], -0.5*pars_prev[n]) })) )
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 0.5*pars_prev[n], -0.5*pars_prev[n]) })))
     #
     start=end+1
     end=start+kk-1
-    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] <= 0, 5*pars_prev[n], -5*pars_prev[n]) })) )
-    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 5*pars_prev[n], -5*pars_prev[n]) })))
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] <= 0, 0.5*pars_prev[n], -0.5*pars_prev[n]) })) )
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){pars_prev[n] + ifelse(pars_prev[n] >= 0, 0.5*pars_prev[n], -0.5*pars_prev[n]) })))
     # mu0
     start=end+1
     end=start
