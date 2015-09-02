@@ -2,7 +2,8 @@ library(stats)
 
 
 spm_integral_MD <- function(dat,parameters) {
-  
+  opt_pars <- NULL
+  bounds <- NULL
   res_prev <- NULL
   pars_prev <<- parameters[1:(length(parameters)-1)]
   iteration <- 0
@@ -62,40 +63,35 @@ spm_integral_MD <- function(dat,parameters) {
   
   maxlik <- function(dat, par) {
     
-    # Adjusting lower and upper bounds:
-    #for(i in length(par)) {
-    #  if(par[i] <= lower_bound[i]) {
-    #    lower_bound[i] <<- lower_bound[i] - parameters[i]/3
-    #    cat("Lower bound\n")
-    #    cat(lower_bound)
-    #  } else if(par[i] >= upper_bound[i]) {
-    #    upper_bound[i] <<- upper_bound[i] + parameters[i]/3
-    #    cat("Upper bound\n")
-    #    cat(upper_bound)
-    #  }
-    #}
-    
     start=1
     end=kk^2
-    a=matrix(par[start:end],ncol=kk, byrow=F)
+    a <<- matrix(par[start:end],ncol=kk, byrow=F)
     start=end+1
     end=start+kk-1
-    f1 <- matrix(par[start:end],ncol=kk, byrow=F)
+    f1 <<- matrix(par[start:end],ncol=kk, byrow=F)
     start=end+1
     end=start+kk^2-1
-    Q <- matrix(par[start:end],ncol=kk, byrow=F)
+    Q <<- matrix(par[start:end],ncol=kk, byrow=F)
     start=end+1
     end=start+kk-1
-    b <- matrix(par[start:end],nrow=kk)
+    b <<- matrix(par[start:end],nrow=kk)
     start=end+1
     end=start+kk-1
-    f <- matrix(par[start:end],ncol=kk, byrow=F)
+    f <<- matrix(par[start:end],ncol=kk, byrow=F)
     start=end+1
     end=start
-    mu0 <- par[start:end]
+    mu0 <<- par[start:end]
     start=end+1
     end=start
-    theta <- par[start:end]
+    theta <<- par[start:end]
+    
+    opt_pars <- list(a=a, f1=f1, Q=Q, f=f, b=b, mu0=mu0, theta=theta)
+    for(i in 1:length(opt_pars)) {
+      if(length(setdiff(opt_pars[[i]],bounds$lower_bound[i])) == 0 || length(setdiff(opt_pars[[i]] %in% bounds$upper_bound[i])) == 0) {
+        print(opt_pars[[i]])
+        stop("Optimization stopped.")
+      }
+    }
     
     dims <- dim(dat)
     res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, kk)
@@ -115,7 +111,8 @@ spm_integral_MD <- function(dat,parameters) {
     res
   }
 
-  bounds <- setBoundaries()
+  bounds <<- setBoundaries()
+  
   # Optimization:
   result <- optim(par = pars_prev, 
                 fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16, ndeps=ndeps), 
