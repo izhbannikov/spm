@@ -111,7 +111,7 @@ spm_integral_MD <- function(dat,parameters) {
     iteration <<- iteration + 1
     
     cat("L = ",res,"\n")
-    cat("Iteration: \nResults:") 
+    cat("Iteration: ", iteration,  "\nResults:\n") 
     print(results)
     
     res
