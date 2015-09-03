@@ -91,7 +91,6 @@ spm_integral_MD <- function(dat,parameters) {
     end=start
     theta <- par[start:end]
     results$thetaH <<- theta
-     
     # End reading parameters
     
     opt_pars <- list(a=a, f1=f1, Q=Q, f=f, b=b, mu0=mu0, theta=theta)
@@ -102,7 +101,7 @@ spm_integral_MD <- function(dat,parameters) {
       }
     }
     
-    if(stopflag) {
+    if(stopflag == F) {
       dims <- dim(dat)
       res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, kk)
     } else {
