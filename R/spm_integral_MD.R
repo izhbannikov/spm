@@ -9,7 +9,7 @@ spm_integral_MD <- function(dat,parameters) {
     # aH
     start=1
     end=kk^2
-    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){res=-1})))
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){res=-1.5})))
     upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){res=-1e-12})))
     # f1H
     start=end+1
@@ -86,6 +86,11 @@ spm_integral_MD <- function(dat,parameters) {
     
     opt_pars <- list(a=a, f1=f1, Q=Q, f=f, b=b, mu0=mu0, theta=theta)
     for(i in 1:length(opt_pars)) {
+      
+      print(bounds$lower_bound[i])
+      print(bound$upper_bound[i])
+      print(opt_pars[[i]])
+      
       if(length(intersect(opt_pars[[i]],c(bounds$lower_bound[i], bounds$upper_bound[i]))) >= 1) {
         print(opt_pars[[i]])
         stop("Optimization stopped. Parametes achieved lower or upper bound, you need more data to correctrly obtain optimal parameters.")
