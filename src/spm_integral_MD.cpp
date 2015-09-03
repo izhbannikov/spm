@@ -225,34 +225,3 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
     return(Rcpp::wrap(L));
 }
 
-/*
-RcppExport SEXP testMatrixMultiply(SEXP aa, SEXP bb) {
-  Rcpp::NumericMatrix a = Rcpp::NumericMatrix(aa);
-  Rcpp::NumericMatrix b = Rcpp::NumericMatrix(bb);
-  
-  return(Rcpp::wrap(multiplyMatrices(a, b)));
-}
-
-RcppExport SEXP testMatrixAdd(SEXP aa, SEXP bb) {
-  Rcpp::NumericMatrix a = Rcpp::NumericMatrix(aa);
-  Rcpp::NumericMatrix b = Rcpp::NumericMatrix(bb);
-  
-  return(Rcpp::wrap(add(a, b)));
-}
-
-RcppExport SEXP testMatrixMultiplyByConst(SEXP aa, SEXP bb) {
-  double constant = as<double>(aa);
-  Rcpp::NumericMatrix a = Rcpp::NumericMatrix(bb);
-  
-  return(Rcpp::wrap(muliplyByConstant(constant, a)));
-}
-
-RcppExport SEXP testPowerMatrix(SEXP aa, SEXP pp) {
-  double p = as<double>(pp);
-  Rcpp::NumericMatrix a = Rcpp::NumericMatrix(aa);
-  
-  return(Rcpp::wrap(powerMatrix(a,p)));
-}
-*/
-
-

@@ -2,6 +2,7 @@ library(stats)
 
 
 spm_integral_MD <- function(dat,parameters) {
+  final_res <<- list()
   setBoundaries <- function() {
     # Lower and upper boundaries:
     lower_bound <- c()
@@ -105,6 +106,7 @@ spm_integral_MD <- function(dat,parameters) {
       dims <- dim(dat)
       res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, kk)
     } else {
+      final_res <<- list(results)
       stop("Optimization stopped. Parametes achieved lower or upper bound, you need more data to correctrly obtain optimal parameters.")
     }
     
@@ -124,7 +126,8 @@ spm_integral_MD <- function(dat,parameters) {
                 fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16, ndeps=ndeps), 
                 method="L-BFGS-B", lower = bounds$lower_bound, upper = bounds$upper_bound)
   
-  res <- list(results, optim_results)
+  final_res <<- list(results, optim_results)
+  final_res
 }
 
 
