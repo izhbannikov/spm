@@ -2,12 +2,6 @@ library(stats)
 
 
 spm_integral_MD <- function(dat,parameters) {
-  bounds <- NULL
-  res_prev <- NULL
-  pars_prev <<- parameters[1:(length(parameters)-1)]
-  iteration <- 0
-  kk <- parameters[length(parameters)]
-  
   setBoundaries <- function() {
     # Lower and upper boundaries:
     lower_bound <- c()
@@ -50,6 +44,14 @@ spm_integral_MD <- function(dat,parameters) {
     
     res=list(lower_bound=lower_bound, upper_bound=upper_bound)
   }
+  
+  res_prev <- NULL
+  pars_prev <<- parameters[1:(length(parameters)-1)]
+  iteration <- 0
+  kk <- parameters[length(parameters)]
+  bounds <- setBoundaries()
+  
+  
   
   ndeps <- c(rep(1e-6,kk^2),
               rep(1e-3,kk),
@@ -110,7 +112,7 @@ spm_integral_MD <- function(dat,parameters) {
     res
   }
 
-  bounds <<- setBoundaries()
+  
   
   # Optimization:
   result <- optim(par = pars_prev, 
