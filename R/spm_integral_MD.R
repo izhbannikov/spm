@@ -86,7 +86,7 @@ spm_integral_MD <- function(dat,parameters) {
     
     opt_pars <- list(a=a, f1=f1, Q=Q, f=f, b=b, mu0=mu0, theta=theta)
     for(i in 1:length(opt_pars)) {
-      if(length(intersect(opt_pars[[i]],c(bounds$lower_bound[i], bounds$upper_bound[i]))) >=1) {
+      if(length(intersect(opt_pars[[i]],c(bounds$lower_bound[i], bounds$upper_bound[i]))) >= 3) {
         print(opt_pars[[i]])
         stop("Optimization stopped. Parametes achieved lower or upper bound, you need more data to correctrly obtain optimal parameters.")
       }
