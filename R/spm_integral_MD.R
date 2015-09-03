@@ -49,9 +49,7 @@ spm_integral_MD <- function(dat,parameters) {
   pars_prev <<- parameters[1:(length(parameters)-1)]
   iteration <- 0
   kk <- parameters[length(parameters)]
-  bounds <- setBoundaries()
-  
-  
+  bounds <<- setBoundaries()
   
   ndeps <- c(rep(1e-6,kk^2),
               rep(1e-3,kk),
@@ -86,13 +84,6 @@ spm_integral_MD <- function(dat,parameters) {
     end=start
     theta <- par[start:end]
     
-    opt_pars <- list(a=a, f1=f1, Q=Q, f=f, b=b, mu0=mu0, theta=theta)
-    for(i in 1:length(opt_pars)) {
-      if((length(setdiff(opt_pars[[i]],bounds$lower_bound[i])) == 0) || (length(setdiff(opt_pars[[i]], bounds$upper_bound[i])) == 0)) {
-        print(opt_pars[[i]])
-        stop("Optimization stopped.")
-      }
-    }
     
     dims <- dim(dat)
     res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, kk)
@@ -106,6 +97,15 @@ spm_integral_MD <- function(dat,parameters) {
                 "f=",f,
                 "mu0=",mu0, 
                 "theta=", theta, "\n")
+    
+    
+    opt_pars <- list(a=a, f1=f1, Q=Q, f=f, b=b, mu0=mu0, theta=theta)
+    for(i in 1:length(opt_pars)) {
+      if((length(setdiff(opt_pars[[i]],bounds$lower_bound[i])) == 0) || (length(setdiff(opt_pars[[i]], bounds$upper_bound[i])) == 0)) {
+        print(opt_pars[[i]])
+        stop("Optimization stopped.")
+      }
+    }
     
     iteration <<- iteration + 1
   
