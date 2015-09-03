@@ -45,7 +45,7 @@ spm_integral_MD <- function(dat,parameters) {
     res=list(lower_bound=lower_bound, upper_bound=upper_bound)
   }
   
-  res_prev <- NULL
+  results <- list(aH=NULL, f1H=NULL, QH=NULL, fH=NULL, bH=NULL, mu0H=NULL, thetaH=NULL)
   pars_prev <<- parameters[1:(length(parameters)-1)]
   iteration <- 0
   kk <- parameters[length(parameters)]
@@ -61,70 +61,71 @@ spm_integral_MD <- function(dat,parameters) {
   
   
   maxlik <- function(dat, par) {
-    
+    stopflag <- F
+    # Reading parameters:
     start=1
     end=kk^2
-    a <- matrix(par[start:end],ncol=kk, byrow=F)
+    a <- matrix(par[start:end],ncol=kk, byrow=F) 
+    results$aH <<- a
     start=end+1
     end=start+kk-1
     f1 <- matrix(par[start:end],ncol=kk, byrow=F)
+    results$f1H <<- a
     start=end+1
     end=start+kk^2-1
     Q <- matrix(par[start:end],ncol=kk, byrow=F)
+    results$QH <<- Q
     start=end+1
     end=start+kk-1
     b <- matrix(par[start:end],nrow=kk)
+    results$bH <<- b
     start=end+1
     end=start+kk-1
     f <- matrix(par[start:end],ncol=kk, byrow=F)
+    results$fH <<- f
     start=end+1
     end=start
     mu0 <- par[start:end]
+    results$mu0 <<- mu0
     start=end+1
     end=start
     theta <- par[start:end]
+    results$thetaH <<- theta
+     
+    # End reading parameters
     
     opt_pars <- list(a=a, f1=f1, Q=Q, f=f, b=b, mu0=mu0, theta=theta)
     for(i in 1:length(opt_pars)) {
-      #print(bounds$lower_bound[i])
-      #print(bounds$upper_bound[i])
-      #print(opt_pars[[i]])
-      
       if(length(intersect(opt_pars[[i]],c(bounds$lower_bound[i], bounds$upper_bound[i]))) >= 1) {
         print(opt_pars[[i]])
-        stop("Optimization stopped. Parametes achieved lower or upper bound, you need more data to correctrly obtain optimal parameters.")
+        stopflag <- T
       }
     }
     
-    dims <- dim(dat)
-    res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, kk)
-    
-    cat("L=",res,"\n")
-    cat("Iter:", iteration, 
-                "a=",a,
-                "f1=",f1,
-                "Q=",Q,
-                "b=",b,
-                "f=",f,
-                "mu0=",mu0, 
-                "theta=", theta, "\n")
-    
-    
-    
+    if(stopflag) {
+      dims <- dim(dat)
+      res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, kk)
+    else {
+      stop("Optimization stopped. Parametes achieved lower or upper bound, you need more data to correctrly obtain optimal parameters.")
+    }
     
     iteration <<- iteration + 1
-  
+    
+    cat("L = ",res,"\n")
+    cat("Iteration: \nResults:") 
+    print(results)
+    
     res
   }
 
   
   
   # Optimization:
-  result <- optim(par = pars_prev, 
+  optim_results <- optim(par = pars_prev, 
                 fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16, ndeps=ndeps), 
                 method="L-BFGS-B", lower = bounds$lower_bound, upper = bounds$upper_bound)
   
-  result
+  res <- list(results, optim_results)
 }
 
 
