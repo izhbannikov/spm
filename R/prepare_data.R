@@ -99,7 +99,7 @@ prepare_data_cont <- function(longdat, vitstat, interval, col.status, col.id, co
     if(verbose)
       cat("Filing missing values with multiple imputations:\n")
     
-    tmp_ans <- mice(prep.dat[,5:dim(prep.dat)[2]], printFlag=ifelse(verbose, T, F),m = 1, maxit=1)
+    tmp_ans <- mice(prep.dat[,5:dim(prep.dat)[2]], printFlag=ifelse(verbose, T, F),m = 2, maxit=2)
     ans1 <- complete(tmp_ans)
     #ans_final <- cbind(prep.dat[,1:3], ans1)
     ans_final <- cbind(prep.dat[,1:4], ans1)
