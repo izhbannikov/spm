@@ -86,10 +86,9 @@ spm_integral_MD <- function(dat,parameters) {
     
     opt_pars <- list(a=a, f1=f1, Q=Q, f=f, b=b, mu0=mu0, theta=theta)
     for(i in 1:length(opt_pars)) {
-      
-      print(bounds$lower_bound[i])
-      print(bound$upper_bound[i])
-      print(opt_pars[[i]])
+      #print(bounds$lower_bound[i])
+      #print(bounds$upper_bound[i])
+      #print(opt_pars[[i]])
       
       if(length(intersect(opt_pars[[i]],c(bounds$lower_bound[i], bounds$upper_bound[i]))) >= 1) {
         print(opt_pars[[i]])
