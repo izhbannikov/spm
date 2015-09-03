@@ -84,6 +84,13 @@ spm_integral_MD <- function(dat,parameters) {
     end=start
     theta <- par[start:end]
     
+    opt_pars <- list(a=a, f1=f1, Q=Q, f=f, b=b, mu0=mu0, theta=theta)
+    for(i in 1:length(opt_pars)) {
+      if(length(intersect(opt_pars[[i]],c(bounds$lower_bound[i], bounds$upper_bound[i]))) >=1) {
+        print(opt_pars[[i]])
+        stop("Optimization stopped. Parametes achieved lower or upper bound, you need more data to correctrly obtain optimal parameters.")
+      }
+    }
     
     dims <- dim(dat)
     res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, kk)
@@ -99,13 +106,7 @@ spm_integral_MD <- function(dat,parameters) {
                 "theta=", theta, "\n")
     
     
-    opt_pars <- list(a=a, f1=f1, Q=Q, f=f, b=b, mu0=mu0, theta=theta)
-    for(i in 1:length(opt_pars)) {
-      if((length(setdiff(opt_pars[[i]],bounds$lower_bound[i])) == 0) || (length(setdiff(opt_pars[[i]], bounds$upper_bound[i])) == 0)) {
-        print(opt_pars[[i]])
-        stop("Optimization stopped.")
-      }
-    }
+    
     
     iteration <<- iteration + 1
   
