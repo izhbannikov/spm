@@ -105,7 +105,7 @@ spm_integral_MD <- function(dat,parameters) {
     if(stopflag) {
       dims <- dim(dat)
       res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, kk)
-    else {
+    } else {
       stop("Optimization stopped. Parametes achieved lower or upper bound, you need more data to correctrly obtain optimal parameters.")
     }
     
