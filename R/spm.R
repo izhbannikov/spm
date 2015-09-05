@@ -15,12 +15,12 @@ spm <- function(dat,k=2, verbose=F, tol=NULL) {
   # Step2: continuous slow optimization:
   data <- dat[[1]][,2:dim(dat[[1]])[2]]
   
-  if(det(pars$pars2$QH) < 0) {
+  if(det(pars$pars2$Q) < 0) {
     cat("Error: determinant of Q < 0\n")
     cat("Q:\n")
-    print(pars$pars2$QH)
+    print(pars$pars2$Q)
     cat("Det(Q):\n")
-    print(det(pars$pars2$QH))
+    print(det(pars$pars2$Q))
     stop()
   }
   
@@ -28,7 +28,7 @@ spm <- function(dat,k=2, verbose=F, tol=NULL) {
   dd <- new.env()
   spm_integral_MD(data, c(pars$pars2$a, pars$pars2$f1, pars$pars2$Q, pars$pars2$b, pars$pars2$f, pars$pars2$mu0, pars$pars2$theta), k, dd, verbose)
   print(dd$results)
-  res=list(starting=list(QH=pars$pars2$QH, aH=pars$pars2$aH, bH=pars$pars2$bH, f1H=pars$pars2$f1H, fH=pars$pars2$fH, mu0H=pars$pars2$mu0H, thetaH=pars$pars2$thetaH), 
+  res=list(starting=list(QH=pars$pars2$Q, aH=pars$pars2$a, bH=pars$pars2$b, f1H=pars$pars2$f1, fH=pars$pars2$f, mu0H=pars$pars2$mu0, theta=pars$pars2$theta), 
            estimated=dd$results)
   invisible(res)
 }
