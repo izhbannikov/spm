@@ -10,7 +10,6 @@ spm_integral <- function(dat,parameters) {
   lower_bound <<- c(-1,0,1e-16,0,0,0, 0)
   upper_bound <<- c(0, Inf, 1e-6, Inf, Inf, Inf, 0.1)
   
-  
   maxlik <- function(dat, par) {
     a <- par[1] 
     f1 <- par[2]
@@ -35,26 +34,6 @@ spm_integral <- function(dat,parameters) {
     
     iteration <<- iteration + 1
     
-    # Adjusting lower and upper bounds:
-    for(i in length(par)) {
-      if(par[i] <= lower_bound[i]) {
-        lower_bound[i] <<- lower_bound[i] - parameters[i]/3
-        cat("Lower bound\n")
-        cat(lower_bound)
-      } else if(par[i] >= upper_bound[i]) {
-        upper_bound[i] <<- upper_bound[i] + parameters[i]/3
-        cat("Upper bound\n")
-        cat(upper_bound)
-      }
-    }
-    
-    #if(is.nan(res)) {
-    #  res <- maxlik(dat, pars_prev)
-    ##  parameters <<- pars_prev
-    #} else {
-    #  res_prev <<- res
-    #  pars_prev <<- par
-    #}
     res
   }
   
