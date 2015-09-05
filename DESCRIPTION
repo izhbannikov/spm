@@ -2,9 +2,9 @@ Package: spm
 Type: Package
 Title: Stochastic Process Modeling (SPM)
 Version: 1.0
-Date: 2015-06-18
+Date: 2015-09-05
 Author: I. Y. Zhbannikov
-Maintainer: Who to complain to <zhbannikov.ilya@gmail.com>
+Maintainer: Ilya Y. Zhbannikov <i.zhbannikov@mail.ru>
 Description: Stochastic Process Modeling
 License: GPL
 Imports: Rcpp (>= 0.11.1), RcppArmadillo (>= 0.4.200.0)
