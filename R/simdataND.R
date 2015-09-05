@@ -1,6 +1,7 @@
 # ND simulation function
 # It uses a, f1, Q, f, b, mu0, theta
-sim <- function(N=100, a, f1, Q, f, b, mu0, theta, ystart, tstart=30, tend=105, dt=1, k=1) {
+sim <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart, tstart=30, tend=105, dt=1, k=1) {
+  # Re-calculating parameters:
   u_ <- -1*a %*% f1
   R_ <- 1 + a
   epsilon_ <- b

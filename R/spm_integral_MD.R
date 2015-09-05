@@ -1,8 +1,5 @@
 library(stats)
 
-results <- new.env()
-
-
 setBoundaries <- function(k, params) {
   # This function sets lower and upper boundaries for optim.
   # - k - number of dimensions
@@ -47,7 +44,7 @@ setBoundaries <- function(k, params) {
 spm_integral_MD <- function(dat,parameters, k, dd) {
   final_res <- list()
   # Current results:
-  results <<- list(aH=NULL, f1H=NULL, QH=NULL, fH=NULL, bH=NULL, mu0H=NULL, thetaH=NULL)
+  results <- list(aH=NULL, f1H=NULL, QH=NULL, fH=NULL, bH=NULL, mu0H=NULL, thetaH=NULL)
   iteration <- 0
   bounds <- setBoundaries(k, parameters)
   
