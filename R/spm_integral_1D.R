@@ -1,7 +1,7 @@
 library(stats)
 
 
-spm_integral <- function(dat,parameters) {
+spm_integral_1D <- function(dat,parameters) {
   
   res_prev <- NULL
   pars_prev <<- parameters
