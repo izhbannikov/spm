@@ -41,7 +41,7 @@ setBoundaries <- function(k, params) {
   res=list(lower_bound=lower_bound, upper_bound=upper_bound)
 }
 
-spm_integral_MD <- function(dat,parameters, k, dd, verbose=F) {
+spm_integral_MD <- function(dat,parameters, k, verbose=F) {
   final_res <- list()
   # Current results:
   results <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
@@ -86,6 +86,7 @@ spm_integral_MD <- function(dat,parameters, k, dd, verbose=F) {
     if(stopflag == F) {
       dims <- dim(dat)
       res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k)
+      assign("results", results, envir=.GlobalEnv)
       iteration <<- iteration + 1
       if(verbose) {
         cat("L = ", res,"\n")
@@ -94,21 +95,22 @@ spm_integral_MD <- function(dat,parameters, k, dd, verbose=F) {
       }
       
     } else {
-      assign("results", results, envir=dd)
-      stop("Optimization stopped. Parametes achieved lower or upper bound, you need more data to correctrly obtain optimal parameters.")
+      cat("Optimization stopped. Parametes achieved lower or upper bound, you need more data to correctrly obtain optimal parameters.")
+      print("###########")
+      res <- NA
     }
     
     res
   }
 
   # Optimization:
-  
-  optim_results <- optim(par = parameters, 
+  optim_results <- NA
+  tryCatch(optim(par = parameters, 
                 fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, factr=1e-16, ndeps=ndeps), 
-                method="L-BFGS-B", lower = bounds$lower_bound, upper = bounds$upper_bound)
-  
+                method="L-BFGS-B", lower = bounds$lower_bound, upper = bounds$upper_bound), 
+           error=function(e) e, 
+           finally=NA)
   final_res <<- list(results, optim_results)
-  dd$results <<- final_res
   final_res
 }
 

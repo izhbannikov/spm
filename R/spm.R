@@ -10,7 +10,11 @@ spm <- function(dat,k=2, verbose=F, tol=NULL) {
   #
   # Step 1: estimation of starting point with quick discrete optimization:
   pars=spm_quick_MD(dat=dat[[2]],k=k)
-  cat("Starting parameters:\n")
+  
+  if(verbose) {
+    cat("Starting parameters:\n")
+    print(pars)
+  }
   
   # Step2: continuous slow optimization:
   data <- dat[[1]][,2:dim(dat[[1]])[2]]
@@ -24,11 +28,9 @@ spm <- function(dat,k=2, verbose=F, tol=NULL) {
     stop()
   }
   
-  
-  dd <- new.env()
-  spm_integral_MD(data, c(pars$pars2$a, pars$pars2$f1, pars$pars2$Q, pars$pars2$b, pars$pars2$f, pars$pars2$mu0, pars$pars2$theta), k, dd, verbose)
-  print(dd$results)
+  spm_integral_MD(data, c(pars$pars2$a, pars$pars2$f1, pars$pars2$Q, pars$pars2$b, pars$pars2$f, pars$pars2$mu0, pars$pars2$theta), k, verbose)
+ 
   res=list(starting=list(QH=pars$pars2$Q, aH=pars$pars2$a, bH=pars$pars2$b, f1H=pars$pars2$f1, fH=pars$pars2$f, mu0H=pars$pars2$mu0, theta=pars$pars2$theta), 
-           estimated=dd$results)
+           estimated=get("results",envir=.GlobalEnv))
   invisible(res)
 }

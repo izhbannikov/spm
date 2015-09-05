@@ -221,7 +221,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
     delete[] k3ar;
     delete[] k4ar;
     
-    std::cout << L << "\n";
+    //std::cout << L << "\n";
     return(Rcpp::wrap(L));
 }
 
