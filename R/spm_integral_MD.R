@@ -41,6 +41,29 @@ setBoundaries <- function(k, params) {
   res=list(lower_bound=lower_bound, upper_bound=upper_bound)
 }
 
+#'Continuous multi-dimensional optimization
+#'It is much slower that discrete but more precise and can handle time intervals with different lengths.
+#'@param dat A data table.
+#'@param parameters A starting pont (a vector).
+#'@param k A number of dimensions.
+#'@param verbose An indicator of verbosing output.
+#'@param tol A tolerance threshold for matrix inversion.
+#'@return A list of two elements: (1) parameters a, f1, Q, f, b, mu0, theta; (2) An output from "optim" function used 
+#'for maximum likelihood estimation.
+#'@examples
+#'#'library(spm)
+#'# Reading longitude data:
+#'longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
+#'# Prepare data for optimization:
+#'vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
+#'# Remove unneeded NAs:
+#'longdat.nonan <- longdat[which(is.na(longdat$Age) == F),]
+#'vitstat.nonan <- vitstat[which(is.na(vitstat$BirthCohort) == F),]
+#'dat=prepare_data(longdat=longdat.nonan, vitstat=vitstat.nonan,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.next="AgeNext", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
+#'# Parameters estimation:
+#'dat<-[,1:6]
+#'pars=spm_integral_MD(dat, parameters=c(-0.05, 80, 2e-8, 80, 5, 2e-5, 0.08), k = 1)
+#'pars
 spm_integral_MD <- function(dat,parameters, k, verbose=F) {
   final_res <- list()
   # Current results:

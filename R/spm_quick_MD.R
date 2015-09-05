@@ -1,8 +1,26 @@
-#'Discrete optimization
+#'Discrete multi-dimensional optimization
 #'It is way much faster that continuous (but less precise) and used mainly in 
 #'estimation of starting point.
-#'
-
+#'@param dat A data table.
+#'@param k A number of dimensions.
+#'@param theta_range A range of theta parameter (axe displacement of Gompertz function).
+#'@param tol A tolerance threshold for matrix inversion.
+#'@return A list of two elements: (1) parameters u, R, b, epsilon, Q, mu0, theta and
+#'(2) parameters a, f1, Q, f, b, mu0, theta. Note: b and mu0 from first list are different 
+#'from b and mu0 from the second list.
+#'@examples
+#'#'library(spm)
+#'# Reading longitude data:
+#'longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
+#'# Prepare data for optimization:
+#'vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
+#'# Remove unneeded NAs:
+#'longdat.nonan <- longdat[which(is.na(longdat$Age) == F),]
+#'vitstat.nonan <- vitstat[which(is.na(vitstat$BirthCohort) == F),]
+#'data=prepare_data(longdat=longdat.nonan, vitstat=vitstat.nonan,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.next="AgeNext", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
+#'# Parameters estimation:
+#'pars=spm_quick_MD(data,k = 1)
+#'pars
 spm_quick_MD <- function(dat,k=2, theta_range=seq(0.078,0.082,by=0.0001), tol=NULL) {
   options(digits=10)
   

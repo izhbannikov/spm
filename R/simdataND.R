@@ -1,5 +1,24 @@
-# ND simulation function
-# It uses a, f1, Q, f, b, mu0, theta
+#' Multi-dimension simulation function
+#' It uses a, f1, Q, f, b, mu0 and theta
+#' as input parameters.
+#' @param N Number of individuals
+#' @param k number of dimensions (k = 1 by default).
+#' @param a A k by k matrix, which characterize the rate of the adaptive response.
+#' @param f1 A particular state, which if a deviation from the normal (or optimal). This is a vector with length of k.
+#' @param Q A matrix k by k, which is a non-negative-definite symmetric matrix.
+#' @param f A vector-function (with length k) of the normal (or optimal) state.
+#' @param b A diffusion coefficient, k by k matrix.
+#' @param mu0 mortality at start period of time.
+#' @param theta A displacement coefficient of the Gompertz function.
+#' @param ystart A vector with length equal to number of dimensions used, defines starting values of covariates.
+#' @param tstart A number that defines starting time (30 by default).
+#' @param tend A number, defines final time (105 by default).
+#' @param dt A time step (1 by default).
+#' @return A table with simulated data.
+#' @examples
+#' library(spm)
+#' data <- sim(N=1000, ystart=c(75, 94), k=1)
+#' head(data)
 sim <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart, tstart=30, tend=105, dt=1, k=1) {
   # Re-calculating parameters:
   u_ <- -1*a %*% f1
@@ -14,17 +33,35 @@ sim <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, 
   simulated
 }
 
-# Function that simulates data using u, R, epsilon, mu0, b, Q, theta
+#' Function that simulates data using u, R, epsilon, mu0, b, Q, theta
+#' @param N Number of individuals
+#' @param k Number of dimensions (k = 1 by default).
+#' @param u A drift vector with length of k.
+#' @param R A k by k regression matrix.
+#' @param epsilon A time-dependent normally distributed random vector (size=k).
+#' @param mu0 mortality at start period of time.
+#' @param b A diffusion coefficient, k by k matrix.
+#' @param Q A matrix k by k, which is a non-negative-definite symmetric matrix.
+#' @param theta A displacement coefficient of the Gompertz function.
+#' @param ystart A vector with length equal to number of dimensions used, defines starting values of covariates.
+#' @param tstart A number that defines starting time (30 by default).
+#' @param tend A number, defines final time (105 by default).
+#' @param dt A time step (1 by default).
+#' @return A table with simulated data.
+#' @examples
+#' library(spm)
+#' data <- simdata(N=1000, ystart=c(75, 94), k=1)
+#' head(data)
 simdata <- function(N=100, # Number of individuals
-                        u, 
-                        R, 
-                        epsilon, 
-                        mu0, 
-                        b, 
-                        Q, 
-                        theta, 
+                        u=8, 
+                        R=0.95, 
+                        epsilon=5, 
+                        mu0=2e-5, 
+                        b=10, 
+                        Q=2e-8, 
+                        theta=0.08, 
                         tstart=30, 
-                        ystart, 
+                        ystart=80, 
                         dt=1, 
                         tmax=105,
                         k=1) {

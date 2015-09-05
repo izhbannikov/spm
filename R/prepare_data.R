@@ -1,14 +1,3 @@
-# Preparing data for stochastic process model
-#'Output values include:
-#'1). Database, prepared for (slow) continuous optimization (with integral).
-#'2). Database, prepared for (quick) discrete optimization (which is used for parameter estimations)
-#'
-#'Main function of this file is prepare_data(...)
-#'
-#'
-#'
-#'
-
 fill_last <- function(x) {
   na_idx <- which(is.na(x))
   unique_elements <- unique(x[-na_idx])
@@ -22,6 +11,34 @@ approx2p <- function(t1, y1, t2, y2, t) {
   y <- y1 + (t - t1)/(t2 - t1)*(y2 -y1)
   y
 }
+
+# Preparing data for stochastic process model
+#'Output values include:
+#'1). Database, prepared for (slow) continuous optimization (with integral).
+#'2). Database, prepared for (quick) discrete optimization (which is used for parameter estimations)
+#'@param longdat A table with longitude records.
+#'@param vitstat A table with vital statistics.
+#'@param col.status A name of column containing status variable (0/1 which indicate alive/dead). 
+#'@param col.id A name of column containing patient ID.
+#'@param col.age A name of age column.
+#'@param col.age.event - A name of event column.
+#'@param covariates A list of covariates.
+#'@param verbose A verbosing output indicator, default TRUE.
+#'@return A list of two elements: first element contains a data table for continuous optimization and 
+#'second element contains a data table for quick discrete optimization used in estimation of starting point.
+#'@examples
+#'library(spm)
+#'#Reading longitude data:
+#'longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
+#'# Prepare data for optimization:
+#'vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
+#'# Remove unneeded NAs:
+#'longdat.nonan <- longdat[which(is.na(longdat$Age) == F),]
+#'vitstat.nonan <- vitstat[which(is.na(vitstat$BirthCohort) == F),]
+#'data=prepare_data(longdat=longdat.nonan, vitstat=vitstat.nonan,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.next="AgeNext", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
+#'# Parameters estimation:
+#'pars=spm(data,k = 1)
+#'pars
 
 prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height"), verbose=T) {
   
