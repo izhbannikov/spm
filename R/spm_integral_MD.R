@@ -107,7 +107,7 @@ spm_integral_MD <- function(dat,parameters, k, dd) {
     } else {
       cat("Optimization stopped. Parametes achieved lower or upper bound, you need more data to correctrly obtain optimal parameters.")
       optim_res <- list()
-      assign(x=optim_res, value=results, envir=dd)
+      assign(x="optim_res", value=results, envir=dd)
       stop()
     }
     

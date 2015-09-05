@@ -1,4 +1,19 @@
-# ND simulation function:
+# ND simulation function
+# It uses a, f1, Q, f, b, mu0, theta
+sim <- function(N=100, a, f1, Q, f, b, mu0, theta, ystart, tstart=30, tend=105, dt=1, k=1) {
+  u_ <- -1*a %*% f1
+  R_ <- 1 + a
+  epsilon_ <- b
+  mu0_ <- mu0 + t(f) %*% Q %*% f
+  b_ <- -1*t(f) %*% Q - Q %*% f
+  Q_ <- Q
+  theta_ <- theta
+  
+  simulated <- sumdata(N=N, u=u_, R=R_, epsilon=epsilon_, mu0=mu0_, b=b_, Q=Q_, theta=theta_, tstart=tstart, ystart=ystart, dt=dt, tmax=tend, k=k)
+  simulated
+}
+
+# Function that simulates data using u, R, epsilon, mu0, b, Q, theta
 simdata <- function(N=100, # Number of individuals
                         u, 
                         R, 
@@ -10,7 +25,6 @@ simdata <- function(N=100, # Number of individuals
                         tstart=30, 
                         ystart, 
                         dt=1, 
-                        nj=85, 
                         tmax=105,
                         k=1) {
   
@@ -85,9 +99,9 @@ simdata <- function(N=100, # Number of individuals
         
         y1 <- y2
         
-        if(j == nj) {
-          new_person <- T
-        }
+        #if(j == nj) {
+        #  new_person <- T
+        #}
         j <- j+1
       }
     }
@@ -95,12 +109,3 @@ simdata <- function(N=100, # Number of individuals
   
   data
 }
-
-
-# Mortality:
-#mumu <- mu0 + f^2*Q
-#bbb <- -2*f*Q
-
-# Dynamics:
-#u <- -a*f1
-#R <- 1+a
