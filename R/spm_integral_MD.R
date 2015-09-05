@@ -41,10 +41,10 @@ setBoundaries <- function(k, params) {
   res=list(lower_bound=lower_bound, upper_bound=upper_bound)
 }
 
-spm_integral_MD <- function(dat,parameters, k, dd) {
+spm_integral_MD <- function(dat,parameters, k, dd, verbose=F) {
   final_res <- list()
   # Current results:
-  results <- list(aH=NULL, f1H=NULL, QH=NULL, fH=NULL, bH=NULL, mu0H=NULL, thetaH=NULL)
+  results <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
   iteration <- 0
   bounds <- setBoundaries(k, parameters)
   
@@ -86,16 +86,17 @@ spm_integral_MD <- function(dat,parameters, k, dd) {
     if(stopflag == F) {
       dims <- dim(dat)
       res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k)
+      iteration <<- iteration + 1
+      if(verbose) {
+        cat("L = ", res,"\n")
+        cat("Iteration: ", iteration,  "\nResults:\n") 
+        print(results)
+      }
+      
     } else {
-      cat("Optimization stopped. Parametes achieved lower or upper bound, you need more data to correctrly obtain optimal parameters.")
-      return
+      assign("results", results, envir=dd)
+      stop("Optimization stopped. Parametes achieved lower or upper bound, you need more data to correctrly obtain optimal parameters.")
     }
-    
-    iteration <<- iteration + 1
-    
-    cat("L = ",res,"\n")
-    cat("Iteration: ", iteration,  "\nResults:\n") 
-    print(results)
     
     res
   }
