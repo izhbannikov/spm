@@ -32,7 +32,9 @@ spm <- function(dat,k=2) {
   mu0H = pars$mu0 - fH %*% QH %*% t(fH)
   thetaH = pars$theta
   print(c(aH, f1H, QH, bH, fH, mu0H, thetaH,k))
-  ans=spm_integral_MD(data, c(aH, f1H, QH, bH, fH, mu0H, thetaH,k))
+  dd <- new.env()
+  spm_integral_MD(data, c(aH, f1H, QH, bH, fH, mu0H, thetaH), k, dd)
+  ans<- dd$results
   res=list(starting=list(QH=QH, aH=aH, bH=bH, f1H=f1H, fH=fH, mu0H=mu0H, thetaH=thetaH), 
            estimated=ans)
   invisible(res)

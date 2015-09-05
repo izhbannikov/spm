@@ -1,9 +1,9 @@
 library(stats)
 
 
-spm_integral_MD <- function(dat,parameters) {
+spm_integral_MD <- function(dat,parameters, k, dd) {
   final_res <<- list()
-  setBoundaries <- function() {
+  setBoundaries <- function(kk) {
     # Lower and upper boundaries:
     lower_bound <- c()
     upper_bound <- c()
@@ -47,16 +47,15 @@ spm_integral_MD <- function(dat,parameters) {
   }
   
   results <- list(aH=NULL, f1H=NULL, QH=NULL, fH=NULL, bH=NULL, mu0H=NULL, thetaH=NULL)
-  pars_prev <<- parameters[1:(length(parameters)-1)]
+  pars_prev <<- parameters
   iteration <- 0
-  kk <- parameters[length(parameters)]
-  bounds <<- setBoundaries()
+  bounds <<- setBoundaries(k)
   
-  ndeps <- c(rep(1e-6,kk^2),
-              rep(1e-3,kk),
-              rep(1e-16,kk^2),
-              rep(1e-3,kk),
-              rep(1e-3,kk),
+  ndeps <- c(rep(1e-6,k^2),
+              rep(1e-3,k),
+              rep(1e-16,k^2),
+              rep(1e-3,k),
+              rep(1e-3,k),
               1e-6,
               1e-4)
   
@@ -65,24 +64,24 @@ spm_integral_MD <- function(dat,parameters) {
     stopflag <- F
     # Reading parameters:
     start=1
-    end=kk^2
-    a <- matrix(par[start:end],ncol=kk, byrow=F) 
+    end=k^2
+    a <- matrix(par[start:end],ncol=k, byrow=F) 
     results$aH <<- a
     start=end+1
-    end=start+kk-1
-    f1 <- matrix(par[start:end],ncol=kk, byrow=F)
+    end=start+k-1
+    f1 <- matrix(par[start:end],ncol=k, byrow=F)
     results$f1H <<- a
     start=end+1
-    end=start+kk^2-1
-    Q <- matrix(par[start:end],ncol=kk, byrow=F)
+    end=start+k^2-1
+    Q <- matrix(par[start:end],ncol=k, byrow=F)
     results$QH <<- Q
     start=end+1
-    end=start+kk-1
-    b <- matrix(par[start:end],nrow=kk)
+    end=start+k-1
+    b <- matrix(par[start:end],nrow=k)
     results$bH <<- b
     start=end+1
-    end=start+kk-1
-    f <- matrix(par[start:end],ncol=kk, byrow=F)
+    end=start+k-1
+    f <- matrix(par[start:end],ncol=k, byrow=F)
     results$fH <<- f
     start=end+1
     end=start
@@ -104,10 +103,11 @@ spm_integral_MD <- function(dat,parameters) {
     
     if(stopflag == F) {
       dims <- dim(dat)
-      res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, kk)
+      res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k)
     } else {
       cat("Optimization stopped. Parametes achieved lower or upper bound, you need more data to correctrly obtain optimal parameters.")
-      stop(onexit(results))
+      dd$results <<- results
+      return
     }
     
     iteration <<- iteration + 1
@@ -127,6 +127,7 @@ spm_integral_MD <- function(dat,parameters) {
                 method="L-BFGS-B", lower = bounds$lower_bound, upper = bounds$upper_bound)
   
   final_res <<- list(results, optim_results)
+  dd$results <<- final_res
   final_res
 }
 
