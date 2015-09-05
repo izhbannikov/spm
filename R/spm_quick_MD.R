@@ -110,7 +110,7 @@ spm_quick_MD <- function(dat,k=2, theta_range=seq(0.078,0.082,by=0.0001), tol=NU
   pars1 <- list(theta=theta, mu0=mu0, b=b, Q=Q, u=u, R=R, eps=eps)
   
   # Making a new parameter set:
-  Q <- QH
+  QH <- Q
   aH <- R - 1
   bH <- as.matrix(eps, nrow=1)
   f1H <- (-1)*u %*% solve(aH, tol=tol)
