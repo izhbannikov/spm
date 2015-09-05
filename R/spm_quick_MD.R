@@ -110,12 +110,13 @@ spm_quick_MD <- function(dat,k=2, theta_range=seq(0.078,0.082,by=0.0001), tol=NU
   pars1 <- list(theta=theta, mu0=mu0, b=b, Q=Q, u=u, R=R, eps=eps)
   
   # Making a new parameter set:
-  aH = R - 1
-  bH = as.matrix(eps, nrow=1)
-  f1H = (-1)*u %*% solve(aH, tol=tol)
-  fH = -0.5 * b %*% solve(QH, tol=tol)
-  mu0H = mu0 - fH %*% QH %*% t(fH)
-  thetaH = theta
+  Q <- QH
+  aH <- R - 1
+  bH <- as.matrix(eps, nrow=1)
+  f1H <- (-1)*u %*% solve(aH, tol=tol)
+  fH <- -0.5 * b %*% solve(QH, tol=tol)
+  mu0H <- mu0 - fH %*% QH %*% t(fH)
+  thetaH <- theta
   pars2 <- list(a=aH, f1=f1H, Q=QH, f=fH, b=bH, mu0=mu0H, theta=thetaH)
   
   pars <- list(pars1=pars1, pars2=pars2)
