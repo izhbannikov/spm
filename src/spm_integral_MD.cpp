@@ -210,7 +210,6 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
         //cout << s << " " << logprobi << " " << m2 << " " << gamma2 << "\n";
       }
       
-      
     }
     
     delete[] out;

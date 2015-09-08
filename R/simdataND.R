@@ -19,18 +19,27 @@
 #' library(spm)
 #' data <- sim(N=1000, ystart=c(75, 94), k=1)
 #' head(data)
-sim <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart, tstart=30, tend=105, dt=1, k=1) {
+sim <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart=c(80), tstart=30, tend=105, dt=1, k=1) {
   # Re-calculating parameters:
-  u_ <- -1*a %*% f1
-  R_ <- 1 + a
-  epsilon_ <- b
+  u_ <- matrix(-1*a %*% f1, nrow=k, byrow=T)
+  #matrix(u,nrow=k,ncol=1,byrow=T)
+  R_ <- matrix(1+a, nrow=k, ncol=k, byrow=T)
+  epsilon_ <- matrix(b, nrow=, ncol=1, byrow=T)
   mu0_ <- mu0 + t(f) %*% Q %*% f
-  b_ <- -1*t(f) %*% Q - Q %*% f
-  Q_ <- Q
+  b_ <- matrix(-1*t(f) %*% Q - Q %*% f, nrow=k, ncol=1, byrow=T)
+  Q_ <- matrix(Q, nrow=k, ncol=k, byrow=T)
   theta_ <- theta
+  ystart = matrix(ystart, nrow=k, ncol=1)
+  #simulated <- sumdata(N=N, u=u_, R=R_, epsilon=epsilon_, mu0=mu0_, b=b_, Q=Q_, theta=theta_, tstart=tstart, ystart=ystart, dt=dt, tmax=tend, k=k)
+  simulated = .Call("simdata_ND", N, u_, R_, epsilon_, mu0_, b_, Q_, theta_, tstart, ystart, tend, k);
   
-  simulated <- sumdata(N=N, u=u_, R=R_, epsilon=epsilon_, mu0=mu0_, b=b_, Q=Q_, theta=theta_, tstart=tstart, ystart=ystart, dt=dt, tmax=tend, k=k)
-  simulated
+  data_names <- c()
+  for(n in 1:k) {
+    data_names <- c(data_names, paste("par",n, "_1", sep=''), paste("par",n, "_2", sep=''))
+  }
+  colnames(simulated) <- c("id", "xi", "t1", "t2", data_names)
+  
+  invisible(simulated)
 }
 
 #' Function that simulates data using u, R, epsilon, mu0, b, Q, theta
