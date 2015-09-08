@@ -21,12 +21,12 @@
 #' head(data)
 sim <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart=c(80), tstart=30, tend=105, dt=1, k=1) {
   # Re-calculating parameters:
-  u_ <- matrix(-1*a %*% f1, nrow=k, byrow=T)
+  u_ <- matrix((f1 %*% (-1*a)), nrow=k, byrow=T)
   #matrix(u,nrow=k,ncol=1,byrow=T)
-  R_ <- matrix(1+a, nrow=k, ncol=k, byrow=T)
-  epsilon_ <- matrix(b, nrow=, ncol=1, byrow=T)
-  mu0_ <- mu0 + t(f) %*% Q %*% f
-  b_ <- matrix(-1*t(f) %*% Q - Q %*% f, nrow=k, ncol=1, byrow=T)
+  R_ <- matrix((1+a), nrow=k, ncol=k, byrow=T)
+  epsilon_ <- matrix(b, nrow=k, ncol=1, byrow=T)
+  mu0_ <- mu0 + (f %*% Q) %*% t(f)
+  b_ <- matrix((-1*f %*% Q - f %*% Q), nrow=k, ncol=1, byrow=T)
   Q_ <- matrix(Q, nrow=k, ncol=k, byrow=T)
   theta_ <- theta
   ystart = matrix(ystart, nrow=k, ncol=1)

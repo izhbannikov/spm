@@ -90,9 +90,11 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
         std::vector<double> row; row.resize(4+2*k);
         row[0] = id; row[1] = xi; row[2] = t1; row[3] = t2;
         
-        for(int ii=4; ii<(4 + 2*k-1); ii++) {
-            row[ii] = y1(ii-4,0);
-            row[ii+1] = y2(ii-4,0);
+        int j=0;
+        for(int ii=4; ii<(4 + 2*k-1); ii+=2) {
+            row[ii] = y1(j,0);
+            row[ii+1] = y2(j,0);
+            j += 1;
         }
         
         data.push_back(row);
