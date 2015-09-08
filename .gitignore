@@ -5,3 +5,4 @@ src/*.o
 src/*.so
 inst/data/longdat.csv
 inst/data/vitstat.csv
+man/.Rhistory
