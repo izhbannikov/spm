@@ -15,6 +15,7 @@ using namespace std;
 /*============FUNCTION DEFINITIONS*/
 double mu(double t, double y1, double gamma1, double fH, double f1H, double mu0H, double thetaH, double QH, double *par);
 double* func1(double t, double *y, double fH, double f1H, double aH, double bH, double QH, double theta);
+void ode45_simpson(double t1, double t2, double y1, double *out, double &s, double nsteps, double fH, double f1H, double aH, double bH, double QH, double thetaH, double mu0H);
 double Q(double t, double QH, double theta);
 /*=========END OF FUNCTION DEFINITIONS*/
 
@@ -51,6 +52,76 @@ double Q(double t, double QH, double theta) {
   return Q;
 }
 
+
+void ode45_simpson(double t1, double t2, double y1, double *out, double &s, double nsteps, 
+          double fH, double f1H, double aH, double bH, double QH, double thetaH, double mu0H) {
+  
+  double *k1ar, *yfin, *ytmp, *k2ar, *k3ar, *k4ar;
+  k1ar = new double[2];
+  yfin = new double[2];
+  ytmp = new double[2];
+  k2ar = new double[2];
+  k3ar = new double[2];
+  k4ar = new double[2];
+  
+  double t = t1;
+  double h=(t2-t1)/nsteps;
+  out[0] = y1;
+  out[1] = 0.00;
+  
+  //Integration:
+  s = h/3.00*(-1.00)*mu(t1,y1,0.00, fH, f1H, mu0H, thetaH, QH);
+  double ifactor;
+      
+  for(int j = 0; j < nsteps; j++) {
+    //Runge-Kutta method:
+    k1ar = func1(t,out, fH, f1H, aH, bH, QH, thetaH);
+    yfin[0] = out[0] + h/6.00*k1ar[0];
+    yfin[1] = out[1] + h/6.00*k1ar[1];
+    ytmp[0] = out[0] + h/2.00*k1ar[0];
+    ytmp[1] = out[1] + h/2.00*k1ar[1];
+         
+    k2ar = func1(t,ytmp, fH, f1H, aH, bH, QH, thetaH);
+    yfin[0] = yfin[0] + h/3.00*k2ar[0];
+    yfin[1] = yfin[1] + h/3.00*k2ar[1];
+    ytmp[0] = out[0] + h/2.00*k2ar[0];
+    ytmp[1] = out[1] + h/2.00*k2ar[1];
+        
+    k3ar = func1(t,ytmp, fH, f1H, aH, bH, QH, thetaH);
+    yfin[0] = yfin[0] + h/3.00*k3ar[0];
+    yfin[1] = yfin[1] + h/3.00*k3ar[1];
+    ytmp[0] = out[0] + h*k3ar[0];
+    ytmp[1] = out[1] + h*k3ar[1];
+        
+    k4ar = func1(t,ytmp, fH, f1H, aH, bH, QH, thetaH);
+    out[0] = yfin[0] + h/6.00*k4ar[0];
+    out[1] = yfin[1] + h/6.00*k4ar[1];
+         
+    t = t + h;
+    
+    //Integration:
+    if (j == nsteps-1) {
+      ifactor = 1.00;
+    } else {
+      if (((j % 2) == 0) && (j != 0)) {
+        ifactor = 2.00;
+      } else {
+        ifactor = 4.00;
+      }
+    }
+    
+    s = s + ifactor*h/3.00*(-1.00)*mu(t,out[0],out[1], fH, f1H, mu0H, thetaH, QH);
+  }
+  
+  delete k1ar; 
+  delete yfin;
+  delete ytmp; 
+  delete k2ar;
+  delete k3ar;
+  delete k4ar;  
+  
+}
+
 RcppExport SEXP complik(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SEXP bh, SEXP fh, SEXP mu0h, SEXP thetah) {
     
     long N = as<long>(n); //Number of rows
@@ -66,15 +137,9 @@ RcppExport SEXP complik(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SE
     Rcpp::NumericMatrix dd = Rcpp::NumericMatrix(dat);   
     
     /*End of data loading*/
-    double *out, *k1ar, *yfin, *ytmp, *k2ar, *k3ar, *k4ar;
-    out = new double[2];
-    k1ar = new double[2];
-    yfin = new double[2];
-    ytmp = new double[2];
-    k2ar = new double[2];
-    k3ar = new double[2];
-    k4ar = new double[2];
-      
+    double *out = new double[2];
+    double s;
+    double  nsteps = 2.00;
     double L; // Likelihood
     L = 0;
     for(int i=0; i<N; i++) {
@@ -84,57 +149,8 @@ RcppExport SEXP complik(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SE
       double y1 = dd(i,3);
       double y2 = dd(i,4);
   
-      double  nsteps = 2.00;
-      double h=(t2-t1)/nsteps;
-    
-      //Integration:
-      double s = h/3.00*(-1.00)*mu(t1,y1,0.00, fH, f1H, mu0H, thetaH, QH);
-      //cout << s << endl;
-      double t = t1;
-      out[0] = y1;
-      out[1] = 0.00;
-      double ifactor;
-      
-      for(int j = 0; j < nsteps; j++) {
-         //Runge-Kutta method:
-         k1ar = func1(t,out, fH, f1H, aH, bH, QH, thetaH);
-         yfin[0] = out[0] + h/6.00*k1ar[0];
-         yfin[1] = out[1] + h/6.00*k1ar[1];
-         ytmp[0] = out[0] + h/2.00*k1ar[0];
-         ytmp[1] = out[1] + h/2.00*k1ar[1];
-         
-         k2ar = func1(t,ytmp, fH, f1H, aH, bH, QH, thetaH);
-         yfin[0] = yfin[0] + h/3.00*k2ar[0];
-         yfin[1] = yfin[1] + h/3.00*k2ar[1];
-         ytmp[0] = out[0] + h/2.00*k2ar[0];
-         ytmp[1] = out[1] + h/2.00*k2ar[1];
-        
-         k3ar = func1(t,ytmp, fH, f1H, aH, bH, QH, thetaH);
-         yfin[0] = yfin[0] + h/3.00*k3ar[0];
-         yfin[1] = yfin[1] + h/3.00*k3ar[1];
-         ytmp[0] = out[0] + h*k3ar[0];
-         ytmp[1] = out[1] + h*k3ar[1];
-        
-         k4ar = func1(t,ytmp, fH, f1H, aH, bH, QH, thetaH);
-         out[0] = yfin[0] + h/6.00*k4ar[0];
-         out[1] = yfin[1] + h/6.00*k4ar[1];
-         
-         t = t + h;
-      
-        //Integration:
-        if (j == nsteps-1) {
-          ifactor = 1.00;
-        } else {
-          if (((j % 2) == 0) && (j != 0)) {
-            ifactor = 2.00;
-          } else {
-            ifactor = 4.00;
-          }
-        }
-        //cout << ifactor << "\n";
-        s = s + ifactor*h/3.00*(-1.00)*mu(t,out[0],out[1], fH, f1H, mu0H, thetaH, QH);
-        
-      }
+      // Runge-Kutta method:
+      ode45_simpson(t1, t2, y1, out, s, nsteps, fH, f1H, aH, bH, QH, thetaH, mu0H);
       
       double m2 = out[0];
       double gamma2 = out[1];

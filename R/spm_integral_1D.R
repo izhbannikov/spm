@@ -7,8 +7,8 @@ spm_integral_1D <- function(dat,parameters) {
   pars_prev <<- parameters
   iteration <- 0
   
-  lower_bound <<- c(-1,0,1e-16,0,0,0, 0)
-  upper_bound <<- c(0, Inf, 1e-6, Inf, Inf, Inf, 0.1)
+  lower_bound <<- c(-1,0,1e-12,1e-6,1e-6,1e-9, 1e-5)
+  upper_bound <<- c(0, Inf, 1e-7, Inf, Inf, 1, 0.1)
   
   maxlik <- function(dat, par) {
     a <- par[1] 

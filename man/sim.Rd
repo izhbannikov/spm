@@ -7,8 +7,8 @@ It uses a, f1, Q, f, b, mu0 and theta
 as input parameters.}
 \usage{
 sim(N = 100, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
-  mu0 = 1e-05, theta = 0.08, ystart, tstart = 30, tend = 105, dt = 1,
-  k = 1)
+  mu0 = 1e-05, theta = 0.08, ystart = c(80), tstart = 30, tend = 105,
+  dt = 1, k = 1)
 }
 \arguments{
 \item{N}{Number of individuals}
