@@ -129,7 +129,7 @@ spm_quick_MD <- function(dat,k=2, theta_range=seq(0.078,0.082,by=0.0001), tol=NU
   
   # Making a new parameter set:
   QH <- Q
-  aH <- R - 1
+  aH <- R - diag(k)
   bH <- as.matrix(eps, nrow=1)
   f1H <- (-1)*u %*% solve(aH, tol=tol)
   fH <- -0.5 * b %*% solve(QH, tol=tol)
