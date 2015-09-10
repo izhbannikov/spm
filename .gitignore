@@ -6,3 +6,4 @@ src/*.so
 inst/data/longdat.csv
 inst/data/vitstat.csv
 man/.Rhistory
+R/Untitled.R
