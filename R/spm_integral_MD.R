@@ -11,31 +11,31 @@ setBoundaries <- function(k, params) {
   # aH
   start=1; end=k^2
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){res=-1.5})))
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){res=-1e-12})))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){res=0.2})))
   # f1H
   start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] <= 0, 0.25*params[n], -0.25*params[n]) }))) 
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, 0.25*params[n], -0.25*params[n]) })))
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ 0 }))) 
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 0.05*params[n], -0.05*params[n]) })))
   # QH
   start=end+1; end=start+k^2-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n) {x=ifelse(params[n] >= 0, runif(1,0,1e-9), -1*runif(1,0,1e-7))})) )
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {x=ifelse(params[n] >= 0, runif(1,0,1e-7), -1*runif(1,0,1e-9))})))
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n) {x=ifelse(params[n] >= 0, runif(1,0,1e-12), -1*runif(1,0,1e-7))})) )
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {x=ifelse(params[n] > 0, runif(1,0,1e-7), -1*runif(1,0,1e-12))})))
   # fH
   start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] <= 0, 0.25*params[n], -0.25*params[n]) })) )
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, 0.25*params[n], -0.25*params[n]) })))
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ 0 })) )
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 0.05*params[n], -0.05*params[n]) })))
   # bH
   start=end+1; end=start+k-1
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] <= 0, 0.5*params[n], -0.5*params[n]) })) )
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, 0.5*params[n], -0.5*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 0.5*params[n], -0.5*params[n]) })))
   # mu0
   start=end+1; end=start
   lower_bound <- c(lower_bound, 1e-8 )
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, 5*params[n], -5*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 5*params[n], -5*params[n]) })))
   # theta
   start=end+1; end=start
   lower_bound <- c(lower_bound, 1e-6 )
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, params[n], -1*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, params[n], -1*params[n]) })))
   
   
   res=list(lower_bound=lower_bound, upper_bound=upper_bound)
@@ -86,7 +86,7 @@ spm_integral_MD <- function(dat,parameters, k, verbose=F) {
     start=1; end=k^2
     a <- matrix(par[start:end],ncol=k, byrow=F); results$a <<- a
     start=end+1; end=start+k-1
-    f1 <- matrix(par[start:end],ncol=k, byrow=F); results$f1 <<- a
+    f1 <- matrix(par[start:end],ncol=k, byrow=F); results$f1 <<- f1
     start=end+1; end=start+k^2-1
     Q <- matrix(par[start:end],ncol=k, byrow=F); results$Q <<- Q
     start=end+1; end=start+k-1
@@ -101,8 +101,10 @@ spm_integral_MD <- function(dat,parameters, k, verbose=F) {
     
     for(i in 1:length(results)) {
       if(length(intersect(results[[i]],c(bounds$lower_bound[i], bounds$upper_bound[i]))) >= 1) {
-        print(results[[i]])
+        cat("Parameter", names(results)[i], "achieved lower/upper bound. Process stopped.\n")
+        cat(results[[i]],"\n")
         stopflag <- T
+        break
       }
     }
     

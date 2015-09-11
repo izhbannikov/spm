@@ -156,8 +156,6 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status, col.id, c
   
   for(iii in 1:length(splitted)) {
     if(!is.na(vitstat.splitted[[iii]][[col.age.event]]) & !is.na(vitstat.splitted[[iii]][[col.status]]) ) {
-      if(verbose)
-        print(iii)
       
       id <- splitted[[iii]][[col.id]][1]
       nrows <- (tail(splitted[[iii]][[col.age]], n=1) - splitted[[iii]][[col.age]][1])/dt + 1

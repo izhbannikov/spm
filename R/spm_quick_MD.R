@@ -21,7 +21,7 @@
 #'# Parameters estimation:
 #'pars=spm_quick_MD(data,k = 1)
 #'pars
-spm_quick_MD <- function(dat,k=2, theta_range=seq(0.078,0.082,by=0.0001), tol=NULL) {
+spm_quick_MD <- function(dat,k=2, theta_range=seq(0.001,0.09,by=0.001), tol=NULL) {
   options(digits=10)
   
   # Logistic regression:
