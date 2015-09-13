@@ -32,18 +32,18 @@ double mu(double t, double y1, double gamma1, double fH, double f1H, double mu0H
 }
 
 //Calculating m (y[1]) & gamma(y[2]):
-double* func1(double t, double *y, double fH, double f1H, double aH, double bH, double QH, double theta) {
+int func1(double *res, double t, double *y, double fH, double f1H, double aH, double bH, double QH, double theta) {
   double hfH, hf1H, dy1, dy2;
   hfH = fH-y[0];
   hf1H = f1H-y[0];
   dy1 = -1.00*aH*hf1H + 2.00*y[1]*Q(t, QH, theta)*hfH;
   //dy2 = 2.00*aH*y[1] + bH - 2.00*pow(y[1],2.00)*Q(t, QH, theta); //dy2 <- 2*aH*y[2] + bH^2 - 2*y[2]^2*Q(t);
   dy2 = 2.00*aH*y[1] + pow(bH,2) - 2.00*pow(y[1],2.00)*Q(t, QH, theta); //dy2 <- 2*aH*y[2] + bH^2 - 2*y[2]^2*Q(t);
-  double *res = new double[2];
+  //double *res = new double[2];
   res[0] = dy1;
   res[1] = dy2;
   
-  return res;
+  return 0;
 }
 
 double Q(double t, double QH, double theta) {
@@ -75,25 +75,25 @@ void ode45_simpson(double t1, double t2, double y1, double *out, double &s, doub
       
   for(int j = 0; j < nsteps; j++) {
     //Runge-Kutta method:
-    k1ar = func1(t,out, fH, f1H, aH, bH, QH, thetaH);
+    int res = func1(k1ar, t,out, fH, f1H, aH, bH, QH, thetaH);
     yfin[0] = out[0] + h/6.00*k1ar[0];
     yfin[1] = out[1] + h/6.00*k1ar[1];
     ytmp[0] = out[0] + h/2.00*k1ar[0];
     ytmp[1] = out[1] + h/2.00*k1ar[1];
          
-    k2ar = func1(t,ytmp, fH, f1H, aH, bH, QH, thetaH);
+    res = func1(k2ar, t,ytmp, fH, f1H, aH, bH, QH, thetaH);
     yfin[0] = yfin[0] + h/3.00*k2ar[0];
     yfin[1] = yfin[1] + h/3.00*k2ar[1];
     ytmp[0] = out[0] + h/2.00*k2ar[0];
     ytmp[1] = out[1] + h/2.00*k2ar[1];
         
-    k3ar = func1(t,ytmp, fH, f1H, aH, bH, QH, thetaH);
+    res = func1(k3ar, t,ytmp, fH, f1H, aH, bH, QH, thetaH);
     yfin[0] = yfin[0] + h/3.00*k3ar[0];
     yfin[1] = yfin[1] + h/3.00*k3ar[1];
     ytmp[0] = out[0] + h*k3ar[0];
     ytmp[1] = out[1] + h*k3ar[1];
         
-    k4ar = func1(t,ytmp, fH, f1H, aH, bH, QH, thetaH);
+    res = func1(k4ar, t,ytmp, fH, f1H, aH, bH, QH, thetaH);
     out[0] = yfin[0] + h/6.00*k4ar[0];
     out[1] = yfin[1] + h/6.00*k4ar[1];
          

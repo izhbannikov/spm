@@ -7,7 +7,7 @@ spm_integral_1D <- function(dat,parameters) {
   pars_prev <<- parameters
   iteration <- 0
   
-  lower_bound <<- c(-1,0,1e-12,1e-6,1e-6,1e-9, 1e-5)
+  lower_bound <<- c(-0.5,0,1e-12,1e-6,1e-6,1e-6, 1e-4)
   upper_bound <<- c(0, Inf, 1e-7, Inf, Inf, 1, 0.1)
   
   maxlik <- function(dat, par) {
@@ -38,7 +38,7 @@ spm_integral_1D <- function(dat,parameters) {
   }
   
   
-  maxlik(as.matrix(dat), pars_prev)
+  #maxlik(as.matrix(dat), pars_prev)
   # Optimization:
   result <- optim(par = pars_prev, 
                   fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16, ndeps=c(1e-12,1e-12,1e-16,1e-12,1e-12,1e-12,1e-12)), 

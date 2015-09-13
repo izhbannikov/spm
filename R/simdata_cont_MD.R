@@ -18,7 +18,7 @@
 #' dat
 #
 simdata_cont_MD <- function(N=10, aH=-0.05, f1H=80, QH=2e-07, fH=80, bH=5, mu0H=2e-05, thetaH=0.08,
-                         step=0.05, tstart=30, tend=105, ystart=80, sd0=2, k=1) {
+                         step=0.05, tstart=30, tend=105, ystart=80, sd0=4, k=1) {
     
   aH<-matrix(aH,nrow=k,ncol=k,byrow=T)
   f1H<-matrix(f1H,nrow=k,ncol=1,byrow=T)
@@ -235,6 +235,6 @@ simdata_cont_MD <- function(N=10, aH=-0.05, f1H=80, QH=2e-07, fH=80, bH=5, mu0H=
     
     # One last step:
     data <- data[2:dim(data)[1],]
-    #colnames(data) <- c("id","xi","t1","t2","y1","y2")
+    colnames(data) <- c("id","xi","t1","t2", unlist(lapply(1:k, function(n) {c(paste("y_", n, "_1", sep=""), paste("y_", n, "_2",sep="") )} )) )
     invisible(data)
 }
