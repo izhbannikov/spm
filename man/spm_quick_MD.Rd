@@ -6,7 +6,7 @@
 It is way much faster that continuous (but less precise) and used mainly in
 estimation of starting point.}
 \usage{
-spm_quick_MD(dat, k = 2, theta_range = seq(0.078, 0.082, by = 1e-04),
+spm_quick_MD(dat, k = 2, theta_range = seq(0.001, 0.09, by = 0.001),
   tol = NULL)
 }
 \arguments{

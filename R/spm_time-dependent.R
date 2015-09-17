@@ -1,19 +1,3 @@
-#' spm_time_dep : a function that can handle time-dependant coefficients:
-#' @param start : a list of starting parameters, default: llist(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08),
-#' @param formulas : a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)")
-#' @return optimal coefficients
-#' @examples
-#' library(spm)
-#' Data preparation:
-#' N <- 1000
-#' data <- simdata_cont(N=N, aH=-0.05, f1H=80, QH=2e-8, fH=80, bH=5, mu0H=2e-5, thetaH=0.08)
-#' opt.par <- spm_time_dep(data[,2:6], formulas=list(at="a", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)"), start=list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08))
-#' opt.par
-
-
-
-
-
 optimize <- function(data, starting_params,  formulas) {
   
   at <- NULL; a <- starting_params$a;
@@ -84,6 +68,17 @@ optimize <- function(data, starting_params,  formulas) {
 
 }
 
+#' spm_time_dep : a function that can handle time-dependant coefficients:
+#' @param start : a list of starting parameters, default: llist(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08),
+#' @param formulas : a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)")
+#' @return optimal coefficients
+#' @examples
+#' library(spm)
+#' Data preparation:
+#' N <- 1000
+#' data <- simdata_cont(N=N, aH=-0.05, f1H=80, QH=2e-8, fH=80, bH=5, mu0H=2e-5, thetaH=0.08)
+#' opt.par <- spm_time_dep(data[,2:6], formulas=list(at="a", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)"), start=list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08))
+#' opt.par
 spm_time_dep <- function(data, 
                          start=list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08),
                          formulas=list(at="a", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)")) {
