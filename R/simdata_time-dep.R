@@ -32,23 +32,19 @@ simdata_time_dep <- function(N=10,formulas=list(at="-0.05", f1t="80", Qt="2e-7*e
   
     
   mu <- function(t, par) {
-    #par[1] - m, par[2] - gamma
-    hfH <- ft(t) - par[[1]]
-    hf1H <- f1t(t) - par[[1]]
-      
-    QH_gamma1 <- Qt(t)*par[[2]]
-    mu <- mu0t(t) + hfH*Qt(t)*hfH + QH_gamma1
+    hfH <- ft(t)-par[[1]];
+    hf1H <- f1t(t)-par[[1]];
+    
+    mu <- mu0t(t)+hfH^2*Qt(t)+Qt(t)*par[[2]]
     mu
   }
   
-  
   func1 <- function(t, y) {
-    # y[[1]] = m, y[[2]] = gamma
-    hfH <- ft(t) - y[[1]]
-    hf1H <- f1t(t) - y[[1]]
-    dm <- -1.0*at(t)*hf1H + 2.0*y[[2]]*Qt(t)*hfH
-    dgamma <- at(t)*y[[2]] + y[[2]]*at(t) + bt(t)*bt(t) - 2.0*y[[2]]*Qt(t)*y[[2]] 
-    list(dm, dgamma)
+    hfH <- ft(t)-y[[1]]
+    hf1H <- f1t(t)-y[[1]]
+    dy1 <- -1.0*at(t)*hf1H + 2.0*y[[2]]*Qt(t)*hfH
+    dy2 <- 2.0*at(t)*y[[2]] + bt(t) - 2.0*y[[2]]^2*Qt(t) #dy2 <- 2*aH*y[2] + bH^2 - 2*y[2]^2*Q(t)
+    list(dy1, dy2)
   }
   
   comp_func_params(formulas$at, formulas$f1t, formulas$Qt, formulas$ft, formulas$bt, formulas$mu0t)
