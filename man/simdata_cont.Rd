@@ -2,7 +2,7 @@
 % Please edit documentation in R/simdata_cont.R
 \name{simdata_cont}
 \alias{simdata_cont}
-\title{Simulation function for continuous trait.}
+\title{One-dimensional simulation function for continuous trait.}
 \usage{
 simdata_cont(N = 10, aH = -0.05, f1H = 80, QH = 2e-07, fH = 80,
   bH = 5, mu0H = 2e-05, thetaH = 0.08, step = 0.05, tstart = 30,
@@ -30,14 +30,12 @@ simdata_cont(N = 10, aH = -0.05, f1H = 80, QH = 2e-07, fH = 80,
 \item{mu0}{mortality at start period of time.}
 
 \item{theta}{A displacement coefficient of the Gompertz function.}
-
-\item{k}{number of dimensions (k = 1 by default).}
 }
 \value{
 A table with simulated data.
 }
 \description{
-Simulation function for continuous trait.
+One-dimensional simulation function for continuous trait.
 }
 \examples{
 library(spm)
