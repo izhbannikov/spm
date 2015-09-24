@@ -14,18 +14,19 @@ approx2p <- function(t1, y1, t2, y2, t) {
 
 # Preparing data for stochastic process model
 #'Output values include:
-#'1). Database, prepared for (slow) continuous optimization (with integral).
-#'2). Database, prepared for (quick) discrete optimization (which is used for parameter estimations)
+#'1). Database (data table), simulated for (slow) continuous optimization with arbitrary intervals between observations.
+#'2). Database (data table), simulated for (quick) discrete optimization with fixed intervals between each observation.
 #'@param longdat A table with longitude records.
-#'@param vitstat A table with vital statistics.
+#'@param vitstat A table with vital statistics (mortality).
+#'@param interval A number of breaks between observations for discrete simulation. Default = 1 (no breaks).
 #'@param col.status A name of column containing status variable (0/1 which indicate alive/dead). 
-#'@param col.id A name of column containing patient ID.
+#'@param col.id A name of column containing patient ID. This ID should be the same in both longdat and vitstat tables.
 #'@param col.age A name of age column.
-#'@param col.age.event - A name of event column.
+#'@param col.age.event A name of event column.
 #'@param covariates A list of covariates.
-#'@param verbose A verbosing output indicator, default TRUE.
-#'@return A list of two elements: first element contains a data table for continuous optimization and 
-#'second element contains a data table for quick discrete optimization used in estimation of starting point.
+#'@param verbose A verbosing output indicator. Default=TRUE.
+#'@return A list of two elements: first element contains a data table for continuous case, with arbitrary intervals between observations  and 
+#'second element contains a data table for a discrete case (fixed intervals between observations).
 #'@examples
 #'library(spm)
 #'#Reading longitude data:
@@ -35,7 +36,7 @@ approx2p <- function(t1, y1, t2, y2, t) {
 #'# Remove unneeded NAs:
 #'longdat.nonan <- longdat[which(is.na(longdat$Age) == F),]
 #'vitstat.nonan <- vitstat[which(is.na(vitstat$BirthCohort) == F),]
-#'data=prepare_data(longdat=longdat.nonan, vitstat=vitstat.nonan,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.next="AgeNext", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
+#'data=prepare_data(longdat=longdat.nonan, vitstat=vitstat.nonan,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
 #'# Parameters estimation:
 #'pars=spm(data,k = 1)
 #'pars
@@ -60,10 +61,14 @@ prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.
       stop(paste("Covariate",c, "not found. Aborting."))
     }
   }
+  if((interval == 0) || (interval > 1)) {
+    interval <- 1
+  }
+  
   
   #-----------Done parsing imput parameters---------------------#
   # Prepare data for continuous optimisation:
-  data_cont <- prepare_data_cont(longdat, vitstat, interval, col.status, col.id, col.age, col.age.event, covariates, verbose)
+  data_cont <- prepare_data_cont(longdat, vitstat, col.status, col.id, col.age, col.age.event, covariates, verbose)
   
   # Prepare data for fast discrete optimization:
   data_discr <- prepare_data_discr(longdat, vitstat, interval, col.status, col.id, col.age, col.age.event, covariates, verbose)
@@ -71,10 +76,9 @@ prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.
   list(data_cont, data_discr)
 }
 
-prepare_data_cont <- function(longdat, vitstat, interval, col.status, col.id, col.age, col.age.event, covariates, verbose) {
+prepare_data_cont <- function(longdat, vitstat, col.status, col.id, col.age, col.age.event, covariates, verbose) {
   #longdat=longdat.nonan
   #vitstat=vitstat.nonan
-  #interval=1
   #col.status="IsDead"
   #col.id="SubjID"
   #col.age="Age"
@@ -140,10 +144,28 @@ prepare_data_cont <- function(longdat, vitstat, interval, col.status, col.id, co
       ans_final[i,3] <- ans_final[(i-1),4]
     }
   }
+  
+  colnames(ans_final) <- c("id", "case", "t1", "t2", unlist(lapply(1:length(covariates), function(n) {c(covariates[n], 
+                                                                                                  paste(covariates[n],".next",sep="")
+  )} 
+  )
+  ) 
+  )
   ans_final
+  
 }
 
 prepare_data_discr <- function(longdat, vitstat, interval, col.status, col.id, col.age, col.age.event, covariates, verbose) {
+  #longdat=longdat.nonan
+  #vitstat=vitstat.nonan
+  #interval = 3
+  #col.status="IsDead"
+  #col.id="ID"
+  #col.age="Age"
+  #col.age.event="LSmort"
+  #covariates=c("DBP", "BMI")
+  #verbose=T
+  
   # Interpolation
   dt <- interval
   tt <- matrix(nrow=0, ncol=4)
@@ -153,7 +175,7 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status, col.id, c
   splitted <- split(longdat, longdat[[col.id]])
   vitstat.splitted <- split(vitstat, vitstat[[col.id]])
   
-  
+  # For each particular person's record:
   for(iii in 1:length(splitted)) {
     if(!is.na(vitstat.splitted[[iii]][[col.age.event]]) & !is.na(vitstat.splitted[[iii]][[col.status]]) ) {
       
@@ -244,6 +266,12 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status, col.id, c
     }
   }
   
+  colnames(dat) <- c("id", "case", "t1", "t2", unlist(lapply(1:length(covariates), function(n) {c(covariates[n], 
+                                                                                                  paste(covariates[n],".next",sep="")
+                                                                                                  )} 
+                                                             )
+                                                      ) 
+                     )
   dat
 }
 

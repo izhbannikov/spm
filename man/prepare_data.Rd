@@ -3,8 +3,8 @@
 \name{prepare_data}
 \alias{prepare_data}
 \title{Output values include:
-1). Database, prepared for (slow) continuous optimization (with integral).
-2). Database, prepared for (quick) discrete optimization (which is used for parameter estimations)}
+1). Database (data table), simulated for (slow) continuous optimization with arbitrary intervals between observations.
+2). Database (data table), simulated for (quick) discrete optimization with fixed intervals between each observation.}
 \usage{
 prepare_data(longdat, vitstat, interval = 1, col.status = "IsDead",
   col.id = "ID", col.age = "Age", col.age.event = "LSmort",
@@ -14,28 +14,30 @@ prepare_data(longdat, vitstat, interval = 1, col.status = "IsDead",
 \arguments{
 \item{longdat}{A table with longitude records.}
 
-\item{vitstat}{A table with vital statistics.}
+\item{vitstat}{A table with vital statistics (mortality).}
+
+\item{interval}{A number of breaks between observations for discrete simulation. Default = 1 (no breaks).}
 
 \item{col.status}{A name of column containing status variable (0/1 which indicate alive/dead).}
 
-\item{col.id}{A name of column containing patient ID.}
+\item{col.id}{A name of column containing patient ID. This ID should be the same in both longdat and vitstat tables.}
 
 \item{col.age}{A name of age column.}
 
-\item{col.age.event}{- A name of event column.}
+\item{col.age.event}{A name of event column.}
 
 \item{covariates}{A list of covariates.}
 
-\item{verbose}{A verbosing output indicator, default TRUE.}
+\item{verbose}{A verbosing output indicator. Default=TRUE.}
 }
 \value{
-A list of two elements: first element contains a data table for continuous optimization and
-second element contains a data table for quick discrete optimization used in estimation of starting point.
+A list of two elements: first element contains a data table for continuous case, with arbitrary intervals between observations  and
+second element contains a data table for a discrete case (fixed intervals between observations).
 }
 \description{
 Output values include:
-1). Database, prepared for (slow) continuous optimization (with integral).
-2). Database, prepared for (quick) discrete optimization (which is used for parameter estimations)
+1). Database (data table), simulated for (slow) continuous optimization with arbitrary intervals between observations.
+2). Database (data table), simulated for (quick) discrete optimization with fixed intervals between each observation.
 }
 \examples{
 library(spm)
@@ -46,7 +48,7 @@ vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
 # Remove unneeded NAs:
 longdat.nonan <- longdat[which(is.na(longdat$Age) == F),]
 vitstat.nonan <- vitstat[which(is.na(vitstat$BirthCohort) == F),]
-data=prepare_data(longdat=longdat.nonan, vitstat=vitstat.nonan,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.next="AgeNext", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
+data=prepare_data(longdat=longdat.nonan, vitstat=vitstat.nonan,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
 # Parameters estimation:
 pars=spm(data,k = 1)
 pars
