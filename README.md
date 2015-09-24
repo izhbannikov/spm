@@ -1,12 +1,12 @@
 # Stochastic Process Modeling (SPM)
 ## Features
 * Data simulation
-* * Continuous
-* * Discrete
+** Continuous
+** Discrete
 * Optimisation
-* * Continuous
-* * Discrete
-* * Time-dependant coefficients
+** Continuous
+** Discrete
+** Time-dependant coefficients
 ## How to use
 ```
 library(spm)
