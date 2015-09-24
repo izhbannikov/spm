@@ -1,13 +1,13 @@
 # Stochastic Process Modeling (SPM)
 ## Features
 ### Data simulation
-* Continuous
-* Discrete
+* Continuous (one- and multiple-dimensions)
+* Discrete (one- and multiple-dimensions)
 
 ### Optimisation
-* Continuous
-* Discrete
-* Time-dependant coefficients
+* Continuous (one- and multiple-dimensions)
+* Discrete (one- and multiple-dimensions)
+* Time-dependant coefficients (one-dimensional optimisation)
 
 ## How to use
 ```
