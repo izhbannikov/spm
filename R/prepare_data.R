@@ -113,7 +113,7 @@ prepare_data_cont <- function(longdat, vitstat, col.status, col.id, col.age, col
   
   prep.dat <- prep.dat[rowSums( matrix(is.na(prep.dat[,5:dim(prep.dat)[2]]), ncol=2*length(covariates),byrow=T)) !=2*length(covariates),]
   prep.dat <- prep.dat[which(is.na(prep.dat[,4])==F),]
-    
+  head(prep.dat)  
   ans_final <- prep.dat
   if(length(which(is.na(prep.dat[,5:dim(prep.dat)[2]]) == T)) > 0) {
     if(verbose)
@@ -135,7 +135,7 @@ prepare_data_cont <- function(longdat, vitstat, col.status, col.id, col.age, col
     }
   }
   
-  # Finalyzing:
+  # Finalizing:
   ans_final <- ans_final[which(ans_final[,3] != ans_final[,4]),] # t1 must be different from t3
   ans_final <- ans_final[which(ans_final[,3] < ans_final[,4]),] # t1 must be less than t3
   # t1 must be equal t3 on previous step, if status = 0 and id is the same
@@ -146,11 +146,7 @@ prepare_data_cont <- function(longdat, vitstat, col.status, col.id, col.age, col
   }
   
   colnames(ans_final) <- c("id", "case", "t1", "t2", unlist(lapply(1:length(covariates), function(n) {c(covariates[n], 
-                                                                                                  paste(covariates[n],".next",sep="")
-  )} 
-  )
-  ) 
-  )
+                                                                                                  paste(covariates[n],".next",sep=""))} )) )
   ans_final
   
 }
@@ -272,6 +268,7 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status, col.id, c
                                                              )
                                                       ) 
                      )
+  rownames(dat) <- 1:dim(dat)[1]
   dat
 }
 
