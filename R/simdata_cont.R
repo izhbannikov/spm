@@ -1,4 +1,4 @@
-#' Simulation function for continuous trait.
+#' One-dimensional simulation function for continuous trait.
 #' @param N Number of individuals.
 #' @param a A k by k matrix, which characterize the rate of the adaptive response.
 #' @param f1 A particular state, which if a deviation from the normal (or optimal). This is a vector with length of k.
@@ -10,7 +10,6 @@
 #' @param ystart A vector with length equal to number of dimensions used, defines starting values of covariates.
 #' @param tstart A number that defines starting time (30 by default).
 #' @param tend A number, defines final time (105 by default).
-#' @param k number of dimensions (k = 1 by default).
 #' @return A table with simulated data.
 #' @examples
 #' library(spm)
@@ -201,6 +200,7 @@ simdata_cont <- function(N=10, aH=-0.05, f1H=80, QH=2e-07, fH=80, bH=5, mu0H=2e-
     
     # One last step:
     data <- data[2:dim(data)[1],]
-    colnames(data) <- c("id","xi","t1","t2","y1","y2")
+    colnames(data) <- c("id","xi","t1","t2","y","y.next")
+    rownames(data) <- 1:dim(data)[1]
     invisible(data)
 }

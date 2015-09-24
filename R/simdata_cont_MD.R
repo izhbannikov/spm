@@ -1,4 +1,4 @@
-#' Simulation function for continuous trait.
+#' Multi-dimensional simulation function for continuous trait.
 #' @param N Number of individuals.
 #' @param a A k by k matrix, which characterize the rate of the adaptive response.
 #' @param f1 A particular state, which if a deviation from the normal (or optimal). This is a vector with length of k.
@@ -235,6 +235,7 @@ simdata_cont_MD <- function(N=10, aH=-0.05, f1H=80, QH=2e-07, fH=80, bH=5, mu0H=
     
     # One last step:
     data <- data[2:dim(data)[1],]
-    colnames(data) <- c("id","xi","t1","t2", unlist(lapply(1:k, function(n) {c(paste("y_", n, "_1", sep=""), paste("y_", n, "_2",sep="") )} )) )
+    colnames(data) <- c("id","xi","t1","t2", unlist(lapply(1:k, function(n) {c(paste("y", n, sep=""), paste("y", n, ".next",sep="") )} )) )
+    rownames(data) <- 1:dim(data)[1]
     invisible(data)
 }
