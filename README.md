@@ -3,10 +3,12 @@
 ### Data simulation
 * Continuous
 * Discrete
+
 ### Optimisation
 * Continuous
 * Discrete
 * Time-dependant coefficients
+
 ## How to use
 ```
 library(spm)
