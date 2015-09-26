@@ -7,7 +7,7 @@ trim.trailing <- function (x) sub("\\s+$", "", x)
 # returns string w/o leading or trailing whitespace
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
-optimize <- function(data, starting_params,  formulas, verbose) {
+optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upper_bound) {
   N <- dim(data)[1]
   at <- NULL#; a <- starting_params$a;
   f1t <- NULL#; f1 <- starting_params$f1;
@@ -122,10 +122,12 @@ optimize <- function(data, starting_params,  formulas, verbose) {
   #result <- optim(par = unlist(starting_params), 
   #              fn=maxlik_t, dat = as.matrix(data), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16, ndeps=c(1e-12, 1e-12, 1e-12,1e-12,1e-16,1e-12,1e-12,1e-12,1e-12)), 
   #              method="L-BFGS-B", lower = c(-0.5, -0.5, -1, 0,1e-12,1e-6,1e-6,1e-6, 1e-4), upper = c(0, 3, 0, Inf, 1e-7, Inf, Inf, 1, 0.1))
-  print(unlist(starting_params))
+  #print(unlist(starting_params))
   result <- optim(par = unlist(starting_params), 
                   fn=maxlik_t, dat = as.matrix(data), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16), 
-                  method="L-BFGS-B")
+                  method="L-BFGS-B", 
+                  lower=lower_bound,
+                  upper=upper_bound)
   
   result
 
@@ -144,8 +146,10 @@ optimize <- function(data, starting_params,  formulas, verbose) {
 #' opt.par
 spm_time_dep <- function(data, 
                          start=list(a1=-0.5, a2=0.2, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08),
-                         formulas=list(at="a1*t+a2", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)"), verbose=T) {
+                         formulas=list(at="a1*t+a2", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)"), 
+                         verbose=T,
+                         lower_bound=c(-1, -0.5, 0, 2e-9, 0, 1, 0, 0), upper_bound=c(-0.001, 1, Inf, 1e-5, Inf, Inf, 1e-3, Inf)) {
   # Optimization:
-  res = optimize(data, start, formulas, verbose)
+  res = optimize(data, start, formulas, verbose, lower_bound, upper_bound)
   invisible(res)
 }
