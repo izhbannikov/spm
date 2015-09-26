@@ -4,7 +4,7 @@
 #' @param N Number of individuals
 #' @param k number of dimensions (k = 1 by default).
 #' @param a A k by k matrix, which characterize the rate of the adaptive response.
-#' @param f1 A particular state, which if a deviation from the normal (or optimal). This is a vector with length of k.
+#' @param f1 A particular state, which is a deviation from the normal (or optimal). This is a vector with length of k.
 #' @param Q A matrix k by k, which is a non-negative-definite symmetric matrix.
 #' @param f A vector-function (with length k) of the normal (or optimal) state.
 #' @param b A diffusion coefficient, k by k matrix.
@@ -30,8 +30,8 @@ sim_discrete <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, the
   Q_ <- matrix(Q, nrow=k, ncol=k, byrow=T)
   theta_ <- theta
   ystart = matrix(ystart, nrow=k, ncol=1)
-  #simulated <- sumdata(N=N, u=u_, R=R_, epsilon=epsilon_, mu0=mu0_, b=b_, Q=Q_, theta=theta_, tstart=tstart, ystart=ystart, dt=dt, tmax=tend, k=k)
-  simulated = .Call("simdata_ND", N, u_, R_, epsilon_, mu0_, b_, Q_, theta_, tstart, ystart, tend, k);
+  simulated <- simdata(N=N, u=u_, R=R_, epsilon=epsilon_, mu0=mu0_, b=b_, Q=Q_, theta=theta_, tstart=tstart, ystart=ystart, dt=dt, tmax=tend, k=k)
+  #simulated = .Call("simdata_ND", N, u_, R_, epsilon_, mu0_, b_, Q_, theta_, tstart, ystart, tend, k);
   
   data_names <- c()
   for(n in 1:k) {
