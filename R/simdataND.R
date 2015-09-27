@@ -17,7 +17,7 @@
 #' @return A table with simulated data.
 #' @examples
 #' library(spm)
-#' data <- sim(N=1000, ystart=c(75, 94), k=1)
+#' data <- sim_discrete(N=1000, ystart=c(75, 94), k=1)
 #' head(data)
 sim_discrete <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart=c(80), tstart=30, tend=105, dt=1, k=1) {
   # Re-calculating parameters:
@@ -30,8 +30,8 @@ sim_discrete <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, the
   Q_ <- matrix(Q, nrow=k, ncol=k, byrow=T)
   theta_ <- theta
   ystart = matrix(ystart, nrow=k, ncol=1)
-  simulated <- simdata(N=N, u=u_, R=R_, epsilon=epsilon_, mu0=mu0_, b=b_, Q=Q_, theta=theta_, tstart=tstart, ystart=ystart, dt=dt, tmax=tend, k=k)
-  #simulated = .Call("simdata_ND", N, u_, R_, epsilon_, mu0_, b_, Q_, theta_, tstart, ystart, tend, k);
+  #simulated <- simdata(N=N, u=u_, R=R_, epsilon=epsilon_, mu0=mu0_, b=b_, Q=Q_, theta=theta_, tstart=tstart, ystart=ystart, dt=dt, tmax=tend, k=k)
+  simulated = .Call("simdata_ND", N, u_, R_, epsilon_, mu0_, b_, Q_, theta_, tstart, ystart, tend, k);
   
   data_names <- c()
   for(n in 1:k) {
