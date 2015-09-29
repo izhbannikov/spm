@@ -31,7 +31,7 @@ sim_discrete <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, the
   theta_ <- theta
   ystart = matrix(ystart, nrow=k, ncol=1)
   #simulated <- simdata(N=N, u=u_, R=R_, epsilon=epsilon_, mu0=mu0_, b=b_, Q=Q_, theta=theta_, tstart=tstart, ystart=ystart, dt=dt, tmax=tend, k=k)
-  simulated = .Call("simdata_ND", N, u_, R_, epsilon_, mu0_, b_, Q_, theta_, tstart, ystart, tend, k);
+  simulated = .Call("simdata_ND", N, u_, R_, epsilon_, mu0_, b_, Q_, theta_, tstart, ystart, tend, k, dt);
   
   data_names <- c()
   for(n in 1:k) {

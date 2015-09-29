@@ -22,7 +22,7 @@ double mu(double t, double mu0, arma::mat b, arma::mat Q, double theta, arma::ma
     return res(0,0);
 }
 
-RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, SEXP b_, SEXP Q_, SEXP theta_, SEXP tstart_, SEXP ystart_, SEXP tend_, SEXP k_) {
+RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, SEXP b_, SEXP Q_, SEXP theta_, SEXP tstart_, SEXP ystart_, SEXP tend_, SEXP k_, SEXP dt_) {
     long N = as<long>(n); // Number of individuals
     int k = as<long>(k_); // Number of dimensions
     arma::mat u = as<arma::mat>(u_);
@@ -45,7 +45,7 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
     double id = 0;
     double t1;
     double t2;
-    double dt=1.0;
+    double dt=as<double>(dt_);
     arma::mat y1;
     arma::mat y2;
     bool new_person = false;
@@ -54,6 +54,7 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
     std::random_device rd;
     std::default_random_engine generator(rd());
     std::uniform_real_distribution<double> uni_distr(0.0,1.0);
+    std::uniform_real_distribution<double> uni_distr_dt(0.0,dt);
     std::vector< std::vector<double> > data;
         
     for(int i=0; i < N; i++) { // Across all individuals
@@ -85,6 +86,7 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
         else {
           xi = 1;
           y2 = arma::mat(k,1);
+          t2 = t1 + uni_distr_dt(generator);
           new_person = true;
         }
           

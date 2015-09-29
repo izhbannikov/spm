@@ -44,12 +44,15 @@ spm <- function(dat,k=2, verbose=F, tol=NULL) {
     print(pars$pars2$Q)
     cat("Det(Q):\n")
     print(det(pars$pars2$Q))
-    stop()
-  }
+    res=list(starting=list(Q=pars$pars2$Q, a=pars$pars2$a, b=pars$pars2$b, f1=pars$pars2$f1, f=pars$pars2$f, mu0=pars$pars2$mu0, theta=pars$pars2$theta), 
+             estimated=NA)
+    
+  } else {
   
-  spm_integral_MD(data, c(pars$pars2$a, pars$pars2$f1, pars$pars2$Q, pars$pars2$b, pars$pars2$f, pars$pars2$mu0, pars$pars2$theta), k, verbose)
+    spm_integral_MD(data, c(pars$pars2$a, pars$pars2$f1, pars$pars2$Q, pars$pars2$b, pars$pars2$f, pars$pars2$mu0, pars$pars2$theta), k, verbose)
  
-  res=list(starting=list(QH=pars$pars2$Q, aH=pars$pars2$a, bH=pars$pars2$b, f1H=pars$pars2$f1, fH=pars$pars2$f, mu0H=pars$pars2$mu0, theta=pars$pars2$theta), 
+    res=list(starting=list(Q=pars$pars2$Q, a=pars$pars2$a, b=pars$pars2$b, f1=pars$pars2$f1, f=pars$pars2$f, mu0=pars$pars2$mu0, theta=pars$pars2$theta), 
            estimated=get("results",envir=.GlobalEnv))
+  }
   invisible(res)
 }
