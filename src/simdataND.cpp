@@ -51,9 +51,9 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
     bool new_person = false;
     double S; 
     
-    //std::random_device rd;
-    //std::default_random_engine generator(rd()); 
-    std::default_random_engine generator(rand() % 100);
+    std::random_device rd;
+    std::default_random_engine generator(rd()); 
+    //std::default_random_engine generator(rand() % 100);
     std::uniform_real_distribution<double> uni_distr(0.0,1.0);
     std::uniform_real_distribution<double> uni_distr_dt(0.0,dt);
     std::vector< std::vector<double> > data;
