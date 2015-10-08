@@ -51,6 +51,25 @@ head(vitstat)
 
 ## Discrete and Continuous cases
 
+There are two main SPM types in the package: discrete model and continuous model. Discrete model assumes equal intervals between follow-up observations. The example of discrete dataset is given below.
+
+```{r}
+library(spm)
+data <- sim_discrete(N=10, ystart=c(80), k=1)
+head(data)
+```
+In this case there are equal intervals between t1 and t2 (Age and Age.next).
+
+The opposite is continuous case, in which intervals between observations are not equal. The example of continuous case dataset is shown below:
+
+```{r}
+library(spm)
+data <- simdata_cont(N=5,ystart = c(50))
+head(data)
+```
+
+
+
 ### Discrete case
 In discrete case, we use the following assumptions:
 $$ \bar{y}(t+1) = \bar{u} + \bar{R} \times \bar{y}(t) + \bar{\epsilon} $$
@@ -60,6 +79,8 @@ Where:
 $$ \mu_0(t) = \mu_0 e^{\theta t} $$
 $$ \bar{b}(t) = \bar{b} e^{\theta t} $$
 $$ \bar{Q}(t) = \bar{Q} e^{\theta t} $$
+
+
 
 ## Continuous case
 
