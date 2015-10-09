@@ -1,5 +1,5 @@
 ---
-title: "Stochastic Process Model (SPM)"
+title: "spm : an R-package that implements a Stochastic Process Model (SPM)"
 author: "Ilya Y. Zhbannikov"
 date: "`r Sys.Date()`"
 output: rmarkdown::pdf_document
@@ -11,12 +11,11 @@ vignette: >
 
 ## Overview
 
-The R-package "spm" (https://github.com/izhbannikov/spm) is developed for modeling aging-related changes and it allows (1) data simulation and (2) estimating the process parameters using maximum likelihood estimation by optimizing some parameters. Specifically, developed R-package spm allows (i) one-dimensional SPM; (ii) multiple dimensional SPM; (iii) data simulation for one- and multiple dimensions.
-
+The R-package \texttt{spm} (\url{https://github.com/izhbannikov/spm}) is developed for modeling aging-related changes and it allows (1) data simulation and (2) estimating the process parameters using maximum likelihood estimation by optimizing parameters used in the model. Specifically, developed R-package spm allows (i) one-dimensional SPM; (ii) multiple dimensional SPM; (iii) data simulation for one- and multiple dimensions.
 
 ## Data description
 
-Data represents a typical clinical trait data and must be presented in form of two datasets: longitudinal dataset, in which one record represents a single observation, and vital statistics, where one record represents a patient and other related information. Longitudinal dataset contains person id, status (dead/alive), time and measurements across the covariates. The spm can handle infinite number of covariates but usually 5-7 covariates are enough in practice. 
+Data represents a typical clinical trait data and must be presented in form of two datasets: longitudinal dataset (follow-up studies), in which one record represents a single observation, and vital statistics, where one record represents all patient information. Longitudinal dataset must contain person ID (Identification number), status (dead(1)/alive(0)), time and measurements across the covariates. The \texttt{spm} can handle an infinite number of covariates but in practice, 5-7 covariates is enough.
 
 ```{r,results='hide',warning=FALSE,echo=FALSE,message=FALSE}
 library(spm)
@@ -26,9 +25,8 @@ longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
 vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
 ```
 
-
-Below there is an example of clinical data that can be used in "spm" and we will discuss the field later.
-Longitude data:
+Below there is an example of clinical data that can be used in \texttt{spm} and we will discuss the field later.
+Longitudinal studies:
 ```{r,echo=FALSE}
 head(longdat)
 ```
@@ -36,6 +34,7 @@ Vital statistics:
 ```{r,echo=FALSE}
 head(vitstat)
 ```
+
 #### Data fields description
 ##### Longitude studies
 * ID - subject unique identificatin number.
@@ -90,6 +89,7 @@ $$ dm(t)/dt = \bar{a}(t) \times (\bar{m}(t) - \bar{f_1}(t)) - 2 \bar{\gamma}(t) 
 $$ d\bar{\gamma}(t)/dt = \bar{a}(t) \times \bar{\gamma}(t) +  \bar{\gamma}(t) \times \bar{a}(t)^* + \bar{b}(t) \times \bar{b}(t)^* - 2 \bar{\gamma}{t} \times \bar{Q}(t) \times \bar{\gamma}(t) $$
 
 ## Coefficient conversion between continuous and discrete cases
+
 $$ Q = Q $$
 $$ \bar{a} = \bar{R} - diag(k) $$
 $$ \bar{b} = \bar{\epsilon} $$
@@ -134,4 +134,4 @@ head(data)
 
 ## More Examples
 
-
+[TODO]
