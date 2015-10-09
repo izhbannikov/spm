@@ -72,7 +72,7 @@ head(data)
 ### Discrete case
 In discrete case, we use the following assumptions:
 $$ \bar{y}(t+1) = \bar{u} + \bar{R} \times \bar{y}(t) + \bar{\epsilon} $$
-$$ \mu = \mu_0(t) + \bar{b}(t) \times \bar{y}(t) + \bar{Q} \times \bar{y}(t)^2 $$
+$$ \mu(t) = \mu_0(t) + \bar{b}(t) \times \bar{y}(t) + \bar{Q} \times \bar{y}(t)^2 $$
 
 Where:
 $$ \mu_0(t) = \mu_0 e^{\theta t} $$
