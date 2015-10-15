@@ -32,6 +32,7 @@ optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upp
   parameters = trim(unlist(strsplit(formulas$f1t,"[\\+\\*\\(\\)]",fixed=F)))
   parameters = parameters[which(!(parameters %in% c("t","exp")))]
   for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}  
+  
   #---
   parameters = trim(unlist(strsplit(formulas$Qt,"[\\+\\*\\(\\)]",fixed=F)))
   parameters = parameters[which(!(parameters %in% c("t","exp")))]
@@ -41,14 +42,17 @@ optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upp
   parameters = trim(unlist(strsplit(formulas$ft,"[\\+\\*\\(\\)]",fixed=F)))
   parameters = parameters[which(!(parameters %in% c("t","exp")))]
   for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
+  
   #---
   parameters = trim(unlist(strsplit(formulas$bt,"[\\+\\*\\(\\)]",fixed=F)))
   parameters = parameters[which(!(parameters %in% c("t","exp")))]
   for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
+  
   #---
   parameters = trim(unlist(strsplit(formulas$mu0t,"[\\+\\*\\(\\)]",fixed=F)))
   parameters = parameters[which(!(parameters %in% c("t","exp")))]
   for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
+  
   
   variables <- unique(variables)
   
@@ -149,12 +153,18 @@ optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upp
 
   comp_func_params(formulas$at, formulas$f1t, formulas$Qt, formulas$ft, formulas$bt, formulas$mu0t)
   
+  optim_results <- NA
+  # Check if function parameters are consistent to those provided in starting list:
+  if( setequal(names(starting_params), variables) == FALSE) {
+    stop("Provided set of function parameters is not equal to that one provided in starting list or vise-versa.")
+  }
+  
   ## Optimization:
   #result <- optim(par = unlist(starting_params), 
   #              fn=maxlik_t, dat = as.matrix(data), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16, ndeps=c(1e-12, 1e-12, 1e-12,1e-12,1e-16,1e-12,1e-12,1e-12,1e-12)), 
   #              method="L-BFGS-B", lower = c(-0.5, -0.5, -1, 0,1e-12,1e-6,1e-6,1e-6, 1e-4), upper = c(0, 3, 0, Inf, 1e-7, Inf, Inf, 1, 0.1))
   #print(unlist(starting_params))
-  optim_results <- NA
+  
   tryCatch(optim(par = unlist(starting_params), 
                   fn=maxlik_t, dat = as.matrix(data), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16), 
                   method="L-BFGS-B", 
@@ -183,7 +193,9 @@ spm_time_dep <- function(data,
                          verbose=TRUE,
                          lower_bound=NULL, upper_bound=NULL) {
   
-  # lower_bound=c(-1, 0, 2e-9, 0, 0, 0, 0, 0), upper_bound=c(-0.001, Inf, 1e-5, 1e-5, Inf, Inf, 1e-3, Inf)
+  # Values for lower/upper boundaries could be: 
+  #lower_bound=c(-1, 0, 2e-9, 0, 0, 0, 0, 0), upper_bound=c(-0.001, Inf, 1e-5, 1e-5, Inf, Inf, 1e-3, Inf)
+  
   # Lower and upper boundaries calculation:
   if(is.null(lower_bound)) {
     lower_bound <- c()
