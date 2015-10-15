@@ -159,6 +159,18 @@ optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upp
     stop("Provided set of function parameters is not equal to that one provided in starting list or vise-versa.")
   }
   
+  if(verbose == TRUE) {
+    cat("Variables:\n")
+    cat(variables,"\n")
+    cat("Functions:\n")
+    print(at)
+    print(f1t)
+    print(Qt)
+    print(ft)
+    print(bt)
+    print(mu0t)
+  }
+  
   ## Optimization:
   #result <- optim(par = unlist(starting_params), 
   #              fn=maxlik_t, dat = as.matrix(data), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16, ndeps=c(1e-12, 1e-12, 1e-12,1e-12,1e-16,1e-12,1e-12,1e-12,1e-12)), 
