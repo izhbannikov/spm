@@ -120,8 +120,8 @@ spm_integral_MD <- function(dat,parameters, k, verbose=F) {
       }
       
     } else {
-      cat("Optimization stopped. Parametes achieved lower or upper bound, you need more data to correctrly obtain optimal parameters.")
-      print("###########")
+      cat("Optimization stopped. Parametes achieved lower or upper bound.\nPerhaps you need more data or these returned parameters might be enough.\n")
+      print("###########################################################")
       res <- NA
     }
     

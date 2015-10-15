@@ -8,6 +8,10 @@ trim.trailing <- function (x) sub("\\s+$", "", x)
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
 optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upper_bound) {
+  final_res <- list()
+  # Current results:
+  results <- list()
+  
   N <- dim(data)[1]
   at <- NULL#; a <- starting_params$a;
   f1t <- NULL#; f1 <- starting_params$f1;
@@ -17,6 +21,7 @@ optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upp
   mu0t <- NULL#; mu0 <- starting_params$mu0;
   #theta <- starting_params$theta
   variables <- c()
+  
   # Assigning parameters:
   #---
   parameters = trim(unlist(strsplit(formulas$at,"[\\+\\*\\(\\)]",fixed=F)))
@@ -48,9 +53,11 @@ optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upp
   variables <- unique(variables)
   
   for(p in names(starting_params)) {
+    results[[p]] <- starting_params[[p]]
     assign(p, starting_params[[p]], envir = globalenv())
   }
-  #print(variables)
+  
+  
   comp_func_params <- function(astring, f1string, qstring, fstring, bstring, mu0string) {
     at <<- eval(bquote(function(t) .(parse(text = astring)[[1]])))
     f1t <<- eval(bquote(function(t) .(parse(text = f1string)[[1]]))) 
@@ -59,15 +66,19 @@ optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upp
     bt <<- eval(bquote(function(t) .(parse(text = bstring)[[1]])))
     mu0t <<- eval(bquote(function(t) .(parse(text = mu0string)[[1]])))
   }
+  
   iteration <- 0
   L.prev <- 0
+  
   maxlik_t <- function(data, params) {
+    stopflag <- FALSE
     
     if(verbose)
       cat("Iteration: ", iteration, "\n")
     
     for(p in names(starting_params)) {
       assign(p, params[[p]], envir = globalenv())
+      results[[p]] <<- params[[p]]
       if(verbose)
         cat(paste(p, get(p)), " ")
     }
@@ -88,29 +99,49 @@ optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upp
     mu <- function(y, t) {
       ans <- mu0t(t) + (y - ft(t))^2*Qt(t)
     }
+    
+    for(i in 1:length(results)) {
+      if(length(intersect(results[[i]],c(lower_bound[i], upper_bound[i]))) >= 1) {
+        cat("Parameter", names(results)[i], "achieved lower/upper bound. Process stopped.\n")
+        cat(results[[i]],"\n")
+        stopflag <- TRUE
+        break
+      }
+    }
   
     L <- 0
-  
-    for(i in 1:N) {
+    
+    if(stopflag == FALSE) {
       
-      delta <- data[i,1]
-      t1 <- data[i, 2]; t2 <- data[i, 3]
-      ind <- ifelse(is.na(data[i, 5]), 0, 1)
-      log_s <- -1*(mu(data[i, 4], t2-t1))
-      if(ind == 0) {
-        L <- L + (1 -delta)*(-1*log_s) + delta*(1-log_s)
-      } else {
-        L <- L + 0.5*pi*(-1*log(sigma_sq(t1, t2)) - (data[i,5] - m(data[i,4], t1, t2))^2/(2*sigma_sq(t1, t2)))
+      for(i in 1:N) {
+        delta <- data[i,1]
+        t1 <- data[i, 2]; t2 <- data[i, 3]
+        ind <- ifelse(is.na(data[i, 5]), 0, 1)
+        log_s <- -1*(mu(data[i, 4], t2-t1))
+        if(ind == 0) {
+          L <- L + (1 -delta)*(-1*log_s) + delta*(1-log_s)
+        } else {
+          L <- L + 0.5*pi*(-1*log(sigma_sq(t1, t2)) - (data[i,5] - m(data[i,4], t1, t2))^2/(2*sigma_sq(t1, t2)))
+        }
+      }
+      
+      assign("results", results, envir=.GlobalEnv)
+      
+      iteration <<- iteration + 1
+      L.prev <<- L
+      
+      
+      if(verbose) {
+        cat("\n")
+        cat(paste("L", L.prev), "\n")
       }
     
-    }
+    } else {
+      
+      cat("Optimization stopped. Parametes achieved lower or upper bound.\nPerhaps you need more data or these returned parameters might be enough.\n")
+      print("###########################################################")
+      L <- NA
     
-    iteration <<- iteration + 1
-    L.prev <<- L
-    
-    if(verbose) {
-      cat("\n")
-      cat(paste("L", L.prev), "\n")
     }
     
     L
@@ -123,14 +154,16 @@ optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upp
   #              fn=maxlik_t, dat = as.matrix(data), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16, ndeps=c(1e-12, 1e-12, 1e-12,1e-12,1e-16,1e-12,1e-12,1e-12,1e-12)), 
   #              method="L-BFGS-B", lower = c(-0.5, -0.5, -1, 0,1e-12,1e-6,1e-6,1e-6, 1e-4), upper = c(0, 3, 0, Inf, 1e-7, Inf, Inf, 1, 0.1))
   #print(unlist(starting_params))
-  result <- optim(par = unlist(starting_params), 
+  optim_results <- NA
+  tryCatch(optim(par = unlist(starting_params), 
                   fn=maxlik_t, dat = as.matrix(data), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16), 
                   method="L-BFGS-B", 
                   lower=lower_bound,
-                  upper=upper_bound)
-  
-  result
-
+                  upper=upper_bound),
+           error=function(e) {print(e)}, 
+           finally=NA)
+  final_res <<- list(results, optim_results)
+  final_res
 }
 
 #' spm_time_dep : a function that can handle time-dependant coefficients:
@@ -147,8 +180,25 @@ optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upp
 spm_time_dep <- function(data, 
                          start=list(a1=-0.5, a2=0.2, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08),
                          formulas=list(at="a1*t+a2", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)"), 
-                         verbose=T,
-                         lower_bound=c(-1, -0.5, 0, 2e-9, 0, 1, 0, 0), upper_bound=c(-0.001, 1, Inf, 1e-5, Inf, Inf, 1e-3, Inf)) {
+                         verbose=TRUE,
+                         lower_bound=NULL, upper_bound=NULL) {
+  
+  # lower_bound=c(-1, 0, 2e-9, 0, 0, 0, 0, 0), upper_bound=c(-0.001, Inf, 1e-5, 1e-5, Inf, Inf, 1e-3, Inf)
+  # Lower and upper boundaries calculation:
+  if(is.null(lower_bound)) {
+    lower_bound <- c()
+    for(i in 1:length(start)) {
+      lower_bound <- c(lower_bound, ifelse(start[[i]] < 0, start[[i]] + 0.5*start[[i]], start[[i]] - 0.5*start[[i]]))
+    }
+  }
+  
+  if(is.null(upper_bound)) {
+    upper_bound <- c()
+    for(i in 1:length(start)) {
+      upper_bound <- c(upper_bound, ifelse(start[[i]] < 0, start[[i]] - 0.5*start[[i]], start[[i]] + 0.5*start[[i]]))
+    }
+  }
+  
   # Optimization:
   res = optimize(data, start, formulas, verbose, lower_bound, upper_bound)
   invisible(res)

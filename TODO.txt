@@ -1,6 +1,4 @@
 TO DO:
 
-- Test bench
+- Test bench (add unit tests)
 - Automatic determination of number of dimensions (k) from the input data
-- Documentation
-- Named output from the function prepare_data
