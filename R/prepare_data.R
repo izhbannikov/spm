@@ -42,6 +42,13 @@ approx2p <- function(t1, y1, t2, y2, t) {
 #'pars
 
 prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height"), verbose=T) {
+  #col.status="IsDead"
+  #col.id="ID"
+  #col.age="Age"
+  #col.age.event="LSmort"
+  #covariates="BG"
+  #interval=1
+  #verbose = T
   
   # Parsing input parameters in order to check for errors:
   if( !(col.status %in% colnames(vitstat)) ) {
@@ -67,6 +74,9 @@ prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.
   
   
   #-----------Done parsing imput parameters---------------------#
+  # First time of data pre-processing:
+  longdat <- longdat[which(!is.na(longdat[[col.age]])),]
+  
   # Prepare data for continuous optimisation:
   data_cont <- prepare_data_cont(longdat, vitstat, col.status, col.id, col.age, col.age.event, covariates, verbose)
   
@@ -90,7 +100,7 @@ prepare_data_cont <- function(longdat, vitstat, col.status, col.id, col.age, col
   prep.dat <- matrix(ncol=(4+2*length(covariates)),nrow=0)
   splitted <- split(longdat, longdat[[col.id]])
   vitstat.splitted <- split(vitstat, vitstat[[col.id]])
-  
+  #iii <- 1
   for(iii in 1:length(splitted)) {
     nrows <- length(splitted[[iii]][[col.id]])
     id <- splitted[[iii]][[col.id]]
@@ -111,7 +121,7 @@ prepare_data_cont <- function(longdat, vitstat, col.status, col.id, col.age, col
   }
   
   
-  prep.dat <- prep.dat[rowSums( matrix(is.na(prep.dat[,5:dim(prep.dat)[2]]), ncol=2*length(covariates),byrow=T)) !=2*length(covariates),]
+  #prep.dat <- prep.dat[rowSums( matrix(is.na(prep.dat[,5:dim(prep.dat)[2]]), ncol=2*length(covariates),byrow=T)) !=2*length(covariates),]
   prep.dat <- prep.dat[which(is.na(prep.dat[,4])==F),]
   head(prep.dat)  
   ans_final <- prep.dat
@@ -154,7 +164,7 @@ prepare_data_cont <- function(longdat, vitstat, col.status, col.id, col.age, col
 prepare_data_discr <- function(longdat, vitstat, interval, col.status, col.id, col.age, col.age.event, covariates, verbose) {
   #longdat=longdat.nonan
   #vitstat=vitstat.nonan
-  #interval = 3
+  #interval = 1
   #col.status="IsDead"
   #col.id="ID"
   #col.age="Age"
@@ -170,11 +180,11 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status, col.id, c
   # Split records by ID:
   splitted <- split(longdat, longdat[[col.id]])
   vitstat.splitted <- split(vitstat, vitstat[[col.id]])
-  
+  #iii <- 1
   # For each particular person's record:
   for(iii in 1:length(splitted)) {
     if(!is.na(vitstat.splitted[[iii]][[col.age.event]]) & !is.na(vitstat.splitted[[iii]][[col.status]]) ) {
-      
+      print(iii)
       id <- splitted[[iii]][[col.id]][1]
       nrows <- (tail(splitted[[iii]][[col.age]], n=1) - splitted[[iii]][[col.age]][1])/dt + 1
       # Perform approximation:

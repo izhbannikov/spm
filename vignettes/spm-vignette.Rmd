@@ -13,6 +13,17 @@ vignette: >
 
 The R-package \texttt{spm} (\url{https://github.com/izhbannikov/spm}) is developed for modeling aging-related changes and it allows (1) data simulation and (2) estimating the process parameters using maximum likelihood estimation by optimizing parameters used in the model. Specifically, developed R-package spm allows (i) one-dimensional SPM; (ii) multiple dimensional SPM; (iii) data simulation for one- and multiple dimensions.
 
+## Introduction
+
+### General description of age-related changes.
+
+
+### Model description
+
+
+
+### What we propose
+
 ## Data description
 
 Data represents a typical clinical trait data and must be presented in form of two datasets: longitudinal dataset (follow-up studies), in which one record represents a single observation, and vital statistics, where one record represents all patient information. Longitudinal dataset must contain person ID (Identification number), status (dead(1)/alive(0)), time and measurements across the covariates. The \texttt{spm} can handle an infinite number of covariates but in practice, 5-7 covariates is enough.

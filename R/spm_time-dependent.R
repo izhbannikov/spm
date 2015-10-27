@@ -7,7 +7,7 @@ trim.trailing <- function (x) sub("\\s+$", "", x)
 # returns string w/o leading or trailing whitespace
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
-optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upper_bound) {
+optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upper_bound, factr=factr) {
   final_res <- list()
   # Current results:
   results <- list()
@@ -105,7 +105,7 @@ optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upp
     }
     
     for(i in 1:length(results)) {
-      if(length(intersect(results[[i]],c(lower_bound[i], upper_bound[i]))) >= 1) {
+      if(length(intersect(results[[i]],c(lower_bound[i], upper_bound[i]))) >= 2) {
         cat("Parameter", names(results)[i], "achieved lower/upper bound. Process stopped.\n")
         cat(results[[i]],"\n")
         stopflag <- TRUE
@@ -153,8 +153,12 @@ optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upp
 
   comp_func_params(formulas$at, formulas$f1t, formulas$Qt, formulas$ft, formulas$bt, formulas$mu0t)
   
-  optim_results <- NA
   # Check if function parameters are consistent to those provided in starting list:
+  if(verbose) {
+    print(names(starting_params))
+    print(variables)
+  }
+  
   if( setequal(names(starting_params), variables) == FALSE) {
     stop("Provided set of function parameters is not equal to that one provided in starting list or vise-versa.")
   }
@@ -177,14 +181,16 @@ optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upp
   #              method="L-BFGS-B", lower = c(-0.5, -0.5, -1, 0,1e-12,1e-6,1e-6,1e-6, 1e-4), upper = c(0, 3, 0, Inf, 1e-7, Inf, Inf, 1, 0.1))
   #print(unlist(starting_params))
   
+  print(factr)
   tryCatch(optim(par = unlist(starting_params), 
-                  fn=maxlik_t, dat = as.matrix(data), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16), 
+                  fn=maxlik_t, dat = as.matrix(data), 
+                 control = list(fnscale=-1, trace=T, maxit=10000, factr=factr, ndeps=replicate(1e-12,n=length(lower_bound))), 
                   method="L-BFGS-B", 
                   lower=lower_bound,
                   upper=upper_bound),
            error=function(e) {print(e)}, 
            finally=NA)
-  final_res <<- list(results, optim_results)
+  final_res <- list(results)
   final_res
 }
 
@@ -203,7 +209,7 @@ spm_time_dep <- function(data,
                          start=list(a1=-0.5, a2=0.2, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08),
                          formulas=list(at="a1*t+a2", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)"), 
                          verbose=TRUE,
-                         lower_bound=NULL, upper_bound=NULL) {
+                         lower_bound=NULL, upper_bound=NULL, factr=1e-16) {
   
   # Values for lower/upper boundaries could be: 
   #lower_bound=c(-1, 0, 2e-9, 0, 0, 0, 0, 0), upper_bound=c(-0.001, Inf, 1e-5, 1e-5, Inf, Inf, 1e-3, Inf)
@@ -212,6 +218,7 @@ spm_time_dep <- function(data,
   if(is.null(lower_bound)) {
     lower_bound <- c()
     for(i in 1:length(start)) {
+      if(start[[i]] == 0) {start[[i]] = 1e-5}
       lower_bound <- c(lower_bound, ifelse(start[[i]] < 0, start[[i]] + 0.5*start[[i]], start[[i]] - 0.5*start[[i]]))
     }
   }
@@ -219,11 +226,12 @@ spm_time_dep <- function(data,
   if(is.null(upper_bound)) {
     upper_bound <- c()
     for(i in 1:length(start)) {
+      if(start[[i]] == 0) {start[[i]] = 1e-5}
       upper_bound <- c(upper_bound, ifelse(start[[i]] < 0, start[[i]] - 0.5*start[[i]], start[[i]] + 0.5*start[[i]]))
     }
   }
   
   # Optimization:
-  res = optimize(data, start, formulas, verbose, lower_bound, upper_bound)
+  res = optimize(data, start, formulas, verbose, lower_bound, upper_bound, factr)
   invisible(res)
 }
