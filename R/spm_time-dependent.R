@@ -13,44 +13,43 @@ optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upp
   results <- list()
   
   N <- dim(data)[1]
-  at <- NULL#; a <- starting_params$a;
-  f1t <- NULL#; f1 <- starting_params$f1;
-  Qt <- NULL#; Q <- starting_params$Q;
-  ft <- NULL#; f <- starting_params$f;
-  bt <- NULL#; b <- starting_params$b;
-  mu0t <- NULL#; mu0 <- starting_params$mu0;
-  #theta <- starting_params$theta
+  at <- NULL
+  f1t <- NULL
+  Qt <- NULL
+  ft <- NULL
+  bt <- NULL
+  mu0t <- NULL
   variables <- c()
   
   # Assigning parameters:
   #---
-  parameters = trim(unlist(strsplit(formulas$at,"[\\+\\*\\(\\)]",fixed=F)))
-  parameters = parameters[which(!(parameters %in% c("t","exp")))]
+  parameters <- trim(unlist(strsplit(formulas$at,"[\\+\\*\\(\\)]",fixed=F)))
+  parameters <- parameters[which(!(parameters %in% c("t","exp")))]
   for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
   
   #----
-  parameters = trim(unlist(strsplit(formulas$f1t,"[\\+\\*\\(\\)]",fixed=F)))
-  parameters = parameters[which(!(parameters %in% c("t","exp")))]
+  parameters <- trim(unlist(strsplit(formulas$f1t,"[\\+\\*\\(\\)]",fixed=F)))
+  parameters <- parameters[which(!(parameters %in% c("t","exp")))]
   for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}  
   
   #---
-  parameters = trim(unlist(strsplit(formulas$Qt,"[\\+\\*\\(\\)]",fixed=F)))
-  parameters = parameters[which(!(parameters %in% c("t","exp")))]
+  parameters <- trim(unlist(strsplit(formulas$Qt,"[\\+\\*\\(\\)]",fixed=F)))
+  parameters <- parameters[which(!(parameters %in% c("t","exp")))]
   for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
   
   #---
-  parameters = trim(unlist(strsplit(formulas$ft,"[\\+\\*\\(\\)]",fixed=F)))
-  parameters = parameters[which(!(parameters %in% c("t","exp")))]
+  parameters <- trim(unlist(strsplit(formulas$ft,"[\\+\\*\\(\\)]",fixed=F)))
+  parameters <- parameters[which(!(parameters %in% c("t","exp")))]
   for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
   
   #---
-  parameters = trim(unlist(strsplit(formulas$bt,"[\\+\\*\\(\\)]",fixed=F)))
-  parameters = parameters[which(!(parameters %in% c("t","exp")))]
+  parameters <- trim(unlist(strsplit(formulas$bt,"[\\+\\*\\(\\)]",fixed=F)))
+  parameters <- parameters[which(!(parameters %in% c("t","exp")))]
   for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
   
   #---
-  parameters = trim(unlist(strsplit(formulas$mu0t,"[\\+\\*\\(\\)]",fixed=F)))
-  parameters = parameters[which(!(parameters %in% c("t","exp")))]
+  parameters <- trim(unlist(strsplit(formulas$mu0t,"[\\+\\*\\(\\)]",fixed=F)))
+  parameters <- parameters[which(!(parameters %in% c("t","exp")))]
   for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
   
   
@@ -177,19 +176,22 @@ optimize <- function(data, starting_params,  formulas, verbose, lower_bound, upp
   
   ## Optimization:
   #result <- optim(par = unlist(starting_params), 
-  #              fn=maxlik_t, dat = as.matrix(data), control = list(fnscale=-1, trace=T, maxit=10000, factr=1e-16, ndeps=c(1e-12, 1e-12, 1e-12,1e-12,1e-16,1e-12,1e-12,1e-12,1e-12)), 
-  #              method="L-BFGS-B", lower = c(-0.5, -0.5, -1, 0,1e-12,1e-6,1e-6,1e-6, 1e-4), upper = c(0, 3, 0, Inf, 1e-7, Inf, Inf, 1, 0.1))
-  #print(unlist(starting_params))
+  #                                fn=maxlik_t, dat = as.matrix(data), 
+  #                               control = list(fnscale=-1, trace=T, maxit=10000, ndeps=replicate(factr,n=length(lower_bound))), 
+  #                                method="L-BFGS-B", 
+  #                                lower=lower_bound,
+  #                                upper=upper_bound)
   
-  print(factr)
+  
   tryCatch(optim(par = unlist(starting_params), 
                   fn=maxlik_t, dat = as.matrix(data), 
-                 control = list(fnscale=-1, trace=T, maxit=10000, factr=factr, ndeps=replicate(1e-12,n=length(lower_bound))), 
+                 control = list(fnscale=-1, trace=TRUE, maxit=10000, ndeps=replicate(factr,n=length(lower_bound))), 
                   method="L-BFGS-B", 
                   lower=lower_bound,
                   upper=upper_bound),
            error=function(e) {print(e)}, 
            finally=NA)
+  
   final_res <- list(results)
   final_res
 }
@@ -209,7 +211,7 @@ spm_time_dep <- function(data,
                          start=list(a1=-0.5, a2=0.2, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08),
                          formulas=list(at="a1*t+a2", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)"), 
                          verbose=TRUE,
-                         lower_bound=NULL, upper_bound=NULL, factr=1e-16) {
+                         lower_bound=NULL, upper_bound=NULL, factr=1e-16, lmult=0.5, umult=2) {
   
   # Values for lower/upper boundaries could be: 
   #lower_bound=c(-1, 0, 2e-9, 0, 0, 0, 0, 0), upper_bound=c(-0.001, Inf, 1e-5, 1e-5, Inf, Inf, 1e-3, Inf)
@@ -219,7 +221,7 @@ spm_time_dep <- function(data,
     lower_bound <- c()
     for(i in 1:length(start)) {
       if(start[[i]] == 0) {start[[i]] = 1e-5}
-      lower_bound <- c(lower_bound, ifelse(start[[i]] < 0, start[[i]] + 0.5*start[[i]], start[[i]] - 0.5*start[[i]]))
+      lower_bound <- c(lower_bound, ifelse(start[[i]] < 0, start[[i]] + lmult*start[[i]], start[[i]] - lmult*start[[i]]))
     }
   }
   
@@ -227,7 +229,7 @@ spm_time_dep <- function(data,
     upper_bound <- c()
     for(i in 1:length(start)) {
       if(start[[i]] == 0) {start[[i]] = 1e-5}
-      upper_bound <- c(upper_bound, ifelse(start[[i]] < 0, start[[i]] - 0.5*start[[i]], start[[i]] + 0.5*start[[i]]))
+      upper_bound <- c(upper_bound, ifelse(start[[i]] < 0, start[[i]] - umult*start[[i]], start[[i]] + umult*start[[i]]))
     }
   }
   
