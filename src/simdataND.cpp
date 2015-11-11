@@ -8,7 +8,7 @@
 #include <math.h> 
 #include <iostream>
 #include <RcppArmadillo.h>
-#include <random>
+//#include <random> - only for C++ 11
 // [[Rcpp::depends(RcppArmadillo)]]
 
 using namespace Rcpp;
@@ -51,11 +51,14 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
     bool new_person = false;
     double S; 
     
+    /*
     std::random_device rd;
     std::default_random_engine generator(rd()); 
     //std::default_random_engine generator(rand() % 100);
     std::uniform_real_distribution<double> uni_distr(0.0,1.0);
     std::uniform_real_distribution<double> uni_distr_dt(0.0,dt);
+    */
+    
     std::vector< std::vector<double> > data;
         
     for(int i=0; i < N; i++) { // Across all individuals
@@ -71,13 +74,16 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
         
         double xi = 0; // case (0 - alive, 1 - dead) indicator
         
-        if(S > uni_distr(generator)) {
+        if(S > Rcpp::runif(1, 0.0, 1.0)[0]) { //if(S > uni_distr(generator)) {
           xi = 0; // case (0 - alive, 1 - dead) indicator
           arma::mat eps(k,1);
           
           for(int ii=0; ii < k; ii++) {
+            /*
             std::normal_distribution<double> norm_distr(0.0,epsilon(ii,0));
             eps(ii,0) = norm_distr(generator);
+            */
+            eps(ii,0) = Rcpp::rnorm(1, 0.0, epsilon(ii,0.0))[0];
           }
           
           y2 = u + R * y1 + eps;
@@ -87,7 +93,8 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
         else {
           xi = 1;
           y2 = arma::mat(k,1);
-          t2 = t1 + uni_distr_dt(generator);
+          /*t2 = t1 + uni_distr_dt(generator);*/
+          t2 = t1 + Rcpp::runif(1, 0.0, dt)[0];
           new_person = true;
         }
           
