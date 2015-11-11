@@ -1,4 +1,0 @@
-# cran.r-project.org/doc/manuals/R-exts.pdf
-PKG_LIBS = $(shell $(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()" ) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
-#PKG_LIBS = $(shell $(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()" )
-PKG_CXXFLAGS=`Rscript -e "Rcpp:::CxxFlags()"`
