@@ -59,10 +59,10 @@ setBoundaries <- function(k, params) {
 #'# Remove unneeded NAs:
 #'longdat.nonan <- longdat[which(is.na(longdat$Age) == F),]
 #'vitstat.nonan <- vitstat[which(is.na(vitstat$BirthCohort) == F),]
-#'dat=prepare_data(longdat=longdat.nonan, vitstat=vitstat.nonan,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.next="AgeNext", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
+#'dat <- prepare_data(longdat=longdat.nonan, vitstat=vitstat.nonan,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
 #'# Parameters estimation:
-#'dat<-[,1:6]
-#'pars=spm_integral_MD(dat, parameters=c(-0.05, 80, 2e-8, 80, 5, 2e-5, 0.08), k = 1)
+#'dat <- dat[[1]][,2:6]
+#'pars <- spm_integral_MD(dat, parameters=c(-0.05, 80, 2e-8, 80, 5, 2e-5, 0.08), k = 1)
 #'pars
 spm_integral_MD <- function(dat,parameters, k, verbose=F) {
   final_res <- list()

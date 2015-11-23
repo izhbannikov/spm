@@ -97,12 +97,15 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
     
     L = 0;
     double  nsteps = 2;
-      
+    //std::cout << N << std::endl;
+    
+    
     for(int i=0; i<N; i++) {
       //Solving differential equations on intervals:
       double t1 = dd(i,1); 
       double t2 = dd(i,2);
-      
+      //std::cout<< i << " " << t1 <<  " " << t2  << " " << M << std::endl;
+    
       int jj=0;
       for(int ii=3; ii<M; ii+=2) {
         y1(jj,0) = dd(i,ii);
@@ -173,7 +176,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
             ifactor = 4.00;
           }
         }
-        //cout << ifactor << "\n";*/
+        //cout << ifactor << "\n";
         s = s + ifactor*h/3.00*(-1.00)*mu(t,out[0],out[1], fH, f1H, mu0H, thetaH, QH);
         
       }
@@ -209,6 +212,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
         L += s + logprobi;
         //cout << s << " " << logprobi << " " << m2 << " " << gamma2 << "\n";
       }
+      
       
     }
     
