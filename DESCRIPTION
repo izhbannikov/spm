@@ -7,8 +7,13 @@ Author: I. Y. Zhbannikov, I. V. Akushevich, K. G. Arbeev, A. I. Yashin
 Maintainer: Ilya Y. Zhbannikov <i.zhbannikov@mail.ru>
 Description: Stochastic Process Modeling
 License: GPL
-Imports: Rcpp (>= 0.11.1), RcppArmadillo (>= 0.4.200.0)
+Imports:
+    Rcpp (>= 0.11.1),
+    RcppArmadillo (>= 0.4.200.0)
 LinkingTo: Rcpp, RcppArmadillo
-Depends: deSolve,mice,sas7bdat,RcppArmadillo
-Suggests: knitr
+Depends:
+    deSolve,mice,sas7bdat,RcppArmadillo
+Suggests:
+    knitr
 VignetteBuilder: knitr
+RoxygenNote: 5.0.0

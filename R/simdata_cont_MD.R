@@ -14,21 +14,29 @@
 #' @return A table with simulated data.
 #' @examples
 #' library(spm)
-#' dat <- simdata_cont(N=2500)
+#' dat <- simdata_cont_MD(N=2500)
 #' dat
 #
-simdata_cont_MD <- function(N=10, aH=-0.05, f1H=80, QH=2e-07, fH=80, bH=5, mu0H=2e-05, thetaH=0.08,
+simdata_cont_MD <- function(N=100, a=-0.05, f1=80, Q=2e-07, f=80, b=5, mu0=2e-05, theta=0.08,
                          step=0.05, tstart=30, tend=105, ystart=80, sd0=4, k=1) {
-    
-  aH<-matrix(aH,nrow=k,ncol=k,byrow=T)
-  f1H<-matrix(f1H,nrow=k,ncol=1,byrow=T)
-  QH<-matrix(QH,nrow=k,ncol=k,byrow=T)
-  fH<-matrix(fH,nrow=k,ncol=1,byrow=T)
-  bH<-matrix(bH,nrow=k,ncol=1,byrow=T)
+  
+  if ( (dim(as.data.frame(a))[1] != k) & (dim(as.data.frame(a))[2] != k) &
+       (dim(as.data.frame(Q))[1] != k) & (dim(as.data.frame(Q))[2] != k) & 
+       (dim(as.data.frame(f1))[1] != k) & (dim(as.data.frame(f))[1] != k) &
+       (dim(as.data.frame(b))[1] != k) & 
+       (dim(as.data.frame(ystart))[1] != k) ) {
+    stop("Dimenstions of provided parameters are not equal.")
+  }  
+  
+  aH<-matrix(a,nrow=k,ncol=k,byrow=T)
+  f1H<-matrix(f1,nrow=k,ncol=1,byrow=T)
+  QH<-matrix(Q,nrow=k,ncol=k,byrow=T)
+  fH<-matrix(f,nrow=k,ncol=1,byrow=T)
+  bH<-matrix(b,nrow=k,ncol=1,byrow=T)
   ystart<-matrix(ystart,nrow=k,ncol=1,byrow=T)
   
   Q <- function(t) {
-    Q <- QH*exp(thetaH*t)
+    Q <- QH*exp(theta*t)
     Q
   }
     
@@ -37,7 +45,7 @@ simdata_cont_MD <- function(N=10, aH=-0.05, f1H=80, QH=2e-07, fH=80, bH=5, mu0H=
     hfH <- fH - par[[1]]
     hf1H <- f1H - par[[1]]
       
-    mu0Ht <- mu0H*exp(thetaH*t)
+    mu0Ht <- mu0*exp(theta*t)
     QH_gamma1 <- QH %*% par[[2]]
     mu <- mu0Ht + t(hfH) %*% QH %*% hfH + sum(diag(QH_gamma1))
     mu
