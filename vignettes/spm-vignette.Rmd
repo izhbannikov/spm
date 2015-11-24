@@ -65,7 +65,7 @@ There are two main SPM types in the package: discrete model and continuous model
 
 ```{r}
 library(spm)
-data <- sim_discrete(N=10, ystart=c(80), k=1)
+data <- simdata_discr_MD(N=10, ystart=c(80), k=1)
 head(data)
 ```
 In this case there are equal intervals between t1 and t2 (Age and Age.next).
@@ -74,7 +74,7 @@ The opposite is continuous case, in which intervals between observations are not
 
 ```{r}
 library(spm)
-data <- simdata_cont(N=5,ystart = c(50))
+data <- simdata_cont_MD(N=5,ystart = c(50))
 head(data)
 ```
 
@@ -127,7 +127,7 @@ For discrete case:
 
 ```{r}
 library(spm)
-data <- sim_discrete(N=100, ystart=c(75, 94), k=2)
+data <- simdata_discr_MD(N=100, ystart=c(75, 94), k=2)
 head(data)
 ```
 
@@ -137,7 +137,7 @@ For continuous case:
 
 ```{r}
 library(spm)
-data <- simdata_cont(N=100)
+data <- simdata_cont_MD(N=100)
 head(data)
 ```
 
