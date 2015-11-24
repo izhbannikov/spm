@@ -129,14 +129,14 @@ spm_integral_MD <- function(dat,parameters, k, verbose=F) {
   }
 
   # Optimization:
-  optim_results <- NA
   tryCatch(optim(par = parameters, 
                 fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, factr=1e-16, ndeps=ndeps), 
                 method="L-BFGS-B", lower = bounds$lower_bound, upper = bounds$upper_bound), 
            error=function(e) e, 
            finally=NA)
-  final_res <<- list(results, optim_results)
-  final_res
+  
+  res <- get("results",envir=.GlobalEnv)
+  invisible(res)
 }
 
 
