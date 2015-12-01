@@ -62,12 +62,23 @@ setBoundaries <- function(k, params) {
 #'dat <- prepare_data(longdat=longdat.nonan, vitstat=vitstat.nonan,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
 #'# Parameters estimation:
 #'dat <- dat[[1]][,2:6]
-#'pars <- spm_integral_MD(dat, parameters=c(-0.05, 80, 2e-8, 80, 5, 2e-5, 0.08), k = 1)
+#'pars <- spm_integral_MD(dat, parameters=c(-0.05 #a, 80 #f1, 2e-8 #Q, 80 #f, 5 #b, 2e-5 #mu0, 0.08 #theta), k = 1)
 #'pars
-spm_integral_MD <- function(dat,parameters, k, verbose=F) {
+#spm_integral_MD <- function(dat,parameters, k, verbose=F) {
+spm_integral_MD <- function(dat, 
+                            a=0.05, 
+                            f1=80, 
+                            Q=2e-8,
+                            f=81,
+                            b=5,
+                            mu0=2e-5,
+                            theta=0.08,
+                            k=1, verbose=F) {
   final_res <- list()
+  parameters <- c(a, f1, Q, f, b, mu0, theta)
   # Current results:
-  results <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
+  results <<- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
+  results_tmp <<- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
   iteration <- 0
   bounds <- setBoundaries(k, parameters)
   
@@ -79,30 +90,47 @@ spm_integral_MD <- function(dat,parameters, k, verbose=F) {
               1e-6, # mu0
               1e-4) # theta
   
+  # Reading parameters:
+  start=1; end=k^2
+  a <- matrix(parameters[start:end],ncol=k, byrow=F); results$a <<- a
+  start=end+1; end=start+k-1
+  f1 <- matrix(parameters[start:end],ncol=k, byrow=F); results$f1 <<- f1
+  start=end+1; end=start+k^2-1
+  Q <- matrix(parameters[start:end],ncol=k, byrow=F); results$Q <<- Q
+  start=end+1; end=start+k-1
+  f <- matrix(parameters[start:end],ncol=k, byrow=F); results$f <<- f
+  start=end+1; end=start+k-1
+  b <- matrix(parameters[start:end],nrow=k); results$b <<- b
+  start=end+1; end=start
+  mu0 <- parameters[start:end]; results$mu0 <<- mu0
+  start=end+1; end=start
+  theta <- parameters[start:end]; results$theta <<- theta
+  # End reading parameters
+  
   
   maxlik <- function(dat, par) {
     stopflag <- F
     # Reading parameters:
     start=1; end=k^2
-    a <- matrix(par[start:end],ncol=k, byrow=F); results$a <<- a
+    a <- matrix(par[start:end],ncol=k, byrow=F); results_tmp$a <<- a
     start=end+1; end=start+k-1
-    f1 <- matrix(par[start:end],ncol=k, byrow=F); results$f1 <<- f1
+    f1 <- matrix(par[start:end],ncol=k, byrow=F); results_tmp$f1 <<- f1
     start=end+1; end=start+k^2-1
-    Q <- matrix(par[start:end],ncol=k, byrow=F); results$Q <<- Q
+    Q <- matrix(par[start:end],ncol=k, byrow=F); results_tmp$Q <<- Q
     start=end+1; end=start+k-1
-    b <- matrix(par[start:end],nrow=k); results$b <<- b
+    f <- matrix(par[start:end],ncol=k, byrow=F); results_tmp$f <<- f
     start=end+1; end=start+k-1
-    f <- matrix(par[start:end],ncol=k, byrow=F); results$f <<- f
+    b <- matrix(par[start:end],nrow=k); results_tmp$b <<- b
     start=end+1; end=start
-    mu0 <- par[start:end]; results$mu0 <<- mu0
+    mu0 <- par[start:end]; results_tmp$mu0 <<- mu0
     start=end+1; end=start
-    theta <- par[start:end]; results$theta <<- theta
+    theta <- par[start:end]; results_tmp$theta <<- theta
     # End reading parameters
     
-    for(i in 1:length(results)) {
-      if(length(intersect(results[[i]],c(bounds$lower_bound[i], bounds$upper_bound[i]))) >= 1) {
+    for(i in 1:length(results_tmp)) {
+      if(length(intersect(results_tmp[[i]],c(bounds$lower_bound[i], bounds$upper_bound[i]))) >= 1) {
         cat("Parameter", names(results)[i], "achieved lower/upper bound. Process stopped.\n")
-        cat(results[[i]],"\n")
+        cat(results_tmp[[i]],"\n")
         stopflag <- T
         break
       }
@@ -110,19 +138,19 @@ spm_integral_MD <- function(dat,parameters, k, verbose=F) {
     
     if(stopflag == F) {
       dims <- dim(dat)
-      res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k)
-      assign("results", results, envir=.GlobalEnv)
+      res <<- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k)
+      assign("results", results_tmp, envir=.GlobalEnv)
       iteration <<- iteration + 1
       if(verbose) {
         cat("L = ", res,"\n")
         cat("Iteration: ", iteration,  "\nResults:\n") 
-        print(results)
+        print(results_tmp)
       }
       
     } else {
       cat("Optimization stopped. Parametes achieved lower or upper bound.\nPerhaps you need more data or these returned parameters might be enough.\n")
       print("###########################################################")
-      res <- NA
+      res <<- get("results",envir=.GlobalEnv)
     }
     
     res
