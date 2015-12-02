@@ -48,7 +48,15 @@ spm <- function(dat,k=2, verbose=F, tol=NULL) {
     
   } else {
   
-    spm_integral_MD(data, c(pars$pars2$a, pars$pars2$f1, pars$pars2$Q, pars$pars2$b, pars$pars2$f, pars$pars2$mu0, pars$pars2$theta), k, verbose)
+    spm_integral_MD(data, 
+                    a=pars$pars2$a, 
+                    f1=pars$pars2$f1, 
+                    Q=pars$pars2$Q, 
+                    f=pars$pars2$f, 
+                    b=pars$pars2$b, 
+                    mu0=pars$pars2$mu0, 
+                    theta=pars$pars2$theta, 
+                    k, verbose)
  
     res=list(starting=list(Q=pars$pars2$Q, a=pars$pars2$a, b=pars$pars2$b, f1=pars$pars2$f1, f=pars$pars2$f, mu0=pars$pars2$mu0, theta=pars$pars2$theta), 
            estimated=get("results",envir=.GlobalEnv))
