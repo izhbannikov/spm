@@ -74,6 +74,16 @@ spm_integral_MD <- function(dat,
                             mu0=2e-5,
                             theta=0.08,
                             k=1, verbose=F) {
+  
+  # test code:
+  a = ddq$pars2$a
+  f1 = ddq$pars2$f1
+  Q = ddq$pars2$Q
+  f = ddq$pars2$f
+  b = ddq$pars2$b
+  mu0 = ddq$pars2$mu0
+  theta = ddq$pars2$theta
+  
   final_res <- list()
   parameters <- c(a, f1, Q, f, b, mu0, theta)
   # Current results:
@@ -92,19 +102,26 @@ spm_integral_MD <- function(dat,
   
   # Reading parameters:
   start=1; end=k^2
-  a <- matrix(parameters[start:end],ncol=k, byrow=F); results$a <<- a
+  a <- matrix(parameters[start:end],ncol=k, byrow=F)
+  results$a <<- a
   start=end+1; end=start+k-1
-  f1 <- matrix(parameters[start:end],ncol=k, byrow=F); results$f1 <<- f1
+  f1 <- matrix(parameters[start:end],ncol=k, byrow=F)
+  results$f1 <<- f1
   start=end+1; end=start+k^2-1
-  Q <- matrix(parameters[start:end],ncol=k, byrow=F); results$Q <<- Q
+  Q <- matrix(parameters[start:end],ncol=k, byrow=F)
+  results$Q <<- Q
   start=end+1; end=start+k-1
-  f <- matrix(parameters[start:end],ncol=k, byrow=F); results$f <<- f
+  f <- matrix(parameters[start:end],ncol=k, byrow=F)
+  results$f <<- f
   start=end+1; end=start+k-1
-  b <- matrix(parameters[start:end],nrow=k); results$b <<- b
+  b <- matrix(parameters[start:end],nrow=k)
+  results$b <<- b
   start=end+1; end=start
-  mu0 <- parameters[start:end]; results$mu0 <<- mu0
+  mu0 <- parameters[start:end]
+  results$mu0 <<- mu0
   start=end+1; end=start
-  theta <- parameters[start:end]; results$theta <<- theta
+  theta <- parameters[start:end]
+  results$theta <<- theta
   # End reading parameters
   
   
@@ -112,19 +129,26 @@ spm_integral_MD <- function(dat,
     stopflag <- F
     # Reading parameters:
     start=1; end=k^2
-    a <- matrix(par[start:end],ncol=k, byrow=F); results_tmp$a <<- a
+    a <- matrix(par[start:end],ncol=k, byrow=F)
+    results_tmp$a <<- a
     start=end+1; end=start+k-1
-    f1 <- matrix(par[start:end],ncol=k, byrow=F); results_tmp$f1 <<- f1
+    f1 <- matrix(par[start:end],ncol=k, byrow=F)
+    results_tmp$f1 <<- f1
     start=end+1; end=start+k^2-1
-    Q <- matrix(par[start:end],ncol=k, byrow=F); results_tmp$Q <<- Q
+    Q <- matrix(par[start:end],ncol=k, byrow=F)
+    results_tmp$Q <<- Q
     start=end+1; end=start+k-1
-    f <- matrix(par[start:end],ncol=k, byrow=F); results_tmp$f <<- f
+    f <- matrix(par[start:end],ncol=k, byrow=F)
+    results_tmp$f <<- f
     start=end+1; end=start+k-1
-    b <- matrix(par[start:end],nrow=k); results_tmp$b <<- b
+    b <- matrix(par[start:end],nrow=k)
+    results_tmp$b <<- b
     start=end+1; end=start
-    mu0 <- par[start:end]; results_tmp$mu0 <<- mu0
+    mu0 <- par[start:end]
+    results_tmp$mu0 <<- mu0
     start=end+1; end=start
-    theta <- par[start:end]; results_tmp$theta <<- theta
+    theta <- par[start:end]
+    results_tmp$theta <<- theta
     # End reading parameters
     
     for(i in 1:length(results_tmp)) {
@@ -160,7 +184,7 @@ spm_integral_MD <- function(dat,
   tryCatch(optim(par = parameters, 
                 fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, factr=1e-16, ndeps=ndeps), 
                 method="L-BFGS-B", lower = bounds$lower_bound, upper = bounds$upper_bound), 
-           error=function(e) e, 
+           error=function(e) {if(verbose  == TRUE) {print(e)}}, 
            finally=NA)
   
   res <- get("results",envir=.GlobalEnv)
