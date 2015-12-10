@@ -8,17 +8,16 @@
 #'@return A list of (1) Estimated starting point (from quick discrete optimization) and 
 #'(2) Estimated coefficients.
 #' @examples
-#' library(spm)
-#' # Reading data
-#' ## Longitudinal studies:
-#' longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
-#' ## Vital statistics:
-#' vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
-#' # Prepare data for optimization:
+#'library(spm)
+#'#Longitudinal dataset
+#'longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
+#'#Vital statistics
+#'vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
+#'#Prepare data for optimization
 #' data=prepare_data(longdat=longdat, vitstat=vitstat,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
-#' # Parameters estimation:
-#' pars=spm(data,k = 1)
-#' pars
+#'#Parameters estimation:
+#'pars=spm(data,k = 1)
+#'pars
 spm <- function(dat,k=2, verbose=F, tol=NULL) {
   # Main function for Stochastic Process Modelling package
   # Parameters: 
@@ -27,7 +26,7 @@ spm <- function(dat,k=2, verbose=F, tol=NULL) {
   # - tol - tolerance threshold for matrix inversion
   #
   # Step 1: estimation of starting point with quick discrete optimization:
-  pars=spm_quick_MD(dat=dat[[2]],k=k)
+  pars=spm_discrete_MD(dat=dat[[2]],k=k)
   
   if(verbose) {
     cat("Starting parameters:\n")
@@ -48,7 +47,7 @@ spm <- function(dat,k=2, verbose=F, tol=NULL) {
     
   } else {
   
-    spm_integral_MD(data, 
+    spm_continuous_MD(data, 
                     a=pars$pars2$a, 
                     f1=pars$pars2$f1, 
                     Q=pars$pars2$Q, 
@@ -56,7 +55,8 @@ spm <- function(dat,k=2, verbose=F, tol=NULL) {
                     b=pars$pars2$b, 
                     mu0=pars$pars2$mu0, 
                     theta=pars$pars2$theta, 
-                    k, verbose)
+                    k, 
+                    verbose)
  
     res=list(starting=list(Q=pars$pars2$Q, a=pars$pars2$a, b=pars$pars2$b, f1=pars$pars2$f1, f=pars$pars2$f, mu0=pars$pars2$mu0, theta=pars$pars2$theta), 
            estimated=get("results",envir=.GlobalEnv))

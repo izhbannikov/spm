@@ -14,9 +14,9 @@
 #'longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
 #'# Prepare data for optimization
 #'vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
-#'data <- prepare_data(longdat=longdat, vitstat=vitstat,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.next="AgeNext", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
+#'data <- prepare_data(longdat=longdat, vitstat=vitstat,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
 #'# Parameters estimation
-#'pars=spm_discrete_MD(data, k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL)
+#'pars <- spm_discrete_MD(data[[2]], k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL)
 #'pars
 spm_discrete_MD <- function(dat,k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL) {
   options(digits=10)
