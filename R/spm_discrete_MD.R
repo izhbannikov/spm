@@ -1,29 +1,25 @@
 #'Discrete multi-dimensional optimization
-#'It is way much faster that continuous (but less precise) and used mainly in 
-#'estimation of starting point.
 #'@param dat A data table.
 #'@param k A number of dimensions.
-#'@param theta_range A range of theta parameter (axe displacement of Gompertz function).
-#'@param tol A tolerance threshold for matrix inversion.
-#'@return A list of two elements: (1) parameters u, R, b, epsilon, Q, mu0, theta and
-#'(2) parameters a, f1, Q, f, b, mu0, theta. Note: b and mu0 from first list are different 
+#'@param theta_range A range of theta parameter (axe displacement of Gompertz function), default: from 0.001 to 0.09 with step of 0.001.
+#'@param tol A tolerance threshold for matrix inversion (NULL by default).
+#'@return A list of two elements: (1) estimated parameters u, R, b, epsilon, Q, mu0, theta and
+#'(2) estimated parameters a, f1, Q, f, b, mu0, theta. Note: b and mu0 from first list are different 
 #'from b and mu0 from the second list.
+#'@details This function is way much faster that continuous \code{spm_continuous_MD(...)} (but less precise) and used mainly in 
+#'estimation a starting point for the \code{spm_continuous_MD(...)}.
 #'@examples
-#'#'library(spm)
-#'# Reading longitude data:
+#'library(spm)
+#'# Reading longitudinal data
 #'longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
-#'# Prepare data for optimization:
+#'# Prepare data for optimization
 #'vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
-#'# Remove unneeded NAs:
-#'longdat.nonan <- longdat[which(is.na(longdat$Age) == F),]
-#'vitstat.nonan <- vitstat[which(is.na(vitstat$BirthCohort) == F),]
-#'data=prepare_data(longdat=longdat.nonan, vitstat=vitstat.nonan,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.next="AgeNext", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
-#'# Parameters estimation:
-#'pars=spm_quick_MD(data,k = 1)
+#'data <- prepare_data(longdat=longdat, vitstat=vitstat,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.next="AgeNext", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
+#'# Parameters estimation
+#'pars=spm_discrete_MD(data, k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL)
 #'pars
-spm_quick_MD <- function(dat,k=2, theta_range=seq(0.001,0.09,by=0.001), tol=NULL) {
+spm_discrete_MD <- function(dat,k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL) {
   options(digits=10)
-  
   # Logistic regression:
   total_cols <- (1 + k + (k*(k+1))/2) + 2
   result <- matrix(nrow=0, ncol=total_cols,0)
@@ -32,7 +28,7 @@ spm_quick_MD <- function(dat,k=2, theta_range=seq(0.001,0.09,by=0.001), tol=NULL
     newdat <- cbind(newdat,exp(theta*dat[,3])) #x0 - time t1
     
     cnames <- c("xi", "u0")
-    # Cycle for bt coefficients:
+    # A loop for the bt coefficients:
     index_i <- 1
     for(i in seq(1,(k*2-1),2)) {
       newdat <- cbind(newdat,dat[,(4+i)]*exp(theta*dat[,3])) #y1_b1t
@@ -111,9 +107,6 @@ spm_quick_MD <- function(dat,k=2, theta_range=seq(0.001,0.09,by=0.001), tol=NULL
   }
   for(i in 1:k) {
     for(j in i:k) {
-      #if(j != i) {
-      #  Q[j,i] <- Q[i,j]/2
-      #}
       Q[j,i] <- Q[i,j]
     }
   }

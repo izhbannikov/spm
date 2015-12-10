@@ -42,30 +42,30 @@ setBoundaries <- function(k, params) {
 }
 
 #'Continuous multi-dimensional optimization
-#'It is much slower that discrete but more precise and can handle time intervals with different lengths.
 #'@param dat A data table.
-#'@param parameters A starting pont (a vector).
+#'@param a A starting value of the rate of adaptive response to any deviation of Y from f1(t).
+#'@param f1 A starting value of the average age trajectories of the variables which process is forced to follow. 
+#'@param Q Starting values of the quadratic hazard term.
+#'@param f A starting value of the "optimal" value of variable which corresponds to the minimum of hazard rate at a respective time.
+#'@param b A starting value of a diffusion coefficient representing a strength of the random disturbance from Wiener Process.
+#'@param mu0 A starting value of the baseline hazard.
+#'@param theta A starting value of the parameter theta (axe displacement of Gompertz function).
 #'@param k A number of dimensions.
 #'@param verbose An indicator of verbosing output.
 #'@param tol A tolerance threshold for matrix inversion.
-#'@return A list of two elements: (1) parameters a, f1, Q, f, b, mu0, theta; (2) An output from "optim" function used 
-#'for maximum likelihood estimation.
+#'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta.
+#'@details \code{spm_integral_MD} runs much slower that discrete but more precise and can handle time intervals with different lengths.
 #'@examples
-#'#'library(spm)
-#'# Reading longitude data:
+#'library(spm)
+#'# Reading the data:
 #'longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
-#'# Prepare data for optimization:
 #'vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
-#'# Remove unneeded NAs:
-#'longdat.nonan <- longdat[which(is.na(longdat$Age) == F),]
-#'vitstat.nonan <- vitstat[which(is.na(vitstat$BirthCohort) == F),]
-#'dat <- prepare_data(longdat=longdat.nonan, vitstat=vitstat.nonan,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
-#'# Parameters estimation:
-#'dat <- dat[[1]][,2:6]
-#'pars <- spm_integral_MD(dat, parameters=c(-0.05 #a, 80 #f1, 2e-8 #Q, 80 #f, 5 #b, 2e-5 #mu0, 0.08 #theta), k = 1)
+#'dd <- prepare_data(longdat=longdat, vitstat=vitstat,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
+#'data <- dd[[1]][,2:6]
+#'#Parameters estimation:
+#'pars <- spm_continuous_MD(dat=data,a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08, k = 1)
 #'pars
-#spm_integral_MD <- function(dat,parameters, k, verbose=F) {
-spm_integral_MD <- function(dat, 
+spm_continuous_MD <- function(dat, 
                             a=0.05, 
                             f1=80, 
                             Q=2e-8,
@@ -74,15 +74,6 @@ spm_integral_MD <- function(dat,
                             mu0=2e-5,
                             theta=0.08,
                             k=1, verbose=F) {
-  
-  # test code:
-  a = ddq$pars2$a
-  f1 = ddq$pars2$f1
-  Q = ddq$pars2$Q
-  f = ddq$pars2$f
-  b = ddq$pars2$b
-  mu0 = ddq$pars2$mu0
-  theta = ddq$pars2$theta
   
   final_res <- list()
   parameters <- c(a, f1, Q, f, b, mu0, theta)
