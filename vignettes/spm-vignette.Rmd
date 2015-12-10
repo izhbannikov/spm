@@ -181,6 +181,7 @@ Compute Survival Fuction ```S``` based on the equations above.
 ####Step 5
 
 In this case we compare the ```S``` to the random number, uniformly distributed. If it is larger, than we assume that the event is happened (death of subject or system failure). Otherwise we proceed to the next iteration.
+
 ```
 if S > runif(1, 0, 1) : 
     y2 = rnorm(1, m, sqrt(gamma))
