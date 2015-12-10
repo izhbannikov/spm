@@ -9,11 +9,9 @@
 #'(2) Estimated coefficients.
 #' @examples
 #'library(spm)
-#'#Longitudinal dataset
-#'longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
-#'#Vital statistics
-#'vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
 #'#Prepare data for optimization
+#'longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
+#'vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
 #' data=prepare_data(longdat=longdat, vitstat=vitstat,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
 #'#Parameters estimation:
 #'pars=spm(data,k = 1)
