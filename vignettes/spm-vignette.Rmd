@@ -11,7 +11,7 @@ vignette: >
 
 ## Overview
 
-The R-package \texttt{spm} (\url{https://github.com/izhbannikov/spm}) is developed for modeling aging-related changes and it allows (1) data simulation and (2) estimating the process parameters using maximum likelihood estimation by optimizing parameters used in the model. Specifically, developed R-package spm allows (i) one-dimensional SPM; (ii) multiple dimensional SPM; (iii) data simulation for one- and multiple dimensions.
+The R-package \texttt{spm} (\url{https://github.com/izhbannikov/spm}) is developed for modeling trajectories from longitudinal data  and it allows (1) data simulation and (2) estimating the process parameters using maximum likelihood estimation by optimizing parameters used in the model. Specifically, developed R-package spm allows (i) one-dimensional SPM; (ii) multiple dimensional SPM; (iii) data simulation for one- and multiple dimensions.
 
 ## Introduction
 
@@ -143,6 +143,5 @@ head(data)
 
 
 
-## More Examples
-
-[TODO]
+## Simulation strategies
+R-package ```spm``` currently offers continuous- and discrete time simulations.

@@ -28,14 +28,11 @@ from given dataset.
 }
 \examples{
 library(spm)
-# Reading data
-## Longitudinal studies:
+#Prepare data for optimization
 longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
-## Vital statistics:
 vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
-# Prepare data for optimization:
 data=prepare_data(longdat=longdat, vitstat=vitstat,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
-# Parameters estimation:
+#Parameters estimation:
 pars=spm(data,k = 1)
 pars
 }

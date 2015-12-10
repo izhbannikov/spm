@@ -1,4 +1,4 @@
-#' One-dimensional simulation function for continuous trait.
+#' One-dimensional simulation function for continuous time (arbitrary intervals between observations).
 #' @param N Number of individuals.
 #' @param a A k by k matrix, which characterize the rate of the adaptive response.
 #' @param f1 A particular state, which if a deviation from the normal (or optimal). This is a vector with length of k.
@@ -13,10 +13,9 @@
 #' @return A table with simulated data.
 #' @examples
 #' library(spm)
-#' dat <- simdata_cont(N=2500)
+#' dat <- simdata_cont_1D(N=2500)
 #' dat
-#
-simdata_cont <- function(N=10, aH=-0.05, f1H=80, QH=2e-07, fH=80, bH=5, mu0H=2e-05, thetaH=0.08,
+simdata_cont_1D <- function(N=10, aH=-0.05, f1H=80, QH=2e-07, fH=80, bH=5, mu0H=2e-05, thetaH=0.08,
                          step=0.05, tstart=30, tend=105, ystart=80, sd0=4) {
      
     Q <- function(t) {
