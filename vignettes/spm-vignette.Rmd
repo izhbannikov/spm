@@ -1,5 +1,5 @@
 ---
-title: "spm : an R-package that implements a Stochastic Process Model (SPM)"
+title: "spm: an R-infrastructure package for Stochastic Process Modeling of survival trajectories from longitudinal studies"
 author: "Ilya Y. Zhbannikov"
 date: "`r Sys.Date()`"
 output: rmarkdown::pdf_document
@@ -13,20 +13,9 @@ vignette: >
 
 The R-package \texttt{spm} (\url{https://github.com/izhbannikov/spm}) is developed for modeling trajectories from longitudinal data  and it allows (1) data simulation and (2) estimating the process parameters using maximum likelihood estimation by optimizing parameters used in the model. Specifically, developed R-package spm allows (i) one-dimensional SPM; (ii) multiple dimensional SPM; (iii) data simulation for one- and multiple dimensions.
 
-## Introduction
-
-### General description of age-related changes.
-
-
-### Model description
-
-
-
-### What we propose
-
 ## Data description
 
-Data represents a typical clinical trait data and must be presented in form of two datasets: longitudinal dataset (follow-up studies), in which one record represents a single observation, and vital statistics, where one record represents all patient information. Longitudinal dataset must contain person ID (Identification number), status (dead(1)/alive(0)), time and measurements across the covariates. The \texttt{spm} can handle an infinite number of covariates but in practice, 5-7 covariates is enough.
+Data represents a typical longitudinal data in form of two datasets: longitudinal dataset (follow-up studies), in which one record represents a single observation, and vital (survival) statistics, where one record represents all information about the subject. Longitudinal dataset cat contain a subject ID (identification number), status (event(1)/no event(0)), time and measurements across the variables. The \texttt{spm} can handle an infinite number of variables but in practice, 5-7 variables is enough.
 
 ```{r,results='hide',warning=FALSE,echo=FALSE,message=FALSE}
 library(spm)
@@ -144,4 +133,69 @@ head(data)
 
 
 ## Simulation strategies
-R-package ```spm``` currently offers continuous- and discrete time simulations.
+R-package ```spm``` currently offers continuous- and discrete time simulations. 
+
+### Continuous-time simulation
+
+####Step 1
+We come with a new subject and at first, we think that subject under study is alive at the starting observation time t1:
+
+```
+event(t1) = False
+new_subject(t1) = True
+```
+Here ```event``` represents the particular event happened to the subject (for example, death or a failure).
+Then we start observing the subject over time.
+
+####Step 2
+Computing t1 and t2:
+
+```
+if event = False and new_subject = True:
+  t1 = runif(1, tstart, tend)
+  t2 = t1 + 2*runif(1, 0, 1)
+else if event = False and new_subject = False:
+  t1 = t2
+  t2 = t1 + 2*runif(1, 0, 1)
+```
+
+If we come with a "fresh" subject, we assume that t1 as a random value, uniformly distributed from start time (tstart) to end (tend). Here ```runif()``` a random number generator which returns uniformly distributed value (from tstart to tend).
+
+####Step 3
+
+Computing y1:
+
+```
+if event = False and new_subject = True:
+  y1 = rnorm(1, ystart, sd0)
+} else {
+  y1 = y2
+}
+```
+
+Here ```rnorm()``` a random number generator which returns normally distributed values, with mean=0 and sd=1.
+
+####Step 4
+Compute Survival Fuction ```S``` based on the equations above.
+
+####Step 5
+
+In this case we compare the ```S``` to the random number, uniformly distributed. If it is larger, than we assume that the event is happened (death of subject or system failure). Otherwise we proceed to the next iteration.
+```
+if S > runif(1, 0, 1) : 
+    y2 = rnorm(1, m, sqrt(gamma))
+    event = True
+    new_subject = True
+else if event = False:
+  y2 = rnorm(1, m, sqrt(gamma))
+  event = False
+  new_record = True
+```
+
+###Discrete-time simulation
+
+In this case we use equal intervals ```dt``` between observations and survival function ```S``` is computed directly from $\mu$:
+
+$S = e^{-1\mu(t_1)}$
+
+The rest of the discrete simulation routine is the same as in continuous-time simulation case.
