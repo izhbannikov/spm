@@ -2,14 +2,12 @@
 % Please edit documentation in R/prepare_data.R
 \name{prepare_data}
 \alias{prepare_data}
-\title{Output values include:
-1). Database (data table), simulated for (slow) continuous optimization with arbitrary intervals between observations.
-2). Database (data table), simulated for (quick) discrete optimization with fixed intervals between each observation.}
+\title{Data pre-processing for analysis with stochastic process model methodology.}
 \usage{
 prepare_data(longdat, vitstat, interval = 1, col.status = "IsDead",
   col.id = "ID", col.age = "Age", col.age.event = "LSmort",
   covariates = c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height"),
-  verbose = T)
+  verbose = TRUE)
 }
 \arguments{
 \item{longdat}{A table with longitude records.}
@@ -35,22 +33,17 @@ A list of two elements: first element contains a data table for continuous case,
 second element contains a data table for a discrete case (fixed intervals between observations).
 }
 \description{
-Output values include:
-1). Database (data table), simulated for (slow) continuous optimization with arbitrary intervals between observations.
-2). Database (data table), simulated for (quick) discrete optimization with fixed intervals between each observation.
+Data pre-processing for analysis with stochastic process model methodology.
 }
 \examples{
 library(spm)
 #Reading longitude data:
-longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
+ldat <- read.csv(system.file("data","longdat.csv",package="spm"))
 # Prepare data for optimization:
-vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
-# Remove unneeded NAs:
-longdat.nonan <- longdat[which(is.na(longdat$Age) == F),]
-vitstat.nonan <- vitstat[which(is.na(vitstat$BirthCohort) == F),]
-data=prepare_data(longdat=longdat.nonan, vitstat=vitstat.nonan,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
+vdat <- read.csv(system.file("data","vitstat.csv",package="spm"))
+data <- prepare_data(longdat=ldat, vitstat=vdat,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=TRUE)
 # Parameters estimation:
-pars=spm(data,k = 1)
+pars <- spm(data,k = 1)
 pars
 }
 

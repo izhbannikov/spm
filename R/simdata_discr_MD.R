@@ -1,6 +1,4 @@
 #' Multi-dimension simulation function
-#' It uses a, f1, Q, f, b, mu0 and theta
-#' as input parameters.
 #' @param N Number of individuals
 #' @param k number of dimensions (k = 1 by default).
 #' @param a A k by k matrix, which characterize the rate of the adaptive response.
@@ -31,7 +29,6 @@ simdata_discr_MD <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5,
   
   # Re-calculating parameters:
   u_ <- matrix((f1 %*% (-1*a)), nrow=k, byrow=T)
-  #matrix(u,nrow=k,ncol=1,byrow=T)
   R_ <- matrix((diag(k) + a), nrow=k, ncol=k, byrow=T)
   epsilon_ <- matrix(b, nrow=k, ncol=1, byrow=T)
   mu0_ <- mu0 + (f %*% Q) %*% t(f)
@@ -39,7 +36,6 @@ simdata_discr_MD <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5,
   Q_ <- matrix(Q, nrow=k, ncol=k, byrow=T)
   theta_ <- theta
   ystart = matrix(ystart, nrow=k, ncol=1)
-  #simulated <- simdata(N=N, u=u_, R=R_, epsilon=epsilon_, mu0=mu0_, b=b_, Q=Q_, theta=theta_, tstart=tstart, ystart=ystart, dt=dt, tmax=tend, k=k)
   simulated = .Call("simdata_ND", N, u_, R_, epsilon_, mu0_, b_, Q_, theta_, tstart, ystart, tend, k, dt);
   
   data_names <- c()

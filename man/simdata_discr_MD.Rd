@@ -2,9 +2,7 @@
 % Please edit documentation in R/simdata_discr_MD.R
 \name{simdata_discr_MD}
 \alias{simdata_discr_MD}
-\title{Multi-dimension simulation function
-It uses a, f1, Q, f, b, mu0 and theta
-as input parameters.}
+\title{Multi-dimension simulation function}
 \usage{
 simdata_discr_MD(N = 100, a = -0.05, f1 = 80, Q = 2e-08, f = 80,
   b = 5, mu0 = 1e-05, theta = 0.08, ystart = 80, tstart = 30,
@@ -42,8 +40,6 @@ A table with simulated data.
 }
 \description{
 Multi-dimension simulation function
-It uses a, f1, Q, f, b, mu0 and theta
-as input parameters.
 }
 \examples{
 library(spm)

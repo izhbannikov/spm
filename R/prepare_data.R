@@ -12,10 +12,7 @@ approx2p <- function(t1, y1, t2, y2, t) {
   y
 }
 
-# Preparing data for stochastic process model
-#'Output values include:
-#'1). Database (data table), simulated for (slow) continuous optimization with arbitrary intervals between observations.
-#'2). Database (data table), simulated for (quick) discrete optimization with fixed intervals between each observation.
+#'Data pre-processing for analysis with stochastic process model methodology.
 #'@param longdat A table with longitude records.
 #'@param vitstat A table with vital statistics (mortality).
 #'@param interval A number of breaks between observations for discrete simulation. Default = 1 (no breaks).
@@ -30,25 +27,15 @@ approx2p <- function(t1, y1, t2, y2, t) {
 #'@examples
 #'library(spm)
 #'#Reading longitude data:
-#'longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
+#'ldat <- read.csv(system.file("data","longdat.csv",package="spm"))
 #'# Prepare data for optimization:
-#'vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
-#'# Remove unneeded NAs:
-#'longdat.nonan <- longdat[which(is.na(longdat$Age) == F),]
-#'vitstat.nonan <- vitstat[which(is.na(vitstat$BirthCohort) == F),]
-#'data=prepare_data(longdat=longdat.nonan, vitstat=vitstat.nonan,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
+#'vdat <- read.csv(system.file("data","vitstat.csv",package="spm"))
+#'data <- prepare_data(longdat=ldat, vitstat=vdat,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=TRUE)
 #'# Parameters estimation:
-#'pars=spm(data,k = 1)
+#'pars <- spm(data,k = 1)
 #'pars
 
-prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height"), verbose=T) {
-  #col.status="IsDead"
-  #col.id="ID"
-  #col.age="Age"
-  #col.age.event="LSmort"
-  #covariates="BG"
-  #interval=1
-  #verbose = T
+prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height"), verbose=TRUE) {
   
   # Parsing input parameters in order to check for errors:
   if( !(col.status %in% colnames(vitstat)) ) {
@@ -87,14 +74,6 @@ prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.
 }
 
 prepare_data_cont <- function(longdat, vitstat, col.status, col.id, col.age, col.age.event, covariates, verbose) {
-  #longdat=longdat.nonan
-  #vitstat=vitstat.nonan
-  #col.status="IsDead"
-  #col.id="SubjID"
-  #col.age="Age"
-  #col.age.event="LSmort"
-  #covariates=c("DBP", "BMI")
-  #verbose=T
   
   # Split records by ID:
   prep.dat <- matrix(ncol=(4+2*length(covariates)),nrow=0)
@@ -122,14 +101,14 @@ prepare_data_cont <- function(longdat, vitstat, col.status, col.id, col.age, col
   
   
   #prep.dat <- prep.dat[rowSums( matrix(is.na(prep.dat[,5:dim(prep.dat)[2]]), ncol=2*length(covariates),byrow=T)) !=2*length(covariates),]
-  prep.dat <- prep.dat[which(is.na(prep.dat[,4])==F),]
+  prep.dat <- prep.dat[which(is.na(prep.dat[,4])==FALSE),]
   head(prep.dat)  
   ans_final <- prep.dat
-  if(length(which(is.na(prep.dat[,5:dim(prep.dat)[2]]) == T)) > 0) {
+  if(length(which(is.na(prep.dat[,5:dim(prep.dat)[2]]) == TRUE)) > 0) {
     if(verbose)
       cat("Filing missing values with multiple imputations:\n")
     
-    tmp_ans <- mice(prep.dat[,5:dim(prep.dat)[2]], printFlag=ifelse(verbose, T, F),m = 2, maxit=2)
+    tmp_ans <- mice(prep.dat[,5:dim(prep.dat)[2]], printFlag=ifelse(verbose, TRUE, FALSE),m = 2, maxit=2)
     ans1 <- complete(tmp_ans)
     #ans_final <- cbind(prep.dat[,1:3], ans1)
     ans_final <- cbind(prep.dat[,1:4], ans1)
@@ -162,15 +141,6 @@ prepare_data_cont <- function(longdat, vitstat, col.status, col.id, col.age, col
 }
 
 prepare_data_discr <- function(longdat, vitstat, interval, col.status, col.id, col.age, col.age.event, covariates, verbose) {
-  #longdat=longdat.nonan
-  #vitstat=vitstat.nonan
-  #interval = 1
-  #col.status="IsDead"
-  #col.id="ID"
-  #col.age="Age"
-  #col.age.event="LSmort"
-  #covariates=c("DBP", "BMI")
-  #verbose=T
   
   # Interpolation
   dt <- interval
@@ -228,11 +198,11 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status, col.id, c
   ans <- ans[rowSums( matrix(is.na(ans[,5:dim(ans)[2]]), ncol=length(covariates),byrow=T)) !=length(covariates),]
   
   ans_final <- ans
-  if(length(which(is.na(ans[,5:dim(ans)[2]]) == T)) > 0) {
+  if(length(which(is.na(ans[,5:dim(ans)[2]]) == TRUE)) > 0) {
     if(verbose)
       cat("Filing missing values with multiple imputations:\n")
     
-    tmp_ans <- mice(ans[,5:dim(ans)[2]], printFlag=ifelse(verbose, T, F), m = 2, maxit = 2)
+    tmp_ans <- mice(ans[,5:dim(ans)[2]], printFlag=ifelse(verbose, TRUE, FALSE), m = 2, maxit = 2)
     ans1 <- complete(tmp_ans)
     ans_final <- cbind(ans[,1:4], ans1)
   }

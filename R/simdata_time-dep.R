@@ -9,7 +9,6 @@
 #' library(spm)
 #' dat <- simdata_time_dep(N=2500)
 #' dat
-#formulas=list(at="a", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)")
 simdata_time_dep <- function(N=10,formulas=list(at="-0.05", f1t="80", Qt="2e-7*exp(0.08*t)", ft="80", bt="5", mu0t="2e-5*exp(0.08*t)"),
                          step=0.05, tstart=30, tend=105, ystart=80, sd0=4, k=1) {
     
