@@ -24,7 +24,7 @@ spm <- function(dat,k=2, verbose=F, tol=NULL) {
   # - tol - tolerance threshold for matrix inversion
   #
   # Step 1: estimation of starting point with quick discrete optimization:
-  pars=spm_discrete_MD(dat=dat[[2]],k=k)
+  pars=spm_discrete(dat=dat[[2]],k=k)
   
   if(verbose) {
     cat("Starting parameters:\n")
@@ -45,7 +45,7 @@ spm <- function(dat,k=2, verbose=F, tol=NULL) {
     
   } else {
   
-    spm_continuous_MD(data, 
+    spm_continuous(data, 
                     a=pars$pars2$a, 
                     f1=pars$pars2$f1, 
                     Q=pars$pars2$Q, 
