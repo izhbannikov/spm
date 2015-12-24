@@ -19,43 +19,49 @@
 #'#Parameters estimation:
 #'pars=spm(data)
 #'pars
-spm <- function(x, model=NULL, formulas = NULL, verbose=F, tol=NULL) {
-  # Main function for Stochastic Process Modelling package
-  # Parameters: 
-  # - dat - input data frame
-  # - tol - tolerance threshold for matrix inversion
+spm <- function(x, model="discrete", formulas = NULL, verbose=F, tol=NULL) {
   
   # List of available models:
-  models <- c("continuous", "time-dependent")
+  models <- c("discrete", "continuous", "time-dependent")
   
-  if(!is.null(model)) {
-    if(length(unique(model)) > 2) {
-      stop("Only continuous and/or time-dependent models can be used.")
-    }
-    for(i in 1:length(model)) {
-      if(!(model[i] %in% models)) {
-        cat("Warning: ", model[i], " - unknown model type!")
-      }
-    }
+  if(!(model %in% models)) {
+    stop(cat(model, " - unknown model type!"))
   }
   
   # Number of variables (dimensions):
   k <- (dim(x[[1]])[2] - 4)/2
   
-  # Estimation of starting point with discrete optimization:
-  pars=spm_discrete(dat=x[[2]],k=k)
   
-  if(verbose) {
-    cat("Starting parameters:\n")
-    print(pars)
+  if(model == "discrete") {
+    # Estimation of starting point with discrete optimization:
+    pars <- spm_discrete(dat=x[[2]],k=k)
+    res <- list(Ak2005=list(u=pars$pars1$u, 
+                            R=pars$pars1$R, 
+                            b=pars$pars1$b, 
+                            Q=pars$pars1$Q, 
+                            epsilon=pars$pars1$eps,
+                            mu0=pars$pars1$mu0,
+                            theta=pars$pars1$theta), 
+                Ya2007=list(a=pars$pars2$a, 
+                            f1=pars$pars2$f1,
+                            Q=pars$pars2$Q,
+                            f=pars$pars2$f, 
+                            b=pars$pars2$b, 
+                            mu0=pars$pars2$mu0, 
+                            theta=pars$pars2$theta))
+    
   }
   
-  res <- list(estimated.discrete=list(Q=pars$pars2$Q, a=pars$pars2$a, b=pars$pars2$b, f1=pars$pars2$f1, f=pars$pars2$f, mu0=pars$pars2$mu0, theta=pars$pars2$theta))
   
-  #If required, continuous-time optimization:
-  if("continuous" %in% model) {
+  if(model == "continuous") {
+    pars <- spm_discrete(dat=x[[2]],k=k)
     data <- x[[1]][,2:dim(x[[1]])[2]]
   
+    if(verbose) {
+      cat("Starting parameters:\n")
+      print(pars)
+    }
+    
     if(det(pars$pars2$Q) < 0) {
       cat("Error: determinant of Q < 0\n")
       cat("Q:\n")
@@ -63,10 +69,9 @@ spm <- function(x, model=NULL, formulas = NULL, verbose=F, tol=NULL) {
       cat("Det(Q):\n")
       print(det(pars$pars2$Q))
       
-      res[["estimated.continuous"]] <- NA
+      res <- NA
     
     } else {
-  
       spm_continuous(data, 
                     a=pars$pars2$a, 
                     f1=pars$pars2$f1, 
@@ -77,39 +82,63 @@ spm <- function(x, model=NULL, formulas = NULL, verbose=F, tol=NULL) {
                     theta=pars$pars2$theta, 
                     k, 
                     verbose)
- 
-      res[["estimated.continuous"]] <- get("results",envir=.GlobalEnv)
+  
+      res.t <- get("results",envir=.GlobalEnv)
+      
+      Q.c <- res.t$Q
+      R.c <- res.t$a + diag(k)
+      eps.c <- as.matrix(res.t$b)
+      u.c <- (-1)*(res.t$f1 %*% res.t$a)
+      b.c <- -2*res.t$f %*% res.t$Q
+      mu0.c <- res.t$mu0 + res.t$f %*% res.t$Q %*% t(res.t$f)
+      theta.c <- res.t$theta
+      
+      res <- list(Ak2005=list(u=u.c, 
+                              R=R.c, 
+                              b=b.c, 
+                              Q=Q.c, 
+                              epsilon=eps.c,
+                              mu0=mu0.c,
+                              theta=theta.c), 
+                  Ya2007=list(a=res.t$a, 
+                              f1=res.t$f1,
+                              Q=res.t$Q,
+                              f=res.t$f, 
+                              b=res.t$b, 
+                              mu0=res.t$mu0, 
+                              theta=res.t$theta))
+      
     }
   }
   
-  if("time-dependent" %in% model) {
-    data <- x[[1]][,2:dim(x[[1]])[2]]
-    if(k > 1) {
-      stop("Number of variables > 1. Model with time-dependent parameters can be used only with one variable!")
-    }
-    
-    spm_time_dep <- function(data, 
-                             start=list(a1=0, a2=estimated.discrete$a, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08),
-                             formulas=list(at="a1*t+a2", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)"), 
-                             verbose=TRUE,
-                             lower_bound=NULL, upper_bound=NULL, factr=1e-16, lmult=0.5, umult=2) {
-      
-    
-    spm_continuous(data, 
-                     a=pars$pars2$a, 
-                     f1=pars$pars2$f1, 
-                     Q=pars$pars2$Q, 
-                     f=pars$pars2$f, 
-                     b=pars$pars2$b, 
-                     mu0=pars$pars2$mu0, 
-                     theta=pars$pars2$theta, 
-                     k, 
-                     verbose)
-      
-      res=list(starting=list(Q=pars$pars2$Q, a=pars$pars2$a, b=pars$pars2$b, f1=pars$pars2$f1, f=pars$pars2$f, mu0=pars$pars2$mu0, theta=pars$pars2$theta), 
-               estimated=get("results",envir=.GlobalEnv))
-    
-  }
+  #if(model == "time-dependent") {
+  #  data <- x[[1]][,2:dim(x[[1]])[2]]
+  #  if(k > 1) {
+  #    stop("Number of variables > 1. Model with time-dependent parameters can be used only with one variable!")
+  #  }
+  #  
+  #  spm_time_dep <- function(data, 
+  #                           start=list(a1=0, a2=estimated.discrete$a, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08),
+  #                           formulas=list(at="a1*t+a2", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)"), 
+  #                           verbose=TRUE,
+  #                           lower_bound=NULL, upper_bound=NULL, factr=1e-16, lmult=0.5, umult=2) {
+  #    
+  #  
+  #  spm_continuous(data, 
+  #                   a=pars$pars2$a, 
+  #                   f1=pars$pars2$f1, 
+  #                   Q=pars$pars2$Q, 
+  #                   f=pars$pars2$f, 
+  #                   b=pars$pars2$b, 
+  #                   mu0=pars$pars2$mu0, 
+  #                   theta=pars$pars2$theta, 
+  #                   k, 
+  #                   verbose)
+  #    
+  #    res <- list(starting=list(Q=pars$pars2$Q, a=pars$pars2$a, b=pars$pars2$b, f1=pars$pars2$f1, f=pars$pars2$f, mu0=pars$pars2$mu0, theta=pars$pars2$theta), 
+  #             estimated=get("results",envir=.GlobalEnv))
+  #  
+  #}
   
   invisible(res)
 }
