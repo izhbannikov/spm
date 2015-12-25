@@ -191,33 +191,25 @@ optimize <- function(data, starting_params,  formulas, verbose,
     stpar[p.const.ind[i]] <- unlist(starting_params, use.names = FALSE)[i]
   }
   names(stpar) <- variables
-  #stpar <- list(stpar)
   
   for(p in names(stpar)) {
     results[[p]] <- stpar[p]
     assign(p, stpar[p], envir = globalenv())
   }
   
-  #print(stpar)
-  
-  
   # Lower and upper boundaries calculation:
-  #if(is.null(lower_bound)) {
-    lower_bound <- c()
-    for(i in 1:length(stpar)) {
-      if(stpar[[i]] == 0) {stpar[[i]] = 1e-5}
-      lower_bound <- c(lower_bound, ifelse(stpar[[i]] < 0, stpar[[i]] + lmult*stpar[[i]], stpar[[i]] - lmult*stpar[[i]]))
-    }
-  #}
+  lower_bound <- c()
+  for(i in 1:length(stpar)) {
+    if(stpar[[i]] == 0) {stpar[[i]] = 1e-5}
+    lower_bound <- c(lower_bound, ifelse(stpar[[i]] < 0, stpar[[i]] + lmult*stpar[[i]], stpar[[i]] - lmult*stpar[[i]]))
+  }
   
-  #if(is.null(upper_bound)) {
-    upper_bound <- c()
-    for(i in 1:length(stpar)) {
-      if(stpar[[i]] == 0) {stpar[[i]] = 1e-5}
-      upper_bound <- c(upper_bound, ifelse(stpar[[i]] < 0, stpar[[i]] - umult*stpar[[i]], stpar[[i]] + umult*stpar[[i]]))
-    }
-  #}
-  print(lower_bound)
+  upper_bound <- c()
+  for(i in 1:length(stpar)) {
+    if(stpar[[i]] == 0) {stpar[[i]] = 1e-5}
+    upper_bound <- c(upper_bound, ifelse(stpar[[i]] < 0, stpar[[i]] - umult*stpar[[i]], stpar[[i]] + umult*stpar[[i]]))
+  }
+  
   
   comp_func_params <- function(astring, f1string, qstring, fstring, bstring, mu0string) {
     at <<- eval(bquote(function(t) .(parse(text = astring)[[1]])))

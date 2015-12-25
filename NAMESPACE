@@ -3,6 +3,7 @@ exportPattern("^[[:alpha:]]+")
 import(stats)
 import(sas7bdat)
 import(mice) 
+import(tools)
 #Export R-functions:
 export(prepare_data)
 export(spm_discrete)

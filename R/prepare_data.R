@@ -13,8 +13,8 @@ approx2p <- function(t1, y1, t2, y2, t) {
 }
 
 #'Data pre-processing for analysis with stochastic process model methodology.
-#'@param longdat A table with longitude records.
-#'@param vitstat A table with vital statistics (mortality).
+#'@param x A table with longitude records.
+#'@param y A table with vital statistics (mortality).
 #'@param interval A number of breaks between observations for discrete simulation. Default = 1 (no breaks).
 #'@param col.status A name of column containing status variable (0/1 which indicate alive/dead). 
 #'@param col.id A name of column containing patient ID. This ID should be the same in both longdat and vitstat tables.
@@ -35,65 +35,133 @@ approx2p <- function(t1, y1, t2, y2, t) {
 #'pars <- spm(data,k = 1)
 #'pars
 
-prepare_data <- function(longdat, vitstat, interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height"), verbose=TRUE) {
+prepare_data <- function(x, y, 
+                         interval=1, 
+                         col.status=NULL, 
+                         col.id=NULL, 
+                         col.age=NULL, 
+                         col.age.event=NULL, 
+                         covariates=NULL, 
+                         verbose=TRUE) {
+  
+  #col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort"
+  # covariates=c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height"), 
+  
+  #x = "~/Projects/spm/inst/data/longdat.csv"
+  #y = "~/Projects/spm/inst/data/vitstat.csv" 
+  #interval=1
+  #col.status=NULL
+  #col.id=NULL
+  #col.age=NULL 
+  #col.age.event=NULL 
+  #covariates=NULL
+  #verbose=TRUE
+  
+  if(file_ext(x) == "csv") {
+    longdat <- read.csv(x)
+  } else if(file_ext(x) == "sas7bdat") {
+    longdat <- read.sas7bdat(x)
+  } 
+  
+  if(file_ext(y) == "csv") {
+    vitstat <- read.csv(y)
+  } else if(file_ext(y) == "sas7bdat") {
+    vitstat <- read.sas7bdat(y)
+  }
   
   # Parsing input parameters in order to check for errors:
-  if( !(col.status %in% colnames(vitstat)) ) {
-    stop(paste("Status column",col.status, "not found in vitstat table. Aborting."))
-  }
-  if( !(col.id %in% colnames(vitstat) || col.id %in% colnames(longdat)) ) {
-    stop(paste("ID column",col.id, "not found in vitstat and/or longdat tables. Aborting."))
-  }
-  if( !(col.age %in% colnames(longdat)) ) {
-    stop(paste("Age column",col.age, "not found in longdat table. Aborting."))
-  }
-  if( !(col.age.event %in% colnames(vitstat)) ) {
-    stop(paste("Event column",col.age.event, "not found in vitstat table. Aborting."))
-  }
-  for(c in covariates) {
-    if( !(c %in% colnames(longdat)) ) {
-      stop(paste("Covariate",c, "not found. Aborting."))
+  if( !is.null(col.status) ) {
+    if( !(col.status %in% colnames(vitstat)) ) {
+      stop(paste("Status column",col.status, "not found in vitstat table. Aborting."))
     }
+    col.status.ind <- grep(col.status, colnames(vitstat))
+  } else if(is.null(col.status)) {
+    col.status.ind <- 2
   }
+  
+  if( !is.null(col.id) ) { 
+    if( !(col.id %in% colnames(vitstat)) || !(col.id %in% colnames(longdat)) ) {
+      stop(paste("ID column",col.id, "not found in vitstat and/or longdat tables. Aborting."))
+    }
+    col.id.ind <- grep(col.id, colnames(vitstat))
+  } else if(is.null(col.id)) {
+    col.id.ind <- 1
+  }
+  
+  if( !is.null(col.age) ) {
+    if( !(col.age %in% colnames(longdat)) ) {
+      stop(paste("Age column",col.age, "not found in longdat table. Aborting."))
+    }
+    col.age.ind <- grep(col.age, colnames(longdat))
+  } else if(is.null(col.age)) {
+    col.age.ind <- 3
+  } 
+  
+  if( !is.null(col.age.event) ) { 
+    if( !(col.age.event %in% colnames(vitstat)) ) {
+      stop(paste("Event column",col.age.event, "not found in vitstat table. Aborting."))
+    }
+    col.age.event.ind <- grep(col.age.event, colnames(vitstat))
+  } else if(is.null(col.age.event)) {
+    col.age.event.ind <- 3
+  }
+  
+  if(!is.null(covariates)) {
+    for(c in covariates) {
+      if( !(c %in% colnames(longdat)) ) {
+        stop(paste("Covariate",c, "not found. Aborting."))
+      }
+    }
+    col.covar.ind <- grep(covariates, colnames(longdat))
+  } else if(is.null(covariates)) {
+    col.covar.ind <- 4:dim(longdat)[2]
+  }
+  
   if((interval == 0) || (interval > 1)) {
     interval <- 1
   }
   
-  
   #-----------Done parsing imput parameters---------------------#
   # First time of data pre-processing:
-  longdat <- longdat[which(!is.na(longdat[[col.age]])),]
+  longdat <- longdat[which(!is.na(longdat[ , col.age.ind])),]
   
   # Prepare data for continuous optimisation:
-  data_cont <- prepare_data_cont(longdat, vitstat, col.status, col.id, col.age, col.age.event, covariates, verbose)
+  data_cont <- prepare_data_cont(longdat, vitstat, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose)
   
   # Prepare data for fast discrete optimization:
-  data_discr <- prepare_data_discr(longdat, vitstat, interval, col.status, col.id, col.age, col.age.event, covariates, verbose)
+  data_discr <- prepare_data_discr(longdat, vitstat, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose)
   
   list(data_cont, data_discr)
 }
 
-prepare_data_cont <- function(longdat, vitstat, col.status, col.id, col.age, col.age.event, covariates, verbose) {
+prepare_data_cont <- function(longdat, 
+                              vitstat, 
+                              col.status.ind, 
+                              col.id.ind, 
+                              col.age.ind, 
+                              col.age.event.ind, 
+                              col.covar.ind, 
+                              verbose) {
   
   # Split records by ID:
-  prep.dat <- matrix(ncol=(4+2*length(covariates)),nrow=0)
-  splitted <- split(longdat, longdat[[col.id]])
-  vitstat.splitted <- split(vitstat, vitstat[[col.id]])
-  #iii <- 1
+  prep.dat <- matrix(ncol=(4+2*length(col.covar.ind)),nrow=0)
+  splitted <- split(longdat, longdat[ , col.id.ind])
+  vitstat.splitted <- split(vitstat, vitstat[ , col.id.ind])
+  
   for(iii in 1:length(splitted)) {
-    nrows <- length(splitted[[iii]][[col.id]])
-    id <- splitted[[iii]][[col.id]]
+    nrows <- length(splitted[[iii]][ , col.id.ind])
+    id <- splitted[[iii]][ , col.id.ind]
     case <- rep(0, nrows)
-    case[nrows] <- vitstat.splitted[[iii]][[col.status]]
-    t1 <- splitted[[iii]][[col.age]]
-    t2 <- c(splitted[[iii]][[col.age]][-1], vitstat.splitted[[iii]][[col.age.event]])
+    case[nrows] <- vitstat.splitted[[iii]][, col.status.ind]
+    t1 <- splitted[[iii]][ , col.age.ind]
+    t2 <- c(splitted[[iii]][ , col.age.ind][-1], vitstat.splitted[[iii]][ , col.age.event.ind])
     
     tmp.frame <- cbind(id, case, t1, t2)
     # Adding covariates:
-    for(name in covariates) {
+    for(ind in col.covar.ind) {
       tmp.frame <- cbind(tmp.frame, 
-                         splitted[[iii]][[name]], 
-                         c(splitted[[iii]][[name]][-1], NA))
+                         splitted[[iii]][, ind], 
+                         c(splitted[[iii]][, ind][-1], NA))
       
     }
     prep.dat <- rbind(prep.dat, tmp.frame)
@@ -102,7 +170,11 @@ prepare_data_cont <- function(longdat, vitstat, col.status, col.id, col.age, col
   
   #prep.dat <- prep.dat[rowSums( matrix(is.na(prep.dat[,5:dim(prep.dat)[2]]), ncol=2*length(covariates),byrow=T)) !=2*length(covariates),]
   prep.dat <- prep.dat[which(is.na(prep.dat[,4])==FALSE),]
-  head(prep.dat)  
+  
+  if(verbose) {
+    head(prep.dat)  
+  }
+  
   ans_final <- prep.dat
   if(length(which(is.na(prep.dat[,5:dim(prep.dat)[2]]) == TRUE)) > 0) {
     if(verbose)
@@ -134,55 +206,57 @@ prepare_data_cont <- function(longdat, vitstat, col.status, col.id, col.age, col
     }
   }
   
-  colnames(ans_final) <- c("id", "case", "t1", "t2", unlist(lapply(1:length(covariates), function(n) {c(covariates[n], 
-                                                                                                  paste(covariates[n],".next",sep=""))} )) )
+  colnames(ans_final) <- c("id", "case", "t1", "t2", unlist(lapply(1:length(col.covar.ind), function(n) {c(names(longdat)[col.covar.ind[n]], 
+                                                                                                  paste(names(longdat)[col.covar.ind[n]],".next",sep=""))} )) )
   ans_final
   
 }
 
-prepare_data_discr <- function(longdat, vitstat, interval, col.status, col.id, col.age, col.age.event, covariates, verbose) {
+prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose) {
   
   # Interpolation
   dt <- interval
   tt <- matrix(nrow=0, ncol=4)
-  par <- matrix(nrow=0, ncol=length(covariates))
+  par <- matrix(nrow=0, ncol=length(col.covar.ind))
   
   # Split records by ID:
-  splitted <- split(longdat, longdat[[col.id]])
-  vitstat.splitted <- split(vitstat, vitstat[[col.id]])
+  splitted <- split(longdat, longdat[, col.id.ind])
+  vitstat.splitted <- split(vitstat, vitstat[, col.id.ind])
   #iii <- 1
   # For each particular person's record:
   for(iii in 1:length(splitted)) {
-    if(!is.na(vitstat.splitted[[iii]][[col.age.event]]) & !is.na(vitstat.splitted[[iii]][[col.status]]) ) {
-      print(iii)
-      id <- splitted[[iii]][[col.id]][1]
-      nrows <- (tail(splitted[[iii]][[col.age]], n=1) - splitted[[iii]][[col.age]][1])/dt + 1
+    if(!is.na(vitstat.splitted[[iii]][ , col.age.event.ind]) & !is.na(vitstat.splitted[[iii]][ , col.status.ind]) ) {
+      if(verbose) {
+        print(iii)
+      }
+      id <- splitted[[iii]][ , col.id.ind][1]
+      nrows <- (tail(splitted[[iii]][ , col.age.ind], n=1) - splitted[[iii]][ , col.age.ind][1])/dt + 1
       # Perform approximation:
       t1.approx <- matrix(ncol=4, nrow=nrows)
       t1.approx[,1] <- id
       t1.approx[,2] <- 0
-      t1.approx[nrows,2] <- vitstat.splitted[[iii]][[col.status]][1] #Last value
-      t1.approx[,3] <- seq(splitted[[iii]][[col.age]][1], splitted[[iii]][[col.age]][length(splitted[[iii]][[col.age]])], by=dt)
+      t1.approx[nrows,2] <- vitstat.splitted[[iii]][ , col.status.ind][1] #Last value
+      t1.approx[,3] <- seq(splitted[[iii]][ , col.age.ind][1], splitted[[iii]][ , col.age.ind][length(splitted[[iii]][ , col.age.ind])], by=dt)
       if(nrows > 1) {
-        t1.approx[,4] <- c(t1.approx[,3][2:nrows], vitstat.splitted[[iii]][[col.age.event]][1])
+        t1.approx[,4] <- c(t1.approx[,3][2:nrows], vitstat.splitted[[iii]][ , col.age.event.ind][1])
       } else {
-        t1.approx[,4] <- vitstat.splitted[[iii]][[col.age.event]][1]
+        t1.approx[,4] <- vitstat.splitted[[iii]][ , col.age.event.ind][1]
       }
       
       tt <- rbind(tt,t1.approx)
-      par1.approx <- matrix(ncol=length(covariates), nrow=nrows, NA)
+      par1.approx <- matrix(ncol=length(col.covar.ind), nrow=nrows, NA)
       
       j <- 1
-      for(name in covariates) {
-        name <- covariates[j]
-        if ( (length(splitted[[iii]][[name]]) > 1) & (length(which(!is.na(splitted[[iii]][[name]]))) > 0) ) {
-          if(length(which(!is.na(splitted[[iii]][[name]]))) == 1) {
-            splitted[[iii]][[name]] <- fill_last(splitted[[iii]][[name]])
+      for(ind in col.covar.ind) {
+        #ind <- col.covar.ind[j]
+        if ( (length(splitted[[iii]][, ind]) > 1) & (length(which(!is.na(splitted[[iii]][, ind]))) > 0) ) {
+          if(length(which(!is.na(splitted[[iii]][, ind]))) == 1) {
+            splitted[[iii]][, ind] <- fill_last(splitted[[iii]][, ind])
           }
           # Fill NAs by linear approximation with approx():
-          nn <- length(splitted[[iii]][[name]])
-          splitted[[iii]][[name]] <- approx(splitted[[iii]][[name]],n=nn)$y
-          par1.approx[,j] <-  approx(splitted[[iii]][[name]], n=nrows)$y
+          nn <- length(splitted[[iii]][, ind])
+          splitted[[iii]][, ind] <- approx(splitted[[iii]][, ind],n=nn)$y
+          par1.approx[,j] <-  approx(splitted[[iii]][, ind], n=nrows)$y
         }
         
         j <- j + 1
@@ -193,9 +267,9 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status, col.id, c
   }
   
   ans=cbind(tt,par)
-  colnames(ans) <- c("ID", "CASE", "T1", "T3", covariates)
+  colnames(ans) <- c("id", "case", "t1", "t2", names(longdat)[col.covar.ind])
   
-  ans <- ans[rowSums( matrix(is.na(ans[,5:dim(ans)[2]]), ncol=length(covariates),byrow=T)) !=length(covariates),]
+  ans <- ans[rowSums( matrix(is.na(ans[,5:dim(ans)[2]]), ncol=length(col.covar.ind),byrow=T)) !=length(col.covar.ind),]
   
   ans_final <- ans
   if(length(which(is.na(ans[,5:dim(ans)[2]]) == TRUE)) > 0) {
@@ -209,8 +283,8 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status, col.id, c
   
   if(verbose)
     cat("Making final table...\n")
-  ndim <- length(covariates)
-  averages = matrix(nrow=1,ncol=length(covariates))
+  ndim <- length(col.covar.ind)
+  averages = matrix(nrow=1,ncol=length(col.covar.ind))
   
   dat <- ans_final[,1] #pid
   dat <- cbind(dat, ans_final[,2]) #sta (outcome)
@@ -220,7 +294,7 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status, col.id, c
   
   j <- 0
   i <- 0
-  for(i in 0:(length(covariates)-1)) {
+  for(i in 0:(length(col.covar.ind)-1)) {
     dat <- cbind(dat, ans_final[,(5+i)]) 
     dat[2:dim(dat)[1],(5+j)] <- dat[1:(dim(dat)[1]-1),(5+j)]
     dat <- cbind(dat, ans_final[,(5+i)]) 
@@ -242,8 +316,8 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status, col.id, c
     }
   }
   
-  colnames(dat) <- c("id", "case", "t1", "t2", unlist(lapply(1:length(covariates), function(n) {c(covariates[n], 
-                                                                                                  paste(covariates[n],".next",sep="")
+  colnames(dat) <- c("id", "case", "t1", "t2", unlist(lapply(1:length(col.covar.ind), function(n) {c(names(longdat)[col.covar.ind[n]], 
+                                                                                                  paste(names(longdat)[col.covar.ind[n]],".next",sep="")
                                                                                                   )} 
                                                              )
                                                       ) 

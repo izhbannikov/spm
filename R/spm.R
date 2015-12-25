@@ -19,7 +19,7 @@
 #'#Parameters estimation:
 #'pars=spm(data)
 #'pars
-spm <- function(x, model="discrete", formulas = NULL, verbose=F, tol=NULL) {
+spm <- function(x, model="discrete", formulas = list(at="a", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)"), verbose=F, tol=NULL) {
   
   # List of available models:
   models <- c("discrete", "continuous", "time-dependent")
@@ -111,34 +111,26 @@ spm <- function(x, model="discrete", formulas = NULL, verbose=F, tol=NULL) {
     }
   }
   
-  #if(model == "time-dependent") {
-  #  data <- x[[1]][,2:dim(x[[1]])[2]]
-  #  if(k > 1) {
-  #    stop("Number of variables > 1. Model with time-dependent parameters can be used only with one variable!")
-  #  }
-  #  
-  #  spm_time_dep <- function(data, 
-  #                           start=list(a1=0, a2=estimated.discrete$a, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08),
-  #                           formulas=list(at="a1*t+a2", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)"), 
-  #                           verbose=TRUE,
-  #                           lower_bound=NULL, upper_bound=NULL, factr=1e-16, lmult=0.5, umult=2) {
-  #    
-  #  
-  #  spm_continuous(data, 
-  #                   a=pars$pars2$a, 
-  #                   f1=pars$pars2$f1, 
-  #                   Q=pars$pars2$Q, 
-  #                   f=pars$pars2$f, 
-  #                   b=pars$pars2$b, 
-  #                   mu0=pars$pars2$mu0, 
-  #                   theta=pars$pars2$theta, 
-  #                   k, 
-  #                   verbose)
-  #    
-  #    res <- list(starting=list(Q=pars$pars2$Q, a=pars$pars2$a, b=pars$pars2$b, f1=pars$pars2$f1, f=pars$pars2$f, mu0=pars$pars2$mu0, theta=pars$pars2$theta), 
-  #             estimated=get("results",envir=.GlobalEnv))
-  #  
-  #}
+  if(model == "time-dependent") {
+    data <- x[[1]][,2:dim(x[[1]])[2]]
+    
+    if(k > 1) {
+      stop("Number of variables > 1. Model with time-dependent parameters can be used only with one variable!")
+    }
+    
+    #if(length(formulas) != 6) {
+    #  stop("It must be 6 equations for corresponding coefficients.")
+    #}
+    
+    pars <- spm_discrete(dat=x[[2]],k=k)
+    
+    res.t <- spm_time_dep(x[[1]][,2:dim(x[[1]])[2]], 
+                            formulas = formulas,
+                            start=list(a=pars$pars2$a, f1=pars$pars2$f1, Q=pars$pars2$Q, f=pars$pars2$f, b=pars$pars2$b, mu0=pars$pars2$mu0))
+    
+    res <- get("results",envir=.GlobalEnv)
+  
+  }
   
   invisible(res)
 }
