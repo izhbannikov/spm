@@ -6,20 +6,26 @@
 A main function that estimates parameters a, f1, Q, f, b, mu0, theta
 from given dataset.}
 \usage{
-spm(dat, k = 2, verbose = F, tol = NULL)
+spm(x, model = "discrete", formulas = list(at = "a", f1t = "f1", Qt =
+  "Q*exp(theta*t)", ft = "f", bt = "b", mu0t = "mu0*exp(theta*t)"),
+  verbose = F, tol = NULL)
 }
 \arguments{
-\item{dat}{A dataset.}
+\item{x}{A dataset.}
 
-\item{k}{Number of dimensions.}
+\item{model}{A model type: c("continuous", "time-dependent").}
+
+\item{formulas}{A list of formulas used in time-dependent model.}
 
 \item{verbose}{A verbosing output indicator.}
 
 \item{tol}{A tolerance threshold for matrix inversion.}
 }
 \value{
-A list of (1) Estimated starting point (from quick discrete optimization) and 
-(2) Estimated coefficients.
+A list of (1) coefficient estimates from discrete model and 
+(if appropriate model type was provided): 
+(2) coefficient estimates from continuous model and
+(3) coefficient estimates from time-dependent model.
 }
 \description{
 Stochastic Process Modelling (SPM)
@@ -33,7 +39,7 @@ longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
 vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
 data=prepare_data(longdat=longdat, vitstat=vitstat,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
 #Parameters estimation:
-pars=spm(data,k = 1)
+pars=spm(data)
 pars
 }
 

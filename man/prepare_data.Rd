@@ -4,46 +4,46 @@
 \alias{prepare_data}
 \title{Data pre-processing for analysis with stochastic process model methodology.}
 \usage{
-prepare_data(longdat, vitstat, interval = 1, col.status = "IsDead",
-  col.id = "ID", col.age = "Age", col.age.event = "LSmort",
-  covariates = c("DBP", "BMI", "DBP1", "DBP2", "Weight", "Height"),
-  verbose = TRUE)
+prepare_data(x, y, col.id = NULL, col.status = NULL, col.age = NULL,
+  col.age.event = NULL, covariates = NULL, interval = 1, verbose = TRUE)
 }
 \arguments{
-\item{longdat}{A table with longitude records.}
+\item{x}{A path to the table with follow-up oservations (longitudinal study). Formats: csv, sas7bdat}
 
-\item{vitstat}{A table with vital statistics (mortality).}
+\item{y}{A path to the table with vital statistics (mortality). File formats: csv, sas7bdat}
 
-\item{interval}{A number of breaks between observations for discrete simulation. Default = 1 (no breaks).}
+\item{col.id}{A name of column containing subject ID. 
+This ID should be the same in both longdat and vitstat tables.
+If not provided, the first column in the x and y will be used by default.}
 
-\item{col.status}{A name of column containing status variable (0/1 which indicate alive/dead).}
+\item{col.status}{A name of the column containing status variable (0/1 which indicate alive/dead). 
+If not provided - then the column #2 from the vital statistics dataset will be used.}
 
-\item{col.id}{A name of column containing patient ID. This ID should be the same in both longdat and vitstat tables.}
+\item{col.age}{A name of age column (also called 't1'). 
+If not provided then the 3rd column from the longitudinal dataset (x) will be used.}
 
-\item{col.age}{A name of age column.}
+\item{col.age.event}{A name of 'event' column.
+The event column indicates a time when the even occured (e.g. system failure).
+If not provided then the 3rd column from the vital statistics dataset will be used.}
 
-\item{col.age.event}{A name of event column.}
+\item{covariates}{A list of covariates. 
+If covariates not provided, then all columns from longitudinal table having index > 3 will be used as covariates.}
 
-\item{covariates}{A list of covariates.}
+\item{interval}{A number of breaks between observations for discrete model. Default = 1 unit of time.}
 
 \item{verbose}{A verbosing output indicator. Default=TRUE.}
 }
 \value{
-A list of two elements: first element contains a data table for continuous case, with arbitrary intervals between observations  and 
-second element contains a data table for a discrete case (fixed intervals between observations).
+A list of two elements: first element contains a preprocessed data for continuous model, with arbitrary intervals between observations  and 
+second element contains a prepocessed data table for a discrete model (with constant intervals between observations).
 }
 \description{
 Data pre-processing for analysis with stochastic process model methodology.
 }
 \examples{
 library(spm)
-#Reading longitude data:
-ldat <- read.csv(system.file("data","longdat.csv",package="spm"))
-# Prepare data for optimization:
-vdat <- read.csv(system.file("data","vitstat.csv",package="spm"))
-data <- prepare_data(longdat=ldat, vitstat=vdat,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=TRUE)
-# Parameters estimation:
-pars <- spm(data,k = 1)
-pars
+data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"))
+head(data[[1]])
+head(data[[2]])
 }
 
