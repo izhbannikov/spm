@@ -1,25 +1,31 @@
-#'Stochastic Process Modelling (SPM)
-#'A main function that estimates parameters a, f1, Q, f, b, mu0, theta
-#'from given dataset.
-#'@param x A dataset.
-#'@param model A model type: c("continuous", "time-dependent").
-#'@param formulas A list of formulas used in time-dependent model.
-#'@param verbose A verbosing output indicator.
-#'@param tol A tolerance threshold for matrix inversion.
-#'@return A list of (1) coefficient estimates from discrete model and 
-#'(if appropriate model type was provided): 
-#'(2) coefficient estimates from continuous model and
-#'(3) coefficient estimates from time-dependent model.
+#'A central function that estimates Stochastic Process Model (SPM) parameters a from given dataset.
+#'@param x A dataset: is the output from prepare_data(...) function and consists of two separate data tables:
+#'(1) a data table for continuous-time model and (2) a data table for discrete-time model.
+#'@param model A model type. Choices are: "discrete", "continuous" or "time-dependent".
+#'@param formulas A list of parameter formulas used in the "time-dependent" model.
+#'@param verbose A verbosing output indicator (FALSE by default).
+#'@param tol A tolerance threshold for matrix inversion (NULL by default).
+#'@return For "discrete" and "continuous" model types: 
+#'(1) a list of model parameter estimates for the discrete model type described in "", Akushevich et al, 2005 and  
+#'(2) a list of model parameter estimates for the continuous model type described in "", Yashin et al, 2007.
+#'
+#'For the "time-dependent" model (model parameters depend on time): a set of model parameter estimates.
 #' @examples
 #'library(spm)
 #'#Prepare data for optimization
-#'longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
-#'vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
-#' data=prepare_data(longdat=longdat, vitstat=vitstat,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
-#'#Parameters estimation:
-#'pars=spm(data)
-#'pars
-spm <- function(x, model="discrete", formulas = list(at="a", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)"), verbose=F, tol=NULL) {
+#'data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"))
+#'#Parameters estimation (default model: discrete-time):
+#'p.discr.model <- spm(data)
+#'p.discr.model
+#'# Continuous-time model:
+#'p.cont.model <- spm(data, model="continuous")
+#'p.cont.model
+#'# Model with time-dependent coefficients:
+#'data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"), covariates="BMI")
+#'p.td.model <- spm(data, model="time-dependent")
+#'p.td.model
+#'
+spm <- function(x, model="discrete", formulas = list(at="a", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)"), verbose=FALSE, tol=NULL) {
   
   # List of available models:
   models <- c("discrete", "continuous", "time-dependent")

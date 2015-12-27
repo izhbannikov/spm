@@ -28,7 +28,7 @@ approx2p <- function(t1, y1, t2, y2, t) {
 #'@param covariates A list of covariates. 
 #'If covariates not provided, then all columns from longitudinal table having index > 3 will be used as covariates. 
 #'@param interval A number of breaks between observations for discrete model. Default = 1 unit of time.
-#'@param verbose A verbosing output indicator. Default=TRUE.
+#'@param verbose A verbosing output indicator. Default=FALSE.
 #'@return A list of two elements: first element contains a preprocessed data for continuous model, with arbitrary intervals between observations  and 
 #'second element contains a prepocessed data table for a discrete model (with constant intervals between observations).
 #'@examples
@@ -43,9 +43,7 @@ prepare_data <- function(x, y,
                          col.age.event=NULL, 
                          covariates=NULL, 
                          interval=1, 
-                         verbose=TRUE) {
-  
-  #col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort"
+                         verbose=FALSE) {
   
   if(file_ext(x) == "csv") {
     longdat <- read.csv(x)

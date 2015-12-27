@@ -5,7 +5,8 @@
 \title{Data pre-processing for analysis with stochastic process model methodology.}
 \usage{
 prepare_data(x, y, col.id = NULL, col.status = NULL, col.age = NULL,
-  col.age.event = NULL, covariates = NULL, interval = 1, verbose = TRUE)
+  col.age.event = NULL, covariates = NULL, interval = 1,
+  verbose = FALSE)
 }
 \arguments{
 \item{x}{A path to the table with follow-up oservations (longitudinal study). Formats: csv, sas7bdat}
@@ -31,7 +32,7 @@ If covariates not provided, then all columns from longitudinal table having inde
 
 \item{interval}{A number of breaks between observations for discrete model. Default = 1 unit of time.}
 
-\item{verbose}{A verbosing output indicator. Default=TRUE.}
+\item{verbose}{A verbosing output indicator. Default=FALSE.}
 }
 \value{
 A list of two elements: first element contains a preprocessed data for continuous model, with arbitrary intervals between observations  and 
