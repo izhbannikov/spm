@@ -4,9 +4,7 @@
 \alias{spm}
 \title{A central function that estimates Stochastic Process Model (SPM) parameters a from given dataset.}
 \usage{
-spm(x, model = "discrete", formulas = list(at = "a", f1t = "f1", Qt =
-  "Q*exp(theta*t)", ft = "f", bt = "b", mu0t = "mu0*exp(theta*t)"),
-  verbose = FALSE, tol = NULL)
+spm(x, model = "discrete", formulas = NULL, verbose = FALSE, tol = NULL)
 }
 \arguments{
 \item{x}{A dataset: is the output from prepare_data(...) function and consists of two separate data tables:

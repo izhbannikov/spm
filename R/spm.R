@@ -25,7 +25,7 @@
 #'p.td.model <- spm(data, model="time-dependent")
 #'p.td.model
 #'
-spm <- function(x, model="discrete", formulas = list(at="a", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)"), verbose=FALSE, tol=NULL) {
+spm <- function(x, model="discrete", formulas = NULL, verbose=FALSE, tol=NULL) {
   
   # List of available models:
   models <- c("discrete", "continuous", "time-dependent")
@@ -128,10 +128,18 @@ spm <- function(x, model="discrete", formulas = list(at="a", f1t="f1", Qt="Q*exp
     #  stop("It must be 6 equations for corresponding coefficients.")
     #}
     
+    formulas.work = list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
+    
+    if(!is.null(formulas)) {
+      for(f in formulas) {
+        formulas.work[[item]] <- formulas[[item]]
+      }
+    }
+    
     pars <- spm_discrete(dat=x[[2]],k=k)
     
     res.t <- spm_time_dep(x[[1]][,2:dim(x[[1]])[2]], 
-                            formulas = formulas,
+                            formulas = formulas.work,
                             start=list(a=pars$pars2$a, f1=pars$pars2$f1, Q=pars$pars2$Q, f=pars$pars2$f, b=pars$pars2$b, mu0=pars$pars2$mu0))
     
     res <- get("results",envir=.GlobalEnv)

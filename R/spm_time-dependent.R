@@ -1,19 +1,19 @@
-# returns string w/o leading whitespace
+# Returns string w/o leading whitespace
 trim.leading <- function (x)  sub("^\\s+", "", x)
 
-# returns string w/o trailing whitespace
+# Returns string w/o trailing whitespace
 trim.trailing <- function (x) sub("\\s+$", "", x)
 
-# returns string w/o leading or trailing whitespace
+# Returns string w/o leading or trailing whitespace
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
 optimize <- function(data, starting_params,  formulas, verbose, 
                      lower_bound, upper_bound, 
                      factr=1e-16, lmult=0.5,umult=2) {
-  ### for test purposes:
+  ### For test purposes:
   #data <- data1[[1]][,2:6]
   #starting_params <- list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5)
-  #formulas <- list(at="a1*t+a2", f1t="f1+f33*t", Qt="Q*exp(theta*t)", ft="f*t+ff", bt="b", mu0t="mu0*exp(theta*t)")
+  #formulas <- list(at="a", f1t="f1*t", Qt="Q", ft="f", bt="b", mu0t="mu0")
   #verbose=TRUE
   ### End of test purposes
   
@@ -341,27 +341,31 @@ optimize <- function(data, starting_params,  formulas, verbose,
 
 #' spm_time_dep : a function that can handle time-dependant coefficients:
 #' @param x : input data table.
-#' @param start : a list of starting parameters, default: llist(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08),
-#' @param formulas : a list of formulas that define age (time) - dependency. Default: list(at="a1*t+a2", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)")
+#' @param start : a list of starting parameters, default: llist(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),
+#' @param formulas : a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
 #' @return optimal coefficients
 #' @examples
 #' library(spm)
 #' #Data preparation:
-#' N <- 1000
-#' data <- simdata_time_dep(N=2500)
-#' opt.par <- spm_time_dep(data[,2:6], formulas=list(at="a", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)"), start=list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08))
+#' n <- 1000
+#' data <- simdata_time_dep(N=n)
+#' opt.par <- spm_time_dep(data[,2:6])
 #' opt.par
 spm_time_dep <- function(x, 
-                         start=list(a1=-0.5, a2=0.2, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),
-                         formulas=list(at="a1*t+a2", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)"), 
+                         start=list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),
+                         formulas=list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"), 
                          verbose=TRUE,
                          lower_bound=NULL, upper_bound=NULL, 
                          factr=1e-16, lmult=0.5, umult=2) {
   
   data <- x
+  formulas.work = list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
+  for(f in formulas) {
+    formulas.work[[item]] <- formulas[[item]]
+  }
   
   # Optimization:
   #res = optimize(data, start, formulas, verbose, lower_bound, upper_bound, factr)
-  res = optimize(data, start, formulas, verbose, factr=1e-16, lmult=lmult, umult=umult)
+  res = optimize(data, start, formulas.work, verbose, factr=1e-16, lmult=lmult, umult=umult)
   invisible(res)
 }
