@@ -45,6 +45,7 @@ prepare_data <- function(x, y,
                          interval=1, 
                          verbose=FALSE) {
   
+  
   if(file_ext(x) == "csv") {
     longdat <- read.csv(x)
   } else if(file_ext(x) == "sas7bdat") {
@@ -80,7 +81,7 @@ prepare_data <- function(x, y,
     if( !(col.age %in% colnames(longdat)) ) {
       stop(paste("Age column",col.age, "not found in longdat table. Aborting."))
     }
-    col.age.ind <- grep(col.age, colnames(longdat))
+    col.age.ind <- grep(paste("\\b", col.age, "\\b", sep=""), colnames(longdat))
   } else if(is.null(col.age)) {
     col.age.ind <- 3
   } 
@@ -89,7 +90,7 @@ prepare_data <- function(x, y,
     if( !(col.age.event %in% colnames(vitstat)) ) {
       stop(paste("Event column",col.age.event, "not found in vitstat table. Aborting."))
     }
-    col.age.event.ind <- grep(col.age.event, colnames(vitstat))
+    col.age.event.ind <- grep(paste("\\b", col.age.event, "\\b", sep=""), colnames(vitstat))
   } else if(is.null(col.age.event)) {
     col.age.event.ind <- 3
   }
@@ -100,7 +101,7 @@ prepare_data <- function(x, y,
         stop(paste("Covariate",c, "not found. Aborting."))
       }
     }
-    col.covar.ind <- grep(covariates, colnames(longdat))
+    col.covar.ind <- grep(paste("\\b", covariates, "\\b", sep=""), colnames(longdat))
   } else if(is.null(covariates)) {
     col.covar.ind <- 4:dim(longdat)[2]
   }
@@ -119,7 +120,7 @@ prepare_data <- function(x, y,
   # Prepare data for fast discrete optimization:
   data_discr <- prepare_data_discr(longdat, vitstat, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose)
   
-  list(data_cont, data_discr)
+  list(model.continuous=data_cont, model.discrete=data_discr)
 }
 
 prepare_data_cont <- function(longdat, 
