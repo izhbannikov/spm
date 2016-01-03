@@ -30,17 +30,17 @@ simdata_discr <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, th
   # Re-calculating parameters:
   u_ <- matrix((f1 %*% (-1*a)), nrow=k, byrow=T)
   R_ <- matrix((diag(k) + a), nrow=k, ncol=k, byrow=T)
-  epsilon_ <- matrix(b, nrow=k, ncol=1, byrow=T)
+  Sigma_ <- matrix(b, nrow=k, ncol=1, byrow=T)
   mu0_ <- mu0 + (f %*% Q) %*% t(f)
   b_ <- matrix((-1*f %*% Q - f %*% Q), nrow=k, ncol=1, byrow=T)
   Q_ <- matrix(Q, nrow=k, ncol=k, byrow=T)
   theta_ <- theta
   ystart = matrix(ystart, nrow=k, ncol=1)
-  simulated = .Call("simdata_ND", N, u_, R_, epsilon_, mu0_, b_, Q_, theta_, tstart, ystart, tend, k, dt);
+  simulated = .Call("simdata_ND", N, u_, R_, Sigma_, mu0_, b_, Q_, theta_, tstart, ystart, tend, k, dt);
   
   data_names <- c()
   for(n in 1:k) {
-    data_names <- c(data_names, paste("par",n, "_1", sep=''), paste("par",n, "_2", sep=''))
+    data_names <- c(data_names, paste("y",n, sep=''), paste("y",n, ".next", sep=''))
   }
   colnames(simulated) <- c("id", "xi", "t1", "t2", data_names)
   

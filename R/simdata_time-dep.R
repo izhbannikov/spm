@@ -9,16 +9,15 @@
 #' library(spm)
 #' dat <- simdata_time_dep(N=2500)
 #' dat
-simdata_time_dep <- function(N=10,formulas=list(at="-0.05", f1t="80", Qt="2e-7*exp(0.08*t)", ft="80", bt="5", mu0t="2e-5*exp(0.08*t)"),
+simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80", bt="5", mu0t="2e-5"),
                          step=0.05, tstart=30, tend=105, ystart=80, sd0=4, k=1) {
-    
+  formulas <- f  
   at <- NULL
   f1t <- NULL
   Qt <- NULL
   ft <- NULL
   bt <- NULL
   mu0t <- NULL
-  #theta <- starting_params$theta
   
   comp_func_params <- function(astring, f1string, qstring, fstring, bstring, mu0string) {
     at <<- eval(bquote(function(t) .(parse(text = astring)[[1]])))

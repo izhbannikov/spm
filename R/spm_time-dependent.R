@@ -353,14 +353,14 @@ optimize <- function(data, starting_params,  formulas, verbose,
 #' opt.par
 spm_time_dep <- function(x, 
                          start=list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),
-                         formulas=list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"), 
+                         f=list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"), 
                          verbose=TRUE,
                          lower_bound=NULL, upper_bound=NULL, 
                          factr=1e-16, lmult=0.5, umult=2) {
-  
+  formulas <- f
   data <- x
   formulas.work = list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
-  for(f in formulas) {
+  for(item in formulas) {
     formulas.work[[item]] <- formulas[[item]]
   }
   

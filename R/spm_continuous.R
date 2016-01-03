@@ -66,7 +66,7 @@ setBoundaries <- function(k, params) {
 #'pars <- spm_continuous(dat=data,a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08, k = 1)
 #'pars
 spm_continuous <- function(dat, 
-                            a=0.05, 
+                            a=-0.05, 
                             f1=80, 
                             Q=2e-8,
                             f=81,

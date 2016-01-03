@@ -3,7 +3,7 @@
 #'@param k A number of dimensions.
 #'@param theta_range A range of theta parameter (axe displacement of Gompertz function), default: from 0.001 to 0.09 with step of 0.001.
 #'@param tol A tolerance threshold for matrix inversion (NULL by default).
-#'@return A list of two elements: (1) estimated parameters u, R, b, epsilon, Q, mu0, theta and
+#'@return A list of two elements: (1) estimated parameters u, R, b, Sigma, Q, mu0, theta and
 #'(2) estimated parameters a, f1, Q, f, b, mu0, theta. Note: b and mu0 from first list are different 
 #'from b and mu0 from the second list.
 #'@details This function is way much faster that continuous \code{spm_continuous_MD(...)} (but less precise) and used mainly in 
@@ -19,20 +19,25 @@
 #'pars <- spm_discrete(data[[2]], k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL)
 #'pars
 spm_discrete <- function(dat,k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL) {
+  #dat <- data[[2]][,1:6]
+  #k=1
+  #theta_range=seq(0.01,0.3,by=0.01)
+  #theta <- 0.08
   options(digits=10)
   # Logistic regression:
   total_cols <- (1 + k + (k*(k+1))/2) + 2
   result <- matrix(nrow=0, ncol=total_cols,0)
   for(theta in theta_range) {
+    ethetat <- exp(theta*dat[,3])
     newdat <- dat[,2] # Outcome
-    newdat <- cbind(newdat,exp(theta*dat[,3])) #x0 - time t1
+    newdat <- cbind(newdat,ethetat) #x0
+    cnames <- c("xi", "x0")
     
-    cnames <- c("xi", "u0")
     # A loop for the bt coefficients:
     index_i <- 1
     for(i in seq(1,(k*2-1),2)) {
-      newdat <- cbind(newdat,dat[,(4+i)]*exp(theta*dat[,3])) #y1_b1t
-      cnames <- c(cnames,paste("y",index_i,"_", "b",index_i,sep=''))
+      newdat <- cbind(newdat,dat[,(4+i)]*ethetat) #x1
+      cnames <- c(cnames,paste("x1","_",index_i,sep=''))
       index_i <- index_i + 1
     }
     
@@ -40,21 +45,25 @@ spm_discrete <- function(dat,k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL
     index_j <- 1
     for(i in seq(1,(k*2-1),2)) {
       for(j in seq(i,(k*2-1),2)) {
-        newdat <- cbind(newdat,dat[,(4+i)]*dat[,(4+j)]*exp(theta*dat[,3]))
-        cnames <- c(cnames,paste("y",index_i,"_", "y",index_j,sep=''))
+        newdat <- cbind(newdat,dat[,(4+i)]*dat[,(4+j)]*ethetat)
+        cnames <- c(cnames,paste("x2","_", index_i,"_",index_j,sep=''))
         index_j <- index_j + 1
       }
       index_i <- index_i + 1
       index_j <- index_i
     }
     
-    reg_formula <- paste(cnames[1],"~", paste(cnames[2:length(cnames)],collapse='+'), "- 1")
-    
     colnames(newdat) <- cnames
     
+    reg_formula <- paste(cnames[1],"~", paste(cnames[2:length(cnames)],collapse='+'), "- 1")
+    #reg_formula <- paste(cnames[1],"~", paste(cnames[2:length(cnames)],collapse='+'))
+    
+    
     res <- glm(reg_formula , data=as.data.frame(newdat)) # -1 means no intercept
+    #res <- glm(reg_formula , data=as.data.frame(newdat), family = binomial(link = "logit")) # -1 means no intercept
     coef <- res$coefficients 
     result <- rbind(result, c(theta, coef, logLik(res)[1]))
+    
   }
 
   parameters_glm <- result[which(result[,total_cols] == max(result[,total_cols])),]
@@ -115,15 +124,15 @@ spm_discrete <- function(dat,k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL
   names(u) <- NULL
   R <- parameters_lsq[,2:(2+k-1)]
   colnames(R) <- NULL
-  eps <- parameters_lsq[,(2+k)]
-  names(eps) <- NULL
+  Sigma <- parameters_lsq[,(2+k)]
+  names(Sigma) <- NULL
   
-  pars1 <- list(theta=theta, mu0=mu0, b=b, Q=Q, u=u, R=R, eps=eps)
+  pars1 <- list(theta=theta, mu0=mu0, b=b, Q=Q, u=u, R=R, Sigma=Sigma)
   
   # Making a new parameter set:
   QH <- Q
   aH <- R - diag(k)
-  bH <- as.matrix(eps, nrow=1)
+  bH <- as.matrix(Sigma, nrow=1)
   f1H <- (-1)*u %*% solve(aH, tol=tol)
   fH <- -0.5 * b %*% solve(QH, tol=tol)
   mu0H <- mu0 - fH %*% QH %*% t(fH)

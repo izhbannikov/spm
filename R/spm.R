@@ -45,7 +45,7 @@ spm <- function(x, model="discrete", formulas = NULL, verbose=FALSE, tol=NULL) {
                             R=pars$pars1$R, 
                             b=pars$pars1$b, 
                             Q=pars$pars1$Q, 
-                            epsilon=pars$pars1$eps,
+                            Sigma=pars$pars1$Sigma,
                             mu0=pars$pars1$mu0,
                             theta=pars$pars1$theta), 
                 Ya2007=list(a=pars$pars2$a, 
@@ -93,7 +93,7 @@ spm <- function(x, model="discrete", formulas = NULL, verbose=FALSE, tol=NULL) {
       
       Q.c <- res.t$Q
       R.c <- res.t$a + diag(k)
-      eps.c <- as.matrix(res.t$b)
+      Sigma.c <- as.matrix(res.t$b)
       u.c <- (-1)*(res.t$f1 %*% res.t$a)
       b.c <- -2*res.t$f %*% res.t$Q
       mu0.c <- res.t$mu0 + res.t$f %*% res.t$Q %*% t(res.t$f)
@@ -103,7 +103,7 @@ spm <- function(x, model="discrete", formulas = NULL, verbose=FALSE, tol=NULL) {
                               R=R.c, 
                               b=b.c, 
                               Q=Q.c, 
-                              epsilon=eps.c,
+                              Sigma=Sigma.c,
                               mu0=mu0.c,
                               theta=theta.c), 
                   Ya2007=list(a=res.t$a, 

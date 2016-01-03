@@ -17,7 +17,7 @@
 #' dat <- simdata_cont(N=500)
 #' dat
 #
-simdata_cont <- function(N=100, a=-0.05, f1=80, Q=2e-07, f=80, b=5, mu0=2e-05, theta=0.08,
+simdata_cont <- function(N=100, a=-0.05, f1=80, Q=2e-08, f=80, b=5, mu0=2e-05, theta=0.08,
                          step=0.05, tstart=30, tend=105, ystart=80, sd0=4, k=1) {
   
   if ( (dim(as.data.frame(a))[1] != k) & (dim(as.data.frame(a))[2] != k) &
@@ -41,7 +41,6 @@ simdata_cont <- function(N=100, a=-0.05, f1=80, Q=2e-07, f=80, b=5, mu0=2e-05, t
   }
     
   mu <- function(t, par) {
-    #par[1] - m, par[2] - gamma
     hfH <- fH - par[[1]]
     hf1H <- f1H - par[[1]]
       
@@ -53,7 +52,6 @@ simdata_cont <- function(N=100, a=-0.05, f1=80, Q=2e-07, f=80, b=5, mu0=2e-05, t
   
   
   func1 <- function(t, y) {
-    # y[[1]] = m, y[[2]] = gamma
     hfH <- fH - y[[1]]
     hf1H <- f1H - y[[1]]
     dm <- -1.0*aH%*%hf1H + 2.0*y[[2]]%*%Q(t)%*%hfH
