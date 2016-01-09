@@ -173,7 +173,7 @@ spm_continuous <- function(dat,
 
   # Optimization:
   tryCatch(optim(par = parameters, 
-                fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, factr=1e-16, ndeps=ndeps), 
+                fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, factr=1e-16, ndeps=ndeps, maxit=10000), 
                 method="L-BFGS-B", lower = bounds$lower_bound, upper = bounds$upper_bound), 
            error=function(e) {if(verbose  == TRUE) {print(e)}}, 
            finally=NA)

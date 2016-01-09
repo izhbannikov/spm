@@ -18,11 +18,7 @@
 #'# Parameters estimation
 #'pars <- spm_discrete(data[[2]], k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL)
 #'pars
-spm_discrete <- function(dat,k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL) {
-  #dat <- data[[2]][,1:6]
-  #k=1
-  #theta_range=seq(0.01,0.3,by=0.01)
-  #theta <- 0.08
+spm_discrete <- function(dat,k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL, verbose=FALSE) {
   options(digits=10)
   # Logistic regression:
   total_cols <- (1 + k + (k*(k+1))/2) + 2
@@ -32,6 +28,7 @@ spm_discrete <- function(dat,k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL
     newdat <- dat[,2] # Outcome
     newdat <- cbind(newdat,ethetat) #x0
     cnames <- c("xi", "x0")
+    #cnames <- c("xi")
     
     # A loop for the bt coefficients:
     index_i <- 1
@@ -55,13 +52,17 @@ spm_discrete <- function(dat,k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL
     
     colnames(newdat) <- cnames
     
-    reg_formula <- paste(cnames[1],"~", paste(cnames[2:length(cnames)],collapse='+'), "- 1")
-    #reg_formula <- paste(cnames[1],"~", paste(cnames[2:length(cnames)],collapse='+'))
+    #reg_formula <- paste("1 -", cnames[1],"~", paste(cnames[2:length(cnames)],collapse='+'))
+    reg_formula <- paste("1 -", cnames[1],"~", paste(cnames[2:length(cnames)],collapse='+'), "- 1")
     
     
-    res <- glm(reg_formula , data=as.data.frame(newdat)) # -1 means no intercept
-    #res <- glm(reg_formula , data=as.data.frame(newdat), family = binomial(link = "logit")) # -1 means no intercept
-    coef <- res$coefficients 
+    res.pois <- glm(reg_formula, data=as.data.frame(newdat), family = poisson(link=log), 
+                    control=list(maxit = 250, trace=verbose))
+    res <- glm(reg_formula, data=as.data.frame(newdat), family = binomial(link = log), 
+               start=coef(res.pois), 
+               control=list(maxit = 250, trace=verbose))
+    
+    coef <- -1*res$coefficients 
     result <- rbind(result, c(theta, coef, logLik(res)[1]))
     
   }
@@ -71,6 +72,7 @@ spm_discrete <- function(dat,k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL
 
   # Least-square:
   index_i <- 1
+  index_j <- 1
   parameters_lsq <- matrix(nrow=0,ncol=(k+3))
   for(i in seq(1,(k*2-1),2)) {
     newdat2 <- dat[,(5+i)]
@@ -93,12 +95,10 @@ spm_discrete <- function(dat,k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL
   }
   
   #Output parameters:
+  parameters_glm <- unname(parameters_glm);
   theta <- parameters_glm[1]
-  names(theta) <- NULL
   mu0 <- parameters_glm[2]
-  names(mu0) <- NULL
   b <- parameters_glm[3:(2+k)]
-  names(b) <- NULL
   #------Q-matrix------#
   Q <- matrix(nrow=k, ncol=k, 0)
   names(Q) <- NULL
@@ -120,12 +120,10 @@ spm_discrete <- function(dat,k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL
     }
   }
   #------end of calculating of Q-matrix--------#
+  parameters_lsq <- unname(parameters_lsq);
   u <- parameters_lsq[,1]
-  names(u) <- NULL
   R <- parameters_lsq[,2:(2+k-1)]
-  colnames(R) <- NULL
   Sigma <- parameters_lsq[,(2+k)]
-  names(Sigma) <- NULL
   
   pars1 <- list(theta=theta, mu0=mu0, b=b, Q=Q, u=u, R=R, Sigma=Sigma)
   

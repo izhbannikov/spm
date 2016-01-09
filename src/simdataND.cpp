@@ -19,6 +19,7 @@ double mu(double t, double mu0, arma::mat b, arma::mat Q, double theta, arma::ma
 double mu(double t, double mu0, arma::mat b, arma::mat Q, double theta, arma::mat y) {
     arma::mat res;
     res = (mu0 + y.t()*b + y.t()*Q*y)*exp(theta*t);
+    //res = (mu0 + y.t()*b + y.t()*Q*y)*exp(theta);
     return res(0,0);
 }
 
@@ -70,7 +71,7 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
       id = id + 1;
       
       while(new_person == false) {
-        S = exp(-1*mu(t1, mu0, b, Q, theta, y1));
+        S = exp(-1*dt*mu(t1, mu0, b, Q, theta, y1));
         
         double xi = 0; // case (0 - alive, 1 - dead) indicator
         

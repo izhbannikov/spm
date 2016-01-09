@@ -63,7 +63,7 @@ prepare_data <- function(x, y,
     if( !(col.status %in% colnames(vitstat)) ) {
       stop(paste("Status column",col.status, "not found in vitstat table. Aborting."))
     }
-    col.status.ind <- grep(col.status, colnames(vitstat))
+    col.status.ind <- grep(paste("\\b", col.status, "\\b", sep=""), colnames(vitstat))
   } else if(is.null(col.status)) {
     col.status.ind <- 2
   }
@@ -72,7 +72,7 @@ prepare_data <- function(x, y,
     if( !(col.id %in% colnames(vitstat)) || !(col.id %in% colnames(longdat)) ) {
       stop(paste("ID column",col.id, "not found in vitstat and/or longdat tables. Aborting."))
     }
-    col.id.ind <- grep(col.id, colnames(vitstat))
+    col.id.ind <- grep(paste("\\b", col.id, "\\b", sep=""), colnames(vitstat))
   } else if(is.null(col.id)) {
     col.id.ind <- 1
   }
