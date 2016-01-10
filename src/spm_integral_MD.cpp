@@ -78,9 +78,9 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
     double thetaH  = as<double>(thetah);
     int dim = as<int>(k);
     //Actual data set
-    std::cout << "1\n";
+    //std::cout << "1\n";
     arma::mat dd = as<arma::mat>(dat);  
-    std::cout << "passed\n";
+    //std::cout << "passed\n";
     double L; // Likelihood
     
     //End of data loading
@@ -124,9 +124,9 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
       
       //Integration:
       gamma1.zeros(); // set gamma1 to zero matrix
-      std::cout << "2\n";
+      //std::cout << "2\n";
       double s = h/3.00*(-1.00)*mu(t1, y1, gamma1, fH, f1H, mu0H, thetaH, QH);
-      std::cout << "passed 2\n";
+      //std::cout << "passed 2\n";
       double t = t1;
       out[0] = y1;
       out[1] = gamma1;
