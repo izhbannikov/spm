@@ -10,15 +10,12 @@
 #'estimation a starting point for the \code{spm_continuous_MD(...)}.
 #'@examples
 #'library(spm)
-#'# Reading longitudinal data
-#'longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
 #'# Prepare data for optimization
-#'vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
-#'data <- prepare_data(longdat=longdat, vitstat=vitstat,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
+#'data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"))
 #'# Parameters estimation
-#'pars <- spm_discrete(data[[2]], k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL)
+#'pars <- spm_discrete(data[[2]])
 #'pars
-spm_discrete <- function(dat,k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL, verbose=FALSE) {
+spm_discrete <- function(dat,k=1, theta_range=seq(0.02,0.1,by=0.001), tol=NULL, verbose=FALSE) {
   options(digits=10)
   # Logistic regression:
   total_cols <- (1 + k + (k*(k+1))/2) + 2
@@ -53,11 +50,14 @@ spm_discrete <- function(dat,k=1, theta_range=seq(0.001,0.09,by=0.001), tol=NULL
     colnames(newdat) <- cnames
     
     #reg_formula <- paste("1 -", cnames[1],"~", paste(cnames[2:length(cnames)],collapse='+'))
-    reg_formula <- paste("1 -", cnames[1],"~", paste(cnames[2:length(cnames)],collapse='+'), "- 1")
+    reg_formula <- as.formula(paste("1 -", cnames[1],"~", paste(cnames[2:length(cnames)],collapse='+'), "- 1"))
     
     
     res.pois <- glm(reg_formula, data=as.data.frame(newdat), family = poisson(link=log), 
                     control=list(maxit = 250, trace=verbose))
+    
+    if(verbose) {cat(coef(res.pois))}
+    
     res <- glm(reg_formula, data=as.data.frame(newdat), family = binomial(link = log), 
                start=coef(res.pois), 
                control=list(maxit = 250, trace=verbose))

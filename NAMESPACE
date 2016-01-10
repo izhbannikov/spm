@@ -4,6 +4,7 @@ import(stats)
 import(sas7bdat)
 import(mice) 
 import(tools)
+import(nloptr)
 #Export R-functions:
 export(prepare_data)
 export(spm_discrete)

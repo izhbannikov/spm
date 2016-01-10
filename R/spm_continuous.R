@@ -11,11 +11,11 @@ setBoundaries <- function(k, params) {
   # aH
   start=1; end=k^2
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){res=-1.5})))
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){res=0.2})))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){res=0})))
   # f1H
   start=end+1; end=start+k-1
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ 0 }))) 
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 0.05*params[n], -0.05*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 2*params[n], -0.5*params[n]) })))
   # QH
   start=end+1; end=start+k^2-1
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n) {x=ifelse(params[n] >= 0, runif(1,0,1e-12), -1*runif(1,0,1e-7))})) )
@@ -23,11 +23,11 @@ setBoundaries <- function(k, params) {
   # fH
   start=end+1; end=start+k-1
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ 0 })) )
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 0.05*params[n], -0.05*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 2*params[n], -2*params[n]) })))
   # bH
   start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] <= 0, 0.5*params[n], -0.5*params[n]) })) )
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 0.5*params[n], -0.5*params[n]) })))
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] <= 0, 2*params[n], -2*params[n]) })) )
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 2*params[n], -2*params[n]) })))
   # mu0
   start=end+1; end=start
   lower_bound <- c(lower_bound, 1e-8 )
@@ -35,7 +35,7 @@ setBoundaries <- function(k, params) {
   # theta
   start=end+1; end=start
   lower_bound <- c(lower_bound, 1e-6 )
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, params[n], -1*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, params[n], -2*params[n]) })))
   
   
   res=list(lower_bound=lower_bound, upper_bound=upper_bound)
@@ -66,14 +66,16 @@ setBoundaries <- function(k, params) {
 #'pars <- spm_continuous(dat=data,a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08, k = 1)
 #'pars
 spm_continuous <- function(dat, 
-                            a=-0.05, 
-                            f1=80, 
-                            Q=2e-8,
-                            f=81,
-                            b=5,
-                            mu0=2e-5,
-                            theta=0.08,
-                            k=1, verbose=F) {
+                           a=-0.05, 
+                           f1=80, 
+                           Q=2e-8,
+                           f=81,
+                           b=5,
+                           mu0=2e-5,
+                           theta=0.08,
+                           k=1, 
+                           stopifbound=FALSE, 
+                           verbose=F) {
   
   final_res <- list()
   parameters <- c(a, f1, Q, f, b, mu0, theta)
@@ -116,7 +118,8 @@ spm_continuous <- function(dat,
   # End reading parameters
   
   
-  maxlik <- function(dat, par) {
+  #maxlik <- function(dat, par) {
+  maxlik <- function(par) {
     stopflag <- F
     # Reading parameters:
     start=1; end=k^2
@@ -142,12 +145,14 @@ spm_continuous <- function(dat,
     results_tmp$theta <<- theta
     # End reading parameters
     
-    for(i in 1:length(results_tmp)) {
-      if(length(intersect(results_tmp[[i]],c(bounds$lower_bound[i], bounds$upper_bound[i]))) >= 1) {
-        cat("Parameter", names(results)[i], "achieved lower/upper bound. Process stopped.\n")
-        cat(results_tmp[[i]],"\n")
-        stopflag <- T
-        break
+    if(stopifbound) {
+      for(i in 1:length(results_tmp)) {
+        if(length(intersect(results_tmp[[i]],c(bounds$lower_bound[i], bounds$upper_bound[i]))) >= 1) {
+          cat("Parameter", names(results)[i], "achieved lower/upper bound. Process stopped.\n")
+          cat(results_tmp[[i]],"\n")
+          stopflag <- T
+          break
+        }
       }
     }
     
@@ -168,15 +173,26 @@ spm_continuous <- function(dat,
       res <<- get("results",envir=.GlobalEnv)
     }
     
+    res <- -1*res
     res
   }
 
   # Optimization:
-  tryCatch(optim(par = parameters, 
-                fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, factr=1e-16, ndeps=ndeps, maxit=10000), 
-                method="L-BFGS-B", lower = bounds$lower_bound, upper = bounds$upper_bound), 
+  #tryCatch(optim(par = parameters, 
+  #              fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, factr=1e-16, ndeps=ndeps, maxit=10000), 
+  #              method="L-BFGS-B", lower = bounds$lower_bound, upper = bounds$upper_bound), 
+  #         error=function(e) {if(verbose  == TRUE) {print(e)}}, 
+  #         finally=NA)
+  
+  # Optimization:
+  tryCatch(nloptr(x0 = parameters, 
+                 eval_f = maxlik, opts = list("algorithm"="NLOPT_LN_NELDERMEAD", 
+                                              "xtol_rel"=1.0e-14),
+                 lb = bounds$lower_bound, ub = bounds$upper_bound),  
            error=function(e) {if(verbose  == TRUE) {print(e)}}, 
            finally=NA)
+  
+  
   
   res <- get("results",envir=.GlobalEnv)
   invisible(res)
