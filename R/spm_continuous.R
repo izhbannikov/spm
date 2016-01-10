@@ -76,7 +76,7 @@ spm_continuous <- function(dat,
                            k=1, 
                            stopifbound=FALSE, 
                            verbose=F) {
-  
+  dat <<- dat
   final_res <- list()
   parameters <- c(a, f1, Q, f, b, mu0, theta)
   # Current results:
