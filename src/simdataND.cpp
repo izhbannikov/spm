@@ -94,6 +94,11 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
         else {
           xi = 1;
           y2 = arma::mat(k,1);
+          
+          for(int ii=0; ii<k; ii++) {
+            y2(ii,0) = NumericVector::get_na();
+          }
+          
           /*t2 = t1 + uni_distr_dt(generator);*/
           t2 = t1 + Rcpp::runif(1, 0.0, dt)[0];
           new_person = true;
