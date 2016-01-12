@@ -9,7 +9,8 @@ trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
 optimize <- function(data, starting_params,  formulas, verbose, 
                      lb, ub, 
-                     algorithm) {
+                     algorithm,
+                     stopifbound) {
   
   final_res <- list()
   
@@ -374,6 +375,6 @@ spm_time_dep <- function(x,
   }
   
   # Optimization:
-  res = optimize(data, start, formulas.work, verbose, lb, ub, algorithm)
+  res = optimize(data, start, formulas.work, verbose, lb, ub, algorithm, stopifbound)
   invisible(res)
 }
