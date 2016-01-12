@@ -189,8 +189,12 @@ spm_continuous <- function(dat,
   #         finally=NA)
   
   # Optimization:
-  print(bounds$lower_bound)
-  print(bounds$upper_bound)
+  if(verbose) {
+    cat("Lower bound:\n")
+    print(bounds$lower_bound)
+    cat("Upper bound:\n")
+    print(bounds$upper_bound)
+  }
   tryCatch(nloptr(x0 = parameters, 
                  eval_f = maxlik, opts = list("algorithm"="NLOPT_LN_NELDERMEAD", 
                                               "xtol_rel"=1.0e-14),
