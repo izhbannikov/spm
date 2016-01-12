@@ -7,9 +7,9 @@
 #' @return A table with simulated data.
 #' @examples
 #' library(spm)
-#' dat <- simdata_time_dep(N=2500)
+#' dat <- simdata_time_dep(N=1000)
 #' dat
-simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80", bt="5", mu0t="2e-5"),
+simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80", bt="5", mu0t="1e-3"),
                          step=0.05, tstart=30, tend=105, ystart=80, sd0=4, k=1) {
   formulas <- f  
   at <- NULL
@@ -228,6 +228,6 @@ simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80
     
     # One last step:
     data <- data[2:dim(data)[1],]
-    colnames(data) <- c("id","xi","t1","t2", unlist(lapply(1:k, function(n) {c(paste("y_", n, "_1", sep=""), paste("y_", n, "_2",sep="") )} )) )
+    colnames(data) <- c("id","xi","t1","t2", unlist(lapply(1:k, function(n) {c(paste("y", n, sep=""), paste("y", n, ".next",sep="") )} )) )
     invisible(data)
 }

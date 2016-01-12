@@ -352,7 +352,7 @@ optimize <- function(data, starting_params,  formulas, verbose,
 #' opt.par <- spm_time_dep(data[,2:6])
 #' opt.par
 spm_time_dep <- function(x, 
-                         start=list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),
+                         start=list(a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3),
                          f=list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"), 
                          verbose=TRUE,
                          lower_bound=NULL, upper_bound=NULL, 

@@ -116,9 +116,13 @@ setub <- function(k, params) {
 #'@param b A starting value of a diffusion coefficient representing a strength of the random disturbance from Wiener Process.
 #'@param mu0 A starting value of the baseline hazard.
 #'@param theta A starting value of the parameter theta (axe displacement of Gompertz function).
-#'@param k A number of dimensions.
+#'@param k A number of variables (dimension).
 #'@param verbose An indicator of verbosing output.
 #'@param tol A tolerance threshold for matrix inversion.
+#'@param stopifbound Estimation stops if at least one parameter achieves lower or upper boundaries.
+#'@param algorithm An optimization algorithm used, can be one of those: NLOPT_LN_NEWUOA,NLOPT_LN_NEWUOA_BOUND or NLOPT_LN_NELDERMEAD. Default: NLOPT_LN_NELDERMEAD
+#'@param lb Lower bound of parameters under estimation.
+#'@param ub Upper bound of parameters under estimation.
 #'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta.
 #'@details \code{spm_continuous} runs much slower that discrete but more precise and can handle time intervals with different lengths.
 #'@examples
