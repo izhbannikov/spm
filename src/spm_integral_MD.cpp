@@ -213,6 +213,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
       } else {
         //cout << "??\n";
         double logprobi = log(1.00 - exp(-1.00*mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH)));
+        //cout << s << " " << logprobi << " " << exp(-1.00*mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH))  <<"\n";
         L += s + logprobi;
         //cout << s << " " << logprobi << " " << m2 << " " << gamma2 << "\n";
       }

@@ -11,15 +11,15 @@ setBoundaries <- function(k, params) {
   # aH
   start=1; end=k^2
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){res=-1.5})))
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){res=0})))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, 2*params[n], -2*params[n]) })))
   # f1H
   start=end+1; end=start+k-1
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ 0 }))) 
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 2*params[n], -0.5*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, 2*params[n], -0.5*params[n]) })))
   # QH
   start=end+1; end=start+k^2-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n) {x=ifelse(params[n] >= 0, runif(1,0,1e-12), -1*runif(1,0,1e-7))})) )
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {x=ifelse(params[n] > 0, runif(1,0,1e-7), -1*runif(1,0,1e-12))})))
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n) {params[n] - ifelse(params[n] >= 0, 10*params[n], -10*params[n] )})) )
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {params[n] + ifelse(params[n] > 0, 10*params[n], -10*params[n] )})))
   # fH
   start=end+1; end=start+k-1
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ 0 })) )
@@ -30,12 +30,12 @@ setBoundaries <- function(k, params) {
   upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 2*params[n], -2*params[n]) })))
   # mu0
   start=end+1; end=start
-  lower_bound <- c(lower_bound, 1e-8 )
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 5*params[n], -5*params[n]) })))
+  lower_bound <- c( lower_bound, 0 )
+  upper_bound <- c( upper_bound, 1 )
   # theta
   start=end+1; end=start
-  lower_bound <- c(lower_bound, 1e-6 )
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, params[n], -2*params[n]) })))
+  lower_bound <- c( lower_bound, 1e-6 )
+  upper_bound <- c( upper_bound, 1 )
   
   
   res=list(lower_bound=lower_bound, upper_bound=upper_bound)
@@ -78,6 +78,9 @@ spm_continuous <- function(dat,
                            verbose=F) {
   dat <<- dat
   final_res <- list()
+  
+  if(mu0 < 0) {mu0 <- 0}
+  
   parameters <- c(a, f1, Q, f, b, mu0, theta)
   # Current results:
   results <<- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
@@ -120,6 +123,7 @@ spm_continuous <- function(dat,
   
   #maxlik <- function(dat, par) {
   maxlik <- function(par) {
+    dat <<- dat
     stopflag <- F
     # Reading parameters:
     start=1; end=k^2
@@ -185,6 +189,8 @@ spm_continuous <- function(dat,
   #         finally=NA)
   
   # Optimization:
+  print(bounds$lower_bound)
+  print(bounds$upper_bound)
   tryCatch(nloptr(x0 = parameters, 
                  eval_f = maxlik, opts = list("algorithm"="NLOPT_LN_NELDERMEAD", 
                                               "xtol_rel"=1.0e-14),
