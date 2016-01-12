@@ -8,16 +8,11 @@ trim.trailing <- function (x) sub("\\s+$", "", x)
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
 optimize <- function(data, starting_params,  formulas, verbose, 
-                     lower_bound, upper_bound, 
-                     factr=1e-16, lmult=0.5,umult=2) {
-  ### For test purposes:
-  #data <- data1[[1]][,2:6]
-  #starting_params <- list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5)
-  #formulas <- list(at="a", f1t="f1*t", Qt="Q", ft="f", bt="b", mu0t="mu0")
-  #verbose=TRUE
-  ### End of test purposes
+                     lb, ub, 
+                     algorithm) {
   
   final_res <- list()
+  
   # Current results:
   results <- list()
   
@@ -33,7 +28,6 @@ optimize <- function(data, starting_params,  formulas, verbose,
   # Assigning parameters:
   p.const.ind <- c()
   p.coeff.ind <- c()
-  
   
   #---
   parameters <- trim(unlist(strsplit(formulas$at,"[\\+\\*\\(\\)]",fixed=F)))
@@ -198,16 +192,25 @@ optimize <- function(data, starting_params,  formulas, verbose,
   }
   
   # Lower and upper boundaries calculation:
+  
   lower_bound <- c()
-  for(i in 1:length(stpar)) {
-    if(stpar[[i]] == 0) {stpar[[i]] = 1e-5}
-    lower_bound <- c(lower_bound, ifelse(stpar[[i]] < 0, stpar[[i]] + lmult*stpar[[i]], stpar[[i]] - lmult*stpar[[i]]))
+  if(is.null(lb)) {
+    for(i in 1:length(stpar)) {
+      if(stpar[[i]] == 0) {stpar[[i]] = 1e-12}
+      lower_bound <- c(lower_bound, ifelse(stpar[[i]] < 0, stpar[[i]] + 0.5*stpar[[i]], stpar[[i]] - 0.5*stpar[[i]]))
+    }
+  } else {
+    lower_bound <- lb
   }
   
   upper_bound <- c()
-  for(i in 1:length(stpar)) {
-    if(stpar[[i]] == 0) {stpar[[i]] = 1e-5}
-    upper_bound <- c(upper_bound, ifelse(stpar[[i]] < 0, stpar[[i]] - umult*stpar[[i]], stpar[[i]] + umult*stpar[[i]]))
+  if(is.null(ub)) {
+    for(i in 1:length(stpar)) {
+      if(stpar[[i]] == 0) {stpar[[i]] = 1e-12}
+      upper_bound <- c(upper_bound, ifelse(stpar[[i]] < 0, stpar[[i]] - 0.5*stpar[[i]], stpar[[i]] + 0.5*stpar[[i]]))
+    }
+  } else {
+    upper_bound <- ub
   }
   
   
@@ -223,12 +226,16 @@ optimize <- function(data, starting_params,  formulas, verbose,
   iteration <- 0
   L.prev <- 0
   
-  maxlik_t <- function(data, params) {
+  maxlik_t <- function(params) {
     stopflag <- FALSE
     
     if(verbose)
       cat("Iteration: ", iteration, "\n")
     
+    names(params) <- names(stpar)
+    
+    #print(stpar)
+    #print(params)
     for(p in names(stpar)) {
       assign(p, params[[p]], envir = globalenv())
       results[[p]] <<- params[[p]]
@@ -253,14 +260,16 @@ optimize <- function(data, starting_params,  formulas, verbose,
       ans <- mu0t(t) + (y - ft(t))^2*Qt(t)
     }
     
-    #for(i in 1:length(results)) {
-    #  if(length(intersect(results[[i]],c(lower_bound[i], upper_bound[i]))) >= 2) {
-    #    cat("Parameter", names(results)[i], "achieved lower/upper bound. Process stopped.\n")
-    #    cat(results[[i]],"\n")
-    #    stopflag <- TRUE
-    #    break
-    #  }
-    #}
+    if(stopifbound) {
+      for(i in 1:length(results)) {
+        if(length(intersect(results[[i]],c(lower_bound[i], upper_bound[i]))) >= 2) {
+          cat("Parameter", names(results)[i], "achieved lower/upper bound. Process stopped.\n")
+          cat(results[[i]],"\n")
+          stopflag <- TRUE
+          break
+        }
+      }
+    }
   
     L <- 0
     
@@ -302,13 +311,6 @@ optimize <- function(data, starting_params,  formulas, verbose,
 
   comp_func_params(formulas$at, formulas$f1t, formulas$Qt, formulas$ft, formulas$bt, formulas$mu0t)
   
-  # Check if function parameters are consistent to those provided in starting list:
-  if(verbose) {
-    print(names(stpar))
-    print(names(starting_params))
-    print(variables)
-  }
-  
   #if( setequal(names(starting_params), variables) == FALSE) {
   #  stop("Provided set of function parameters is not equal to that one provided in starting list or vise-versa.")
   #}
@@ -325,15 +327,21 @@ optimize <- function(data, starting_params,  formulas, verbose,
     print(mu0t)
   }
   
-  ## Optimization:
-  tryCatch(optim(par = unlist(stpar), 
-                  fn=maxlik_t, dat = as.matrix(data), 
-                 control = list(fnscale=-1, trace=TRUE, maxit=10000), #ndeps=replicate(factr,n=length(lower_bound))), 
-                  method="L-BFGS-B",#, 
-                  lower=lower_bound,
-                  upper=upper_bound),
-           error=function(e) {print(e)}, 
+  # Optimization:
+  if(verbose) {
+    cat("Lower bound:\n")
+    print(lower_bound)
+    cat("Upper bound:\n")
+    print(upper_bound)
+  }
+  tryCatch(nloptr(x0 = unlist(stpar), 
+                  eval_f = maxlik_t, opts = list("algorithm"=algorithm, 
+                                               "xtol_rel"=1.0e-8),
+                  lb = lower_bound, ub = upper_bound),  
+           error=function(e) {if(verbose  == TRUE) {print(e)}}, 
            finally=NA)
+  
+  
   
   final_res <- list(results)
   final_res
@@ -354,9 +362,10 @@ optimize <- function(data, starting_params,  formulas, verbose,
 spm_time_dep <- function(x, 
                          start=list(a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3),
                          f=list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"), 
-                         verbose=TRUE,
-                         lower_bound=NULL, upper_bound=NULL, 
-                         factr=1e-16, lmult=0.5, umult=2) {
+                         stopifbound=FALSE, 
+                         algorithm="NLOPT_LN_NELDERMEAD",
+                         lb=NULL, ub=NULL,
+                         verbose=FALSE) {
   formulas <- f
   data <- x
   formulas.work = list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
@@ -365,7 +374,6 @@ spm_time_dep <- function(x,
   }
   
   # Optimization:
-  #res = optimize(data, start, formulas, verbose, lower_bound, upper_bound, factr)
-  res = optimize(data, start, formulas.work, verbose, factr=1e-16, lmult=lmult, umult=umult)
+  res = optimize(data, start, formulas.work, verbose, lb, ub, algorithm)
   invisible(res)
 }
