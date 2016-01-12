@@ -1,5 +1,3 @@
-library(stats)
-
 setBoundaries <- function(k, params) {
   # This function sets lower and upper boundaries for optim.
   # - k - number of dimensions
@@ -54,14 +52,12 @@ setBoundaries <- function(k, params) {
 #'@param verbose An indicator of verbosing output.
 #'@param tol A tolerance threshold for matrix inversion.
 #'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta.
-#'@details \code{spm_integral_MD} runs much slower that discrete but more precise and can handle time intervals with different lengths.
+#'@details \code{spm_continuous} runs much slower that discrete but more precise and can handle time intervals with different lengths.
 #'@examples
 #'library(spm)
 #'# Reading the data:
-#'longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
-#'vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
-#'dd <- prepare_data(longdat=longdat, vitstat=vitstat,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
-#'data <- dd[[1]][,2:6]
+#'dd <- prepare_data(x=read.csv(system.file("data","longdat.csv",package="spm")), y=read.csv(system.file("data","vitstat.csv",package="spm")))
+#'data <- dd[[1]][,2:6] # We have to remove subject ID from the simulated data.
 #'#Parameters estimation:
 #'pars <- spm_continuous(dat=data,a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08, k = 1)
 #'pars
@@ -75,7 +71,17 @@ spm_continuous <- function(dat,
                            theta=0.08,
                            k=1, 
                            stopifbound=FALSE, 
-                           verbose=F) {
+                           algorithm="NLOPT_LN_NELDERMEAD",
+                           verbose=FALSE) {
+  
+  avail_algorithms <- c("NLOPT_LN_NEWUOA",
+                        "NLOPT_LN_NEWUOA_BOUND",
+                        "NLOPT_LN_NELDERMEAD")
+  
+  if(!(algorithm %in% avail_algorithms)) {
+    stop(cat("Provided algorithm", algorithm, "not in the list of available optimization methods."))
+  }
+  
   dat <<- dat
   final_res <- list()
   
@@ -118,8 +124,7 @@ spm_continuous <- function(dat,
   start=end+1; end=start
   theta <- parameters[start:end]
   results$theta <<- theta
-  # End reading parameters
-  
+  # End of reading parameters
   
   #maxlik <- function(dat, par) {
   maxlik <- function(par) {
@@ -182,13 +187,6 @@ spm_continuous <- function(dat,
   }
 
   # Optimization:
-  #tryCatch(optim(par = parameters, 
-  #              fn=maxlik, dat = as.matrix(dat), control = list(fnscale=-1, trace=T, factr=1e-16, ndeps=ndeps, maxit=10000), 
-  #              method="L-BFGS-B", lower = bounds$lower_bound, upper = bounds$upper_bound), 
-  #         error=function(e) {if(verbose  == TRUE) {print(e)}}, 
-  #         finally=NA)
-  
-  # Optimization:
   if(verbose) {
     cat("Lower bound:\n")
     print(bounds$lower_bound)
@@ -196,8 +194,8 @@ spm_continuous <- function(dat,
     print(bounds$upper_bound)
   }
   tryCatch(nloptr(x0 = parameters, 
-                 eval_f = maxlik, opts = list("algorithm"="NLOPT_LN_NELDERMEAD", 
-                                              "xtol_rel"=1.0e-14),
+                 eval_f = maxlik, opts = list("algorithm"=algorithm, 
+                                              "xtol_rel"=1.0e-8),
                  lb = bounds$lower_bound, ub = bounds$upper_bound),  
            error=function(e) {if(verbose  == TRUE) {print(e)}}, 
            finally=NA)
