@@ -39,6 +39,74 @@ setBoundaries <- function(k, params) {
   res=list(lower_bound=lower_bound, upper_bound=upper_bound)
 }
 
+setlb <- function(k, params) {
+  # This function sets lower and upper boundaries for optim.
+  # - k - number of dimensions
+  # - params - initial parameters, a vector
+  #
+  # Lower boundaries:
+  lower_bound <- c()
+  # Setting boundaries for coefficients:
+  # aH
+  start=1; end=k^2
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){res=-1.5})))
+  # f1H
+  start=end+1; end=start+k-1
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ 0 }))) 
+  # QH
+  start=end+1; end=start+k^2-1
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n) {params[n] - ifelse(params[n] >= 0, 10*params[n], -10*params[n] )})) )
+  # fH
+  start=end+1; end=start+k-1
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ 0 })) )
+  # bH
+  start=end+1; end=start+k-1
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] <= 0, 2*params[n], -2*params[n]) })) )
+  # mu0
+  start=end+1; end=start
+  lower_bound <- c( lower_bound, 0 )
+  # theta
+  start=end+1; end=start
+  lower_bound <- c( lower_bound, 1e-6 )
+  
+  lower_bound
+}
+
+setub <- function(k, params) {
+  # This function sets lower and upper boundaries for optim.
+  # - k - number of dimensions
+  # - params - initial parameters, a vector
+  #
+  #Upper boundaries:
+  upper_bound <- c()
+  # Setting boundaries for coefficients:
+  # aH
+  start=1; end=k^2
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, 2*params[n], -2*params[n]) })))
+  # f1H
+  start=end+1; end=start+k-1
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, 2*params[n], -0.5*params[n]) })))
+  # QH
+  start=end+1; end=start+k^2-1
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {params[n] + ifelse(params[n] > 0, 10*params[n], -10*params[n] )})))
+  # fH
+  start=end+1; end=start+k-1
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 2*params[n], -2*params[n]) })))
+  # bH
+  start=end+1; end=start+k-1
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 2*params[n], -2*params[n]) })))
+  # mu0
+  start=end+1; end=start
+  upper_bound <- c( upper_bound, 1 )
+  # theta
+  start=end+1; end=start
+  upper_bound <- c( upper_bound, 1 )
+  
+  upper_bound
+}
+
+
+
 #'Continuous multi-dimensional optimization
 #'@param dat A data table.
 #'@param a A starting value of the rate of adaptive response to any deviation of Y from f1(t).
@@ -72,6 +140,7 @@ spm_continuous <- function(dat,
                            k=1, 
                            stopifbound=FALSE, 
                            algorithm="NLOPT_LN_NELDERMEAD",
+                           lb=NULL, ub=NULL,
                            verbose=FALSE) {
   
   avail_algorithms <- c("NLOPT_LN_NEWUOA",
@@ -92,7 +161,22 @@ spm_continuous <- function(dat,
   results <<- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
   results_tmp <<- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
   iteration <- 0
-  bounds <- setBoundaries(k, parameters)
+  
+  bounds <- list()
+  
+  if(is.null(lb)) {
+    bounds$lower_bound <- setlb(k, parameters)
+  } else {
+    bounds$lower_bound <- lb
+  }
+  
+  if(is.null(ub)) {
+    bounds$upper_bound <- setub(k, parameters)
+  } else {
+    bounds$upper_bound <- ub
+  }
+  
+  #bounds <- setBoundaries(k, parameters)
   
   ndeps <- c(rep(1e-6,k^2), # a
               rep(1e-3,k), # f1
