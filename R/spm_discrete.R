@@ -116,6 +116,7 @@ spm_discrete <- function(dat,k=1, theta_range=seq(0.02,0.1,by=0.001), tol=NULL, 
   }
   for(i in 1:k) {
     for(j in i:k) {
+      Q[i,j] <- abs(Q[i,j])
       Q[j,i] <- Q[i,j]
     }
   }
