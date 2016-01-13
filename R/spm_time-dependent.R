@@ -335,10 +335,18 @@ optimize <- function(data, starting_params,  formulas, verbose,
     cat("Upper bound:\n")
     print(upper_bound)
   }
-  tryCatch(nloptr(x0 = unlist(stpar), 
+  tryCatch({ans <- nloptr(x0 = unlist(stpar), 
                   eval_f = maxlik_t, opts = list("algorithm"=algorithm, 
                                                "xtol_rel"=1.0e-8),
-                  lb = lower_bound, ub = upper_bound),  
+                  lb = lower_bound, ub = upper_bound)
+            i <- 1
+            for(p in names(stpar)) {
+              results[[p]] <<- ans$solution[i]
+              i <- i + 1
+              if(verbose)
+                cat(paste(p, get(p)), " ")
+            }
+           },  
            error=function(e) {if(verbose  == TRUE) {print(e)}}, 
            finally=NA)
   
