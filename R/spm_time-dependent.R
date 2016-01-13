@@ -357,16 +357,21 @@ optimize <- function(data, starting_params,  formulas, verbose,
   final_res
 }
 
-#' spm_time_dep : a function that can handle time-dependant coefficients:
-#' @param x : input data table.
-#' @param start : a list of starting parameters, default: llist(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),
-#' @param formulas : a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
-#' @return optimal coefficients
+#'spm_time_dep : a function that estimates parameters from the model with time-dependent coefficients.
+#'@param x : input data table.
+#'@param start : a list of starting parameters, default: llist(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),
+#'@param f : a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
+#'@param stopifbound Estimation stops if at least one parameter achieves lower or upper boundaries.
+#'@param algorithm An optimization algorithm used, can be one of those: NLOPT_LN_NEWUOA,NLOPT_LN_NEWUOA_BOUND or NLOPT_LN_NELDERMEAD. Default: NLOPT_LN_NELDERMEAD
+#'@param lb Lower bound of parameters under estimation.
+#'@param ub Upper bound of parameters under estimation.
+#'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta.
 #' @examples
 #' library(spm)
 #' #Data preparation:
 #' n <- 1000
 #' data <- simdata_time_dep(N=n)
+#' # Estimation:
 #' opt.par <- spm_time_dep(data[,2:6])
 #' opt.par
 spm_time_dep <- function(x, 

@@ -180,16 +180,6 @@ spm_continuous <- function(dat,
     bounds$upper_bound <- ub
   }
   
-  #bounds <- setBoundaries(k, parameters)
-  
-  ndeps <- c(rep(1e-6,k^2), # a
-              rep(1e-3,k), # f1
-              rep(1e-16,k^2), # Q
-              rep(1e-3,k), # f
-              rep(1e-3,k), # b
-              1e-6, # mu0
-              1e-4) # theta
-  
   # Reading parameters:
   start=1; end=k^2
   a <- matrix(parameters[start:end],ncol=k, byrow=F)
@@ -214,9 +204,8 @@ spm_continuous <- function(dat,
   results$theta <<- theta
   # End of reading parameters
   
-  #maxlik <- function(dat, par) {
   maxlik <- function(par) {
-    dat <<- dat
+    
     stopflag <- F
     # Reading parameters:
     start=1; end=k^2
@@ -281,10 +270,20 @@ spm_continuous <- function(dat,
     cat("Upper bound:\n")
     print(bounds$upper_bound)
   }
-  tryCatch(nloptr(x0 = parameters, 
+  tryCatch({ans <- nloptr(x0 = parameters, 
                  eval_f = maxlik, opts = list("algorithm"=algorithm, 
                                               "xtol_rel"=1.0e-8),
-                 lb = bounds$lower_bound, ub = bounds$upper_bound),  
+                 lb = bounds$lower_bound, ub = bounds$upper_bound)
+            
+            i <- 1
+            for(p in names(stpar)) {
+              results[[p]] <<- ans$solution[i]
+              i <- i + 1
+              if(verbose)
+                cat(paste(p, results[[p]]), " ")
+            }
+            
+           },  
            error=function(e) {if(verbose  == TRUE) {print(e)}}, 
            finally=NA)
   
