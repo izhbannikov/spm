@@ -2,31 +2,40 @@
 % Please edit documentation in R/spm_time-dependent.R
 \name{spm_time_dep}
 \alias{spm_time_dep}
-\title{spm_time_dep : a function that can handle time-dependant coefficients:}
+\title{spm_time_dep : a function that estimates parameters from the model with time-dependent coefficients.}
 \usage{
-spm_time_dep(x, start = list(a = -0.5, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0
-  = 1e-05), formulas = list(at = "a", f1t = "f1", Qt = "Q", ft = "f", bt =
-  "b", mu0t = "mu0"), verbose = TRUE, lower_bound = NULL,
-  upper_bound = NULL, factr = 1e-16, lmult = 0.5, umult = 2)
+spm_time_dep(x, start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0
+  = 0.001), f = list(at = "a", f1t = "f1", Qt = "Q", ft = "f", bt = "b", mu0t
+  = "mu0"), stopifbound = FALSE, algorithm = "NLOPT_LN_NELDERMEAD",
+  lb = NULL, ub = NULL, verbose = FALSE)
 }
 \arguments{
 \item{x}{: input data table.}
 
 \item{start}{: a list of starting parameters, default: llist(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),}
 
-\item{formulas}{: a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")}
+\item{f}{: a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")}
+
+\item{stopifbound}{Estimation stops if at least one parameter achieves lower or upper boundaries.}
+
+\item{algorithm}{An optimization algorithm used, can be one of those: NLOPT_LN_NEWUOA,NLOPT_LN_NEWUOA_BOUND or NLOPT_LN_NELDERMEAD. Default: NLOPT_LN_NELDERMEAD}
+
+\item{lb}{Lower bound of parameters under estimation.}
+
+\item{ub}{Upper bound of parameters under estimation.}
 }
 \value{
-optimal coefficients
+A set of estimated parameters a, f1, Q, f, b, mu0, theta.
 }
 \description{
-spm_time_dep : a function that can handle time-dependant coefficients:
+spm_time_dep : a function that estimates parameters from the model with time-dependent coefficients.
 }
 \examples{
 library(spm)
 #Data preparation:
 n <- 1000
 data <- simdata_time_dep(N=n)
+# Estimation:
 opt.par <- spm_time_dep(data[,2:6])
 opt.par
 }

@@ -4,8 +4,10 @@
 \alias{spm_continuous}
 \title{Continuous multi-dimensional optimization}
 \usage{
-spm_continuous(dat, a = 0.05, f1 = 80, Q = 2e-08, f = 81, b = 5,
-  mu0 = 2e-05, theta = 0.08, k = 1, verbose = F)
+spm_continuous(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 81, b = 5,
+  mu0 = 2e-05, theta = 0.08, k = 1, stopifbound = FALSE,
+  algorithm = "NLOPT_LN_NELDERMEAD", lb = NULL, ub = NULL,
+  verbose = FALSE)
 }
 \arguments{
 \item{dat}{A data table.}
@@ -24,7 +26,15 @@ spm_continuous(dat, a = 0.05, f1 = 80, Q = 2e-08, f = 81, b = 5,
 
 \item{theta}{A starting value of the parameter theta (axe displacement of Gompertz function).}
 
-\item{k}{A number of dimensions.}
+\item{k}{A number of variables (dimension).}
+
+\item{stopifbound}{Estimation stops if at least one parameter achieves lower or upper boundaries.}
+
+\item{algorithm}{An optimization algorithm used, can be one of those: NLOPT_LN_NEWUOA,NLOPT_LN_NEWUOA_BOUND or NLOPT_LN_NELDERMEAD. Default: NLOPT_LN_NELDERMEAD}
+
+\item{lb}{Lower bound of parameters under estimation.}
+
+\item{ub}{Upper bound of parameters under estimation.}
 
 \item{verbose}{An indicator of verbosing output.}
 
@@ -37,15 +47,13 @@ A set of estimated parameters a, f1, Q, f, b, mu0, theta.
 Continuous multi-dimensional optimization
 }
 \details{
-\code{spm_integral_MD} runs much slower that discrete but more precise and can handle time intervals with different lengths.
+\code{spm_continuous} runs much slower that discrete but more precise and can handle time intervals with different lengths.
 }
 \examples{
 library(spm)
 # Reading the data:
-longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
-vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
-dd <- prepare_data(longdat=longdat, vitstat=vitstat,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
-data <- dd[[1]][,2:6]
+dd <- prepare_data(x=read.csv(system.file("data","longdat.csv",package="spm")), y=read.csv(system.file("data","vitstat.csv",package="spm")))
+data <- dd[[1]][,2:6] # We have to remove subject ID from the simulated data.
 #Parameters estimation:
 pars <- spm_continuous(dat=data,a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08, k = 1)
 pars

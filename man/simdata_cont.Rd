@@ -4,7 +4,7 @@
 \alias{simdata_cont}
 \title{Multi-dimensional simulation function for continuous trait.}
 \usage{
-simdata_cont(N = 100, a = -0.05, f1 = 80, Q = 2e-07, f = 80, b = 5,
+simdata_cont(N = 100, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
   mu0 = 2e-05, theta = 0.08, step = 0.05, tstart = 30, tend = 105,
   ystart = 80, sd0 = 4, k = 1)
 }
