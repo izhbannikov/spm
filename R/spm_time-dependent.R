@@ -307,6 +307,7 @@ optimize <- function(data, starting_params,  formulas, verbose,
     
     }
     
+    L <- -1*L
     L
   }
 
