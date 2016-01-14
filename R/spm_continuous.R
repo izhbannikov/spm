@@ -82,7 +82,8 @@ setub <- function(k, params) {
   # Setting boundaries for coefficients:
   # aH
   start=1; end=k^2
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, 2*params[n], -2*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){res=0})))
+  #upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, 2*params[n], -2*params[n]) })))
   # f1H
   start=end+1; end=start+k-1
   upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, 2*params[n], -0.5*params[n]) })))
