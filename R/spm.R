@@ -61,7 +61,7 @@ spm <- function(x, model="discrete", formulas = NULL, verbose=FALSE, tol=NULL) {
   
   if(model == "continuous") {
     pars <- spm_discrete(dat=x[[2]],k=k, verbose = verbose, tol = tol)
-    data <- data.frame(x[[1]][,2:dim(x[[1]])[2]])
+    data <- as.matrix(x[[1]][,2:dim(x[[1]])[2]])
   
     if(verbose) {
       cat("Starting parameters:\n")
