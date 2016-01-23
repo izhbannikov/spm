@@ -9,8 +9,8 @@
 #' library(spm)
 #' dat <- simdata_time_dep(N=1000)
 #' dat
-simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80", bt="5", mu0t="1e-3"),
-                         step=0.05, tstart=30, tend=105, ystart=80, sd0=4, k=1) {
+simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-5", ft="80", bt="2.5", mu0t="1e-1"),
+                         step=1, tstart=30, tend=105, ystart=80, sd0=2) {
   formulas <- f  
   at <- NULL
   f1t <- NULL
@@ -28,206 +28,72 @@ simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80
     mu0t <<- eval(bquote(function(t) .(parse(text = mu0string)[[1]])))
   }
   
-    
-  mu <- function(t, par) {
-    hfH <- ft(t)-par[[1]];
-    hf1H <- f1t(t)-par[[1]];
-    
-    mu <- mu0t(t)+hfH^2*Qt(t)+Qt(t)*par[[2]]
-    mu
+  sigma_sq <- function(t1, t2) {
+    # t2 = t_{j}, t1 = t_{j-1}
+    ans <- bt(t1)*(t2-t1)
+    #ans <- 2.5*(t2-t1)
+    ans
   }
   
-  func1 <- function(t, y) {
-    hfH <- ft(t)-y[[1]]
-    hf1H <- f1t(t)-y[[1]]
-    dy1 <- -1.0*at(t)*hf1H + 2.0*y[[2]]*Qt(t)*hfH
-    dy2 <- 2.0*at(t)*y[[2]] + bt(t) - 2.0*y[[2]]^2*Qt(t) #dy2 <- 2*aH*y[2] + bH^2 - 2*y[2]^2*Q(t)
-    list(dy1, dy2)
+  m <- function(y, t1, t2) {
+    # y = y_{j-1}, t1 = t_{j-1}, t2 = t_{j}
+    ans <- y + at(t1)*(y - f1t(t1))*(t2 - t1)
+    #ans <- y + (-0.05)*(y - 80)*(t2 - t1)
+    ans
   }
+  
+  mu <- function(y, t) {
+    ans <- mu0t(t) + (y - ft(t))^2*Qt(t)
+    #ans <- 1e-1 + (y - 80)^2*2e-5
+  }
+  
   
   comp_func_params(formulas$at, formulas$f1t, formulas$Qt, formulas$ft, formulas$bt, formulas$mu0t)
   
-  new_person <- T
-  data <- matrix(nrow=1,ncol=(4+2*k),NA)
+  data <- matrix(nrow=1,ncol=6, NA)
   record <- 1
   id <- 1
   for(i in 1:N) {
-    if(new_person == T) {
-      t1 <- runif(1,tstart, tend) # Starting time
-      t2 <- t1 + 2*runif(1,0,1) + step # Ending time
+    t2 <- runif(1,tstart, tend) # Starting time
+    # Starting point
+    new_person <- FALSE
+    y2 <- rnorm(1,mean=ystart, sd=sd0)  
+    while(new_person == FALSE){
+      t1 <- t2
+      t2 <- t1 + runif(1,0,1) + step
+      y1 <- y2
         
-      # Starting point
-      y1 <- rnorm(1,mean=ystart, sd=sd0)
-      nsteps <- 2.00
-      h=(t2-t1)/nsteps
-        
-      # Integration:
-      s <- h/3*(-1)*mu(t1, list(y1,0))
-        
-      t <- t1
-      out <- list(y1,0)
-      yfin <- list()
-      ytmp <- list()
-      
-      for(j in 1:nsteps) {
-        # Runge-Kutta method:
-        k1ar <- func1(t,out)
-        yfin[[1]] <- out[[1]] + h/6.00*k1ar[[1]]
-        yfin[[2]] <- out[[2]] + h/6.00*k1ar[[2]]
-        ytmp[[1]] <- out[[1]] + h/2.00*k1ar[[1]]
-        ytmp[[2]] <- out[[2]] + h/2.00*k1ar[[2]]
-        
-        k2ar <- func1(t,ytmp)
-        yfin[[1]] <- yfin[[1]] + h/3.00*k2ar[[1]]
-        yfin[[2]] <- yfin[[2]] + h/3.00*k2ar[[2]]
-        ytmp[[1]] <- out[[1]] + h/2.00*k2ar[[1]]
-        ytmp[[2]] <- out[[2]] + h/2.00*k2ar[[2]]
-        
-        k3ar <- func1(t,ytmp)
-        yfin[[1]] <- yfin[[1]] + h/3.00*k3ar[[1]]
-        yfin[[2]] <- yfin[[2]] + h/3.00*k3ar[[2]]
-        ytmp[[1]] <- out[[1]] + h*k3ar[[1]]
-        ytmp[[2]] <- out[[2]] + h*k3ar[[2]]
-        
-        k4ar <- func1(t,ytmp)
-        out[[1]] <- yfin[[1]] + h/6.00*k4ar[[1]]
-        out[[2]] <- yfin[[2]] + h/6.00*k4ar[[2]]
-        
-        t <- t + h
-          
-        # Integration:
-        if (j == nsteps) {
-          ifactor <- 1
-        } else {
-          if ((j %% 2) == 0) {
-            ifactor <- 2
-          } else {
-            ifactor <- 4
-          }
-        }
-        s <- s + ifactor*h/3.00*(-1)*mu(t,out)
-          
-      }
-        
-      m <- out[[1]]
-      gamma <- out[[2]]
-        
-      S <- exp(s)
-        
+      S <- exp(-1*mu(y1,t1)*(t2-t1))
+      #S <- exp(-1*mu(y1, t1))
       xi <- 0
       if (S > runif(1,0,1)) {
         xi <- 0
+        y2 <- rnorm(1,mean=m(y1, t1, t2), sd=sqrt(sigma_sq(t1,t2)))
+        #y2 <- rnorm(1,mean=m(y1, t1, t2), sd=sigma_sq(t1,t2))
+        new_person <- FALSE
+        cov <- c(y1, y2)
+        data <- rbind(data, c(id, xi, t1, t2, cov))
+        
       } else {
         xi <- 1
-      }
-      
-      if(xi == 0) {
-        #y2 <- matrix(unlist(lapply(1:k, function(n) {rnorm(1,mean=m[n,1], sd=sqrt(gamma[n,n]))} )), 
-        #       nrow=k, ncol=1, byrow=T)
-        y2 <- rnorm(1,mean=m, sd=sqrt(gamma))
-        new_person <- F
-      } else {
         y2 <- NA
-        new_person <- T
-      }
-      
-      cov <- c(y1, y2)
-      data <- rbind(data, c(id, xi, t1, t2, cov))
-      record <- record + 1
-        
-      if(new_person == T) {
-          id <- id + 1
-        }
-      } 
-      
-      while(new_person == F){
-        t1 <- t2
-        t2 <- t1 + 2*runif(1,0,1) + step
-        y1 <- y2
-        
-        nsteps <- 2
-        h=(t2-t1)/nsteps
-        
-        # Integration:
-        s <- h/3*(-1)*mu(t1, list(y1,0))
-        
-        t <- t1
-        out <- list(y1,0)
-        for(j in 1:nsteps) {
-          # Runge-Kutta method:
-          k1ar <- func1(t,out)
-          yfin[[1]] <- out[[1]] + h/6.00*k1ar[[1]]
-          yfin[[2]] <- out[[2]] + h/6.00*k1ar[[2]]
-          ytmp[[1]] <- out[[1]] + h/2.00*k1ar[[1]]
-          ytmp[[2]] <- out[[2]] + h/2.00*k1ar[[2]]
-          
-          k2ar <- func1(t,ytmp)
-          yfin[[1]] <- yfin[[1]] + h/3.00*k2ar[[1]]
-          yfin[[2]] <- yfin[[2]] + h/3.00*k2ar[[2]]
-          ytmp[[1]] <- out[[1]] + h/2.00*k2ar[[1]]
-          ytmp[[2]] <- out[[2]] + h/2.00*k2ar[[2]]
-          
-          k3ar <- func1(t,ytmp)
-          yfin[[1]] <- yfin[[1]] + h/3.00*k3ar[[1]]
-          yfin[[2]] <- yfin[[2]] + h/3.00*k3ar[[2]]
-          ytmp[[1]] <- out[[1]] + h*k3ar[[1]]
-          ytmp[[2]] <- out[[2]] + h*k3ar[[2]]
-          
-          k4ar <- func1(t,ytmp)
-          out[[1]] <- yfin[[1]] + h/6.00*k4ar[[1]]
-          out[[2]] <- yfin[[2]] + h/6.00*k4ar[[2]]
-          
-          t <- t + h
-          
-          # Integration:
-          if (j == nsteps) {
-            ifactor <- 1
-          } else {
-            if ((j %% 2) == 0) {
-              ifactor <- 2
-            } else {
-              ifactor <- 4
-            }
-          }
-          s <- s + ifactor*h/3.00*(-1)*mu(t,out)
-          
-        }
-        
-        m <- out[[1]]
-        gamma <- out[[2]]
-        
-        S <- exp(s)
-        
-        xi <- 0
-        if (S > runif(1,0,1)) {
-          xi <- 0
-          y2 <- rnorm(1,mean=m, sd=gamma)
-          new_person <- F
-          cov <- c(y1, y2)
-          data <- rbind(data, c(id, xi, data[record,4], t2, cov))
-          record <- record + 1
-          
-        } else {
-          xi <- 1
-          y2 <- NA
-          new_person <- T
-          cov <- c(y1, y2)
-          data <- rbind(data, c(id, xi, data[record,4], t2, cov))
-          record <- record + 1
-          id <- id + 1
-        }
-        
-        if(t2 > tend & new_person == F) {
-          new_person <- T
-          id <- id + 1
-        }
+        new_person <- TRUE
+        cov <- c(y1, y2)
+        data <- rbind(data, c(id, xi, t1, t2, cov))
+        id <- id + 1
         
       }
-      
+        
+      if(t2 > tend & new_person == FALSE) {
+        new_person <- TRUE
+        id <- id + 1
+      }
     }
+      
+  }
     
-    # One last step:
-    data <- data[2:dim(data)[1],]
-    colnames(data) <- c("id","xi","t1","t2", unlist(lapply(1:k, function(n) {c(paste("y", n, sep=""), paste("y", n, ".next",sep="") )} )) )
-    invisible(data)
+  # One last step:
+  data <- data[2:dim(data)[1],]
+  colnames(data) <- c("id","xi","t1","t2", "y", "y.next")
+  invisible(data)
 }

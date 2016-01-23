@@ -1,43 +1,3 @@
-setBoundaries <- function(k, params) {
-  # This function sets lower and upper boundaries for optim.
-  # - k - number of dimensions
-  # - params - initial parameters, a vector
-  #
-  # Lower and upper boundaries:
-  lower_bound <- c(); upper_bound <- c()
-  # Setting boundaries for coefficients:
-  # aH
-  start=1; end=k^2
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){res=-1.5})))
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, 2*params[n], -2*params[n]) })))
-  # f1H
-  start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ 0 }))) 
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, 2*params[n], -0.5*params[n]) })))
-  # QH
-  start=end+1; end=start+k^2-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n) {params[n] - ifelse(params[n] >= 0, 10*params[n], -10*params[n] )})) )
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {params[n] + ifelse(params[n] > 0, 10*params[n], -10*params[n] )})))
-  # fH
-  start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ 0 })) )
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 2*params[n], -2*params[n]) })))
-  # bH
-  start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] <= 0, 2*params[n], -2*params[n]) })) )
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 2*params[n], -2*params[n]) })))
-  # mu0
-  start=end+1; end=start
-  lower_bound <- c( lower_bound, 0 )
-  upper_bound <- c( upper_bound, 1 )
-  # theta
-  start=end+1; end=start
-  lower_bound <- c( lower_bound, 1e-6 )
-  upper_bound <- c( upper_bound, 1 )
-  
-  
-  res=list(lower_bound=lower_bound, upper_bound=upper_bound)
-}
 
 setlb <- function(k, params) {
   # This function sets lower and upper boundaries for optim.
@@ -52,16 +12,16 @@ setlb <- function(k, params) {
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){res=-1.5})))
   # f1H
   start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ 0 }))) 
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, 0.05*params[n], -0.05*params[n]) }))) 
   # QH
   start=end+1; end=start+k^2-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n) {params[n] - ifelse(params[n] >= 0, 10*params[n], -10*params[n] )})) )
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ 0 })))
   # fH
   start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ 0 })) )
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, 0.05*params[n], -0.05*params[n]) })) )
   # bH
   start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] <= 0, 2*params[n], -2*params[n]) })) )
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] <= 0, 0.05*params[n], -0.05*params[n]) })) )
   # mu0
   start=end+1; end=start
   lower_bound <- c( lower_bound, 0 )
@@ -83,25 +43,24 @@ setub <- function(k, params) {
   # aH
   start=1; end=k^2
   upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){res=0})))
-  #upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, 2*params[n], -2*params[n]) })))
   # f1H
   start=end+1; end=start+k-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, 2*params[n], -0.5*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, 0.05*params[n], -0.05*params[n]) })))
   # QH
   start=end+1; end=start+k^2-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {params[n] + ifelse(params[n] > 0, 10*params[n], -10*params[n] )})))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {params[n] + ifelse(params[n] > 0, 0.5*params[n], -0.5*params[n] )})))
   # fH
   start=end+1; end=start+k-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 2*params[n], -2*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 0.05*params[n], -0.05*params[n]) })))
   # bH
   start=end+1; end=start+k-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 2*params[n], -2*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 0.05*params[n], -0.05*params[n]) })))
   # mu0
   start=end+1; end=start
-  upper_bound <- c( upper_bound, 1 )
+  upper_bound <- c( upper_bound, 0.1 )
   # theta
   start=end+1; end=start
-  upper_bound <- c( upper_bound, 1 )
+  upper_bound <- c( upper_bound, 0.1 )
   
   upper_bound
 }
@@ -144,16 +103,17 @@ spm_continuous <- function(dat,
                            theta=0.08,
                            k=1, 
                            stopifbound=FALSE, 
-                           algorithm="NLOPT_LN_NELDERMEAD",
+                           algorithm="NLOPT_LN_NEWUOA_BOUND",
                            lb=NULL, ub=NULL,
                            verbose=FALSE) {
   
-  avail_algorithms <- c("NLOPT_LN_NEWUOA",
+  avail_algorithms <- c("NLOPT_GN_DIRECT_L_RAND",
+                        "NLOPT_LN_NEWUOA",
                         "NLOPT_LN_NEWUOA_BOUND",
                         "NLOPT_LN_NELDERMEAD")
   
   if(!(algorithm %in% avail_algorithms)) {
-    stop(cat("Provided algorithm", algorithm, "not in the list of available optimization methods."))
+  #  stop(cat("Provided algorithm", algorithm, "not in the list of available optimization methods."))
   }
   
   dat <<- dat
@@ -277,7 +237,7 @@ spm_continuous <- function(dat,
                  lb = bounds$lower_bound, ub = bounds$upper_bound)
             
             i <- 1
-            for(p in names(stpar)) {
+            for(p in names(results)) {
               results[[p]] <<- ans$solution[i]
               i <- i + 1
               if(verbose)
@@ -291,6 +251,18 @@ spm_continuous <- function(dat,
   
   
   res <- get("results",envir=.GlobalEnv)
+  
+  # Check if any parameter achieved upper/lower limit and report it:
+  limit <- FALSE
+  for(i in 1:length(res)) {
+    if(length(intersect(res[[i]],c(bounds$lower_bound[i], bounds$upper_bound[i]))) >= 1) {
+      cat("Parameter", names(res)[i], "achieved lower/upper bound.\n")
+      cat(res[[i]],"\n")
+      limit <- TRUE
+    }
+  }
+  res$limit <- limit
+  
   invisible(res)
 }
 

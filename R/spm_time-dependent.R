@@ -198,7 +198,7 @@ optimize <- function(data, starting_params,  formulas, verbose,
   if(is.null(lb)) {
     for(i in 1:length(stpar)) {
       if(stpar[[i]] == 0) {stpar[[i]] = 1e-12}
-      lower_bound <- c(lower_bound, ifelse(stpar[[i]] < 0, stpar[[i]] + 0.5*stpar[[i]], stpar[[i]] - 0.5*stpar[[i]]))
+      lower_bound <- c(lower_bound, ifelse(stpar[[i]] < 0, stpar[[i]] + 0.25*stpar[[i]], stpar[[i]] - 0.25*stpar[[i]]))
     }
   } else {
     lower_bound <- lb
@@ -208,7 +208,7 @@ optimize <- function(data, starting_params,  formulas, verbose,
   if(is.null(ub)) {
     for(i in 1:length(stpar)) {
       if(stpar[[i]] == 0) {stpar[[i]] = 1e-12}
-      upper_bound <- c(upper_bound, ifelse(stpar[[i]] < 0, stpar[[i]] - 0.5*stpar[[i]], stpar[[i]] + 0.5*stpar[[i]]))
+      upper_bound <- c(upper_bound, ifelse(stpar[[i]] < 0, stpar[[i]] - 0.25*stpar[[i]], stpar[[i]] + 0.25*stpar[[i]]))
     }
   } else {
     upper_bound <- ub
@@ -230,6 +230,14 @@ optimize <- function(data, starting_params,  formulas, verbose,
   maxlik_t <- function(params) {
     stopflag <- FALSE
     
+    #a <- params[1]
+    #f1 <- params[2]
+    #Q <- params[3]
+    #f <- params[4]
+    #b <- params[5] 
+    #mu0 <- params[6]
+    
+    
     if(verbose)
       cat("Iteration: ", iteration, "\n")
     
@@ -241,24 +249,28 @@ optimize <- function(data, starting_params,  formulas, verbose,
       assign(p, params[[p]], envir = globalenv())
       results[[p]] <<- params[[p]]
       if(verbose)
-        cat(paste(p, get(p)), " ")
+        cat(paste(p, results[[p]]), " ")
     }
     
     
     sigma_sq <- function(t1, t2) {
       # t2 = t_{j}, t1 = t_{j-1}
       ans <- bt(t1)*(t2-t1)
+      #ans <- b*(t2-t1)
       ans
     }
   
     m <- function(y, t1, t2) {
       # y = y_{j-1}, t1 = t_{j-1}, t2 = t_{j}
       ans <- y + at(t1)*(y - f1t(t1))*(t2 - t1)
+      #ans <- y + a*(y - f1)*(t2 - t1)
       ans
     }
   
-    mu <- function(y, t) {
+    mu <- function(y) {
       ans <- mu0t(t) + (y - ft(t))^2*Qt(t)
+      #ans <- mu0 + (y - f)^2*Q
+      ans
     }
     
     if(stopifbound) {
@@ -280,11 +292,16 @@ optimize <- function(data, starting_params,  formulas, verbose,
         delta <- data[i,1]
         t1 <- data[i, 2]; t2 <- data[i, 3]
         ind <- ifelse(is.na(data[i, 5]), 0, 1)
-        log_s <- -1*(mu(data[i, 4], t2-t1))
+        #log_s <- -1*(mu(data[i, 4], t2-t1))
+        S <- exp(-1*mu(data[i, 4])*(t2-t1))
         if(ind == 0) {
-          L <- L + (1 -delta)*(-1*log_s) + delta*(1-log_s)
+          #L <- L + (1 -delta)*(-1*log_s) + delta*(1-log_s)
+          L <- L + (1 - delta)*log(S) + delta*log(1-S)
         } else {
-          L <- L + 0.5*pi*(-1*log(sigma_sq(t1, t2)) - (data[i,5] - m(data[i,4], t1, t2))^2/(2*sigma_sq(t1, t2)))
+          yj <- data[i,5]
+          mj <- m(data[i,4], t1, t2)
+          pn <- -1*log(sqrt(2*pi)*sqrt(sigma_sq(t1, t2))) - (yj - mj)^2/(2*sigma_sq(t1, t2))
+          L <- L + pn + (1 - delta)*log(S) + delta*log(1-S)
         }
       }
       
