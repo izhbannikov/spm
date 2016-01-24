@@ -28,20 +28,4 @@ For the "time-dependent" model (model parameters depend on time): a set of model
 \description{
 A central function that estimates Stochastic Process Model (SPM) parameters a from given dataset.
 }
-\examples{
-library(spm)
-#Prepare data for optimization
-data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"))
-#Parameters estimation (default model: discrete-time):
-p.discr.model <- spm(data)
-p.discr.model
-# Continuous-time model:
-p.cont.model <- spm(data, model="continuous")
-p.cont.model
-# Model with time-dependent coefficients:
-data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"), covariates="BMI")
-p.td.model <- spm(data, model="time-dependent")
-p.td.model
-
-}
 

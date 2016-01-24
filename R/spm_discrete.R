@@ -3,18 +3,19 @@
 #'@param k A number of dimensions.
 #'@param theta_range A range of theta parameter (axe displacement of Gompertz function), default: from 0.001 to 0.09 with step of 0.001.
 #'@param tol A tolerance threshold for matrix inversion (NULL by default).
+#'@param verbose An indicator of verbosing output.
 #'@return A list of two elements: (1) estimated parameters u, R, b, Sigma, Q, mu0, theta and
 #'(2) estimated parameters a, f1, Q, f, b, mu0, theta. Note: b and mu0 from first list are different 
 #'from b and mu0 from the second list.
 #'@details This function is way much faster that continuous \code{spm_continuous_MD(...)} (but less precise) and used mainly in 
 #'estimation a starting point for the \code{spm_continuous_MD(...)}.
-#'@examples
-#'library(spm)
+#examples
+#library(spm)
 #'# Prepare data for optimization
-#'data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"))
-#'# Parameters estimation
-#'pars <- spm_discrete(data[[2]])
-#'pars
+#data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"))
+## Parameters estimation
+#pars <- spm_discrete(data[[2]])
+#pars
 spm_discrete <- function(dat,k=1, theta_range=seq(0.02,0.1,by=0.001), tol=NULL, verbose=FALSE) {
   options(digits=10)
   # Logistic regression:

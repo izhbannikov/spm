@@ -4,12 +4,16 @@
 \alias{simdata_time_dep}
 \title{Simulation function for continuous trait with time-dependant coefficients.}
 \usage{
-simdata_time_dep(N = 10, f = list(at = "-0.05", f1t = "80", Qt = "2e-8", ft
-  = "80", bt = "5", mu0t = "1e-3"), step = 0.05, tstart = 30, tend = 105,
-  ystart = 80, sd0 = 4, k = 1)
+simdata_time_dep(N = 10, f = list(at = "-0.05", f1t = "80", Qt = "2e-5", ft
+  = "80", bt = "2.5", mu0t = "1e-1"), step = 1, tstart = 30, tend = 105,
+  ystart = 80, sd0 = 2)
 }
 \arguments{
 \item{N}{Number of individuals.}
+
+\item{f}{a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)")}
+
+\item{step}{An interval between two observations, a random uniformally-distributed value is then added to this step.}
 
 \item{tstart}{A number that defines starting time (30 by default).}
 
@@ -17,7 +21,7 @@ simdata_time_dep(N = 10, f = list(at = "-0.05", f1t = "80", Qt = "2e-8", ft
 
 \item{ystart}{A starting value of covariates.}
 
-\item{formulas}{: a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)")}
+\item{sd0}{A standard deviation for modelling the next covariate value.}
 }
 \value{
 A table with simulated data.
@@ -28,6 +32,6 @@ Simulation function for continuous trait with time-dependant coefficients.
 \examples{
 library(spm)
 dat <- simdata_time_dep(N=1000)
-dat
+head(dat)
 }
 

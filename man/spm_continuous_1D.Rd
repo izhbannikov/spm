@@ -23,12 +23,6 @@ spm_continuous_1D(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
 \item{mu0}{A starting value of the baseline hazard.}
 
 \item{theta}{A starting value of the parameter theta (axe displacement of Gompertz function).}
-
-\item{k}{A number of dimensions.}
-
-\item{verbose}{An indicator of verbosing output.}
-
-\item{tol}{A tolerance threshold for matrix inversion.}
 }
 \value{
 A set of estimated parameters a, f1, Q, f, b, mu0, theta.
@@ -38,16 +32,5 @@ Continuous one-dimensional optimization
 }
 \details{
 \code{spm_integral_1D} runs much slower that discrete but more precise and can handle time intervals with different lengths.
-}
-\examples{
-library(spm)
-# Reading the data:
-longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
-vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
-dd <- prepare_data(longdat=longdat, vitstat=vitstat,interval=1, col.status="IsDead", col.id="ID", col.age="Age", col.age.event="LSmort", covariates=c("DBP"), verbose=T)
-data <- dd[[1]][,2:6]
-#Parameters estimation:
-pars <- spm_continuous_1D(dat=data,a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08)
-pars
 }
 

@@ -5,8 +5,8 @@
 \title{Multi-dimensional simulation function for continuous trait.}
 \usage{
 simdata_cont(N = 100, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
-  mu0 = 2e-05, theta = 0.08, step = 0.05, tstart = 30, tend = 105,
-  ystart = 80, sd0 = 4, k = 1)
+  mu0 = 2e-05, theta = 0.08, step = 1, tstart = 30, tend = 105,
+  ystart = 80, sd0 = 2, k = 1)
 }
 \arguments{
 \item{N}{Number of individuals.}
@@ -25,11 +25,15 @@ simdata_cont(N = 100, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
 
 \item{theta}{A displacement coefficient of the Gompertz function.}
 
+\item{step}{a discrete step size between two observations. A random uniform value is then added to this step size.}
+
 \item{tstart}{A number that defines starting time (30 by default).}
 
 \item{tend}{A number, defines final time (105 by default).}
 
 \item{ystart}{A vector with length equal to number of dimensions used, defines starting values of covariates.}
+
+\item{sd0}{a standard deviation for modelling the next covariate value.}
 
 \item{k}{number of dimensions (k = 1 by default).}
 }
@@ -42,6 +46,6 @@ Multi-dimensional simulation function for continuous trait.
 \examples{
 library(spm)
 dat <- simdata_cont(N=500)
-dat
+head(dat)
 }
 

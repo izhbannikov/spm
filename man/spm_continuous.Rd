@@ -6,7 +6,7 @@
 \usage{
 spm_continuous(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 81, b = 5,
   mu0 = 2e-05, theta = 0.08, k = 1, stopifbound = FALSE,
-  algorithm = "NLOPT_LN_NELDERMEAD", lb = NULL, ub = NULL,
+  algorithm = "NLOPT_LN_NEWUOA_BOUND", lb = NULL, ub = NULL,
   verbose = FALSE)
 }
 \arguments{
@@ -37,8 +37,6 @@ spm_continuous(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 81, b = 5,
 \item{ub}{Upper bound of parameters under estimation.}
 
 \item{verbose}{An indicator of verbosing output.}
-
-\item{tol}{A tolerance threshold for matrix inversion.}
 }
 \value{
 A set of estimated parameters a, f1, Q, f, b, mu0, theta.
@@ -48,14 +46,5 @@ Continuous multi-dimensional optimization
 }
 \details{
 \code{spm_continuous} runs much slower that discrete but more precise and can handle time intervals with different lengths.
-}
-\examples{
-library(spm)
-# Reading the data:
-dd <- prepare_data(x=read.csv(system.file("data","longdat.csv",package="spm")), y=read.csv(system.file("data","vitstat.csv",package="spm")))
-data <- dd[[1]][,2:6] # We have to remove subject ID from the simulated data.
-#Parameters estimation:
-pars <- spm_continuous(dat=data,a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08, k = 1)
-pars
 }
 

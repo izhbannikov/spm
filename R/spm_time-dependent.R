@@ -1,12 +1,25 @@
-# Returns string w/o leading whitespace
+#'Returns string w/o leading whitespace
+#'@param x a string to trim
 trim.leading <- function (x)  sub("^\\s+", "", x)
 
-# Returns string w/o trailing whitespace
+#'Returns string w/o trailing whitespace
+#'@param x a string to trim
 trim.trailing <- function (x) sub("\\s+$", "", x)
 
-# Returns string w/o leading or trailing whitespace
+#'Returns string w/o leading or trailing whitespace
+#'@param x a string to trim
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
+#'A sub-finction that corresponds to the spm_time_dep(...)
+#'@param data a data matrix.
+#'@param starting_params initial point.
+#'@param formulas a set of formulas for model parameters.
+#'@param verbose a verbosing output.
+#'@param lb lower bound.
+#'@param ub upper bound.
+#'@param algorithm some optimization algorithm, for example, NLOPT_LN_NEWUOA.
+#'@param stopifbound if TRUE then algorithm stops when at least one parameter
+#' achieved boundaries.
 optimize <- function(data, starting_params,  formulas, verbose, 
                      lb, ub, 
                      algorithm,
@@ -292,10 +305,8 @@ optimize <- function(data, starting_params,  formulas, verbose,
         delta <- data[i,1]
         t1 <- data[i, 2]; t2 <- data[i, 3]
         ind <- ifelse(is.na(data[i, 5]), 0, 1)
-        #log_s <- -1*(mu(data[i, 4], t2-t1))
         S <- exp(-1*mu(data[i, 4])*(t2-t1))
         if(ind == 0) {
-          #L <- L + (1 -delta)*(-1*log_s) + delta*(1-log_s)
           L <- L + (1 - delta)*log(S) + delta*log(1-S)
         } else {
           yj <- data[i,5]
@@ -382,15 +393,17 @@ optimize <- function(data, starting_params,  formulas, verbose,
 #'@param algorithm An optimization algorithm used, can be one of those: NLOPT_LN_NEWUOA,NLOPT_LN_NEWUOA_BOUND or NLOPT_LN_NELDERMEAD. Default: NLOPT_LN_NELDERMEAD
 #'@param lb Lower bound of parameters under estimation.
 #'@param ub Upper bound of parameters under estimation.
+#'@param verbose turns on verbosing output.
 #'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta.
-#' @examples
-#' library(spm)
-#' #Data preparation:
-#' n <- 1000
-#' data <- simdata_time_dep(N=n)
-#' # Estimation:
-#' opt.par <- spm_time_dep(data[,2:6])
-#' opt.par
+#'@examples
+#'library(spm)
+#'#Data preparation:
+#'n <- 100
+#'data <- simdata_time_dep(N=n)
+#'# Estimation:
+#'opt.par <- spm_time_dep(data[,2:6])
+#'opt.par
+#'
 spm_time_dep <- function(x, 
                          start=list(a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3),
                          f=list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"), 
@@ -399,7 +412,7 @@ spm_time_dep <- function(x,
                          lb=NULL, ub=NULL,
                          verbose=FALSE) {
   formulas <- f
-  data <- x
+  data <- as.matrix(x)
   formulas.work = list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
   for(item in formulas) {
     formulas.work[[item]] <- formulas[[item]]

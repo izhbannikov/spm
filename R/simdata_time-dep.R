@@ -1,14 +1,16 @@
 #' Simulation function for continuous trait with time-dependant coefficients.
 #' @param N Number of individuals.
-#' @param formulas : a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)")
-#' @param ystart A starting value of covariates.
+#' @param f a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)")
+#' @param step An interval between two observations, a random uniformally-distributed value is then added to this step.
 #' @param tstart A number that defines starting time (30 by default).
 #' @param tend A number, defines final time (105 by default).
+#' @param ystart A starting value of covariates.
+#' @param sd0 A standard deviation for modelling the next covariate value.
 #' @return A table with simulated data.
 #' @examples
 #' library(spm)
 #' dat <- simdata_time_dep(N=1000)
-#' dat
+#' head(dat)
 simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-5", ft="80", bt="2.5", mu0t="1e-1"),
                          step=1, tstart=30, tend=105, ystart=80, sd0=2) {
   formulas <- f  

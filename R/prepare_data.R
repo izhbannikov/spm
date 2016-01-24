@@ -1,15 +1,11 @@
+#'Filling the last cell
+#'@param x a data vector.
 fill_last <- function(x) {
   na_idx <- which(is.na(x))
   unique_elements <- unique(x[-na_idx])
   set_diff <- unique_elements[length(unique_elements)]
   x[na_idx] <- set_diff
   x
-}
-
-approx2p <- function(t1, y1, t2, y2, t) {
-  # 2-point linear interpolation:
-  y <- y1 + (t - t1)/(t2 - t1)*(y2 -y1)
-  y
 }
 
 #'Data pre-processing for analysis with stochastic process model methodology.
@@ -31,11 +27,11 @@ approx2p <- function(t1, y1, t2, y2, t) {
 #'@param verbose A verbosing output indicator. Default=FALSE.
 #'@return A list of two elements: first element contains a preprocessed data for continuous model, with arbitrary intervals between observations  and 
 #'second element contains a prepocessed data table for a discrete model (with constant intervals between observations).
-#'@examples
-#'library(spm)
-#'data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"))
-#'head(data[[1]])
-#'head(data[[2]])
+#@examples
+#library(spm)
+#data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"))
+#head(data[[1]])
+#head(data[[2]])
 prepare_data <- function(x, y, 
                          col.id=NULL, 
                          col.status=NULL,
@@ -123,6 +119,15 @@ prepare_data <- function(x, y,
   list(model.continuous=data_cont, model.discrete=data_discr)
 }
 
+#'Prepares continuouts-time dataset.
+#'@param longdat a longitudinal study dataset.
+#'@param vitstat vital (mortality) statistics.
+#'@param col.status.ind index of "status" column.
+#'@param col.id.ind subject id column index.
+#'@param col.age.ind index of the age column.
+#'@param col.age.event.ind an index of the column which represents the time in which event occured.
+#'@param col.covar.ind a set of column indexes which represent covariates.
+#'@param verbose turns on/off verbosing output.
 prepare_data_cont <- function(longdat, 
                               vitstat, 
                               col.status.ind, 
@@ -201,6 +206,16 @@ prepare_data_cont <- function(longdat,
   
 }
 
+#'Prepares discrete-time dataset.
+#'@param longdat a longitudinal study dataset.
+#'@param vitstat vital (mortality) statistics.
+#'@param interval interval between observations.
+#'@param col.status.ind index of "status" column.
+#'@param col.id.ind subject id column index.
+#'@param col.age.ind index of the age column.
+#'@param col.age.event.ind an index of the column which represents the time in which event occured.
+#'@param col.covar.ind a set of column indexes which represent covariates.
+#'@param verbose turns on/off verbosing output.
 prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose) {
   
   # Interpolation

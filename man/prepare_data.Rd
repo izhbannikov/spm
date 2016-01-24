@@ -41,10 +41,4 @@ second element contains a prepocessed data table for a discrete model (with cons
 \description{
 Data pre-processing for analysis with stochastic process model methodology.
 }
-\examples{
-library(spm)
-data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"))
-head(data[[1]])
-head(data[[2]])
-}
 

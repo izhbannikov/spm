@@ -23,6 +23,8 @@ spm_time_dep(x, start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0
 \item{lb}{Lower bound of parameters under estimation.}
 
 \item{ub}{Upper bound of parameters under estimation.}
+
+\item{verbose}{turns on verbosing output.}
 }
 \value{
 A set of estimated parameters a, f1, Q, f, b, mu0, theta.
@@ -33,10 +35,11 @@ spm_time_dep : a function that estimates parameters from the model with time-dep
 \examples{
 library(spm)
 #Data preparation:
-n <- 1000
+n <- 100
 data <- simdata_time_dep(N=n)
 # Estimation:
 opt.par <- spm_time_dep(data[,2:6])
 opt.par
+
 }
 
