@@ -15,6 +15,8 @@ spm_discrete(dat, k = 1, theta_range = seq(0.02, 0.1, by = 0.001),
 \item{theta_range}{A range of theta parameter (axe displacement of Gompertz function), default: from 0.001 to 0.09 with step of 0.001.}
 
 \item{tol}{A tolerance threshold for matrix inversion (NULL by default).}
+
+\item{verbose}{An indicator of verbosing output.}
 }
 \value{
 A list of two elements: (1) estimated parameters u, R, b, Sigma, Q, mu0, theta and
@@ -27,13 +29,6 @@ Discrete multi-dimensional optimization
 \details{
 This function is way much faster that continuous \code{spm_continuous_MD(...)} (but less precise) and used mainly in 
 estimation a starting point for the \code{spm_continuous_MD(...)}.
-}
-\examples{
-library(spm)
 # Prepare data for optimization
-data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"))
-# Parameters estimation
-pars <- spm_discrete(data[[2]])
-pars
 }
 

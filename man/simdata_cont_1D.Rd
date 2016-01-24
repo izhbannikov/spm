@@ -11,25 +11,29 @@ simdata_cont_1D(N = 10, aH = -0.05, f1H = 80, QH = 2e-07, fH = 80,
 \arguments{
 \item{N}{Number of individuals.}
 
+\item{aH}{A k by k matrix, which characterize the rate of the adaptive response.}
+
+\item{f1H}{A particular state, which if a deviation from the normal (or optimal). This is a vector with length of k.}
+
+\item{QH}{A matrix k by k, which is a non-negative-definite symmetric matrix.}
+
+\item{fH}{A vector-function (with length k) of the normal (or optimal) state.}
+
+\item{bH}{A diffusion coefficient, k by k matrix.}
+
+\item{mu0H}{mortality at start period of time.}
+
+\item{thetaH}{A displacement coefficient of the Gompertz function.}
+
+\item{step}{An interval between two observations, a random uniformally-distributed value is then added to this step.}
+
 \item{tstart}{A number that defines starting time (30 by default).}
 
 \item{tend}{A number, defines final time (105 by default).}
 
 \item{ystart}{A vector with length equal to number of dimensions used, defines starting values of covariates.}
 
-\item{a}{A k by k matrix, which characterize the rate of the adaptive response.}
-
-\item{f1}{A particular state, which if a deviation from the normal (or optimal). This is a vector with length of k.}
-
-\item{Q}{A matrix k by k, which is a non-negative-definite symmetric matrix.}
-
-\item{f}{A vector-function (with length k) of the normal (or optimal) state.}
-
-\item{b}{A diffusion coefficient, k by k matrix.}
-
-\item{mu0}{mortality at start period of time.}
-
-\item{theta}{A displacement coefficient of the Gompertz function.}
+\item{sd0}{A standard deviation for modelling the next covariate value.}
 }
 \value{
 A table with simulated data.
@@ -39,7 +43,7 @@ One-dimensional simulation function for continuous time (arbitrary intervals bet
 }
 \examples{
 library(spm)
-dat <- simdata_cont_1D(N=2500)
+dat <- simdata_cont_1D(N=250)
 dat
 }
 

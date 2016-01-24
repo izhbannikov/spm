@@ -8,14 +8,16 @@
 #' @param mu0 mortality at start period of time.
 #' @param theta A displacement coefficient of the Gompertz function.
 #' @param ystart A vector with length equal to number of dimensions used, defines starting values of covariates.
+#' @param step a discrete step size between two observations. A random uniform value is then added to this step size.
 #' @param tstart A number that defines starting time (30 by default).
 #' @param tend A number, defines final time (105 by default).
+#' @param sd0 a standard deviation for modelling the next covariate value.
 #' @param k number of dimensions (k = 1 by default).
 #' @return A table with simulated data.
 #' @examples
 #' library(spm)
 #' dat <- simdata_cont(N=500)
-#' dat
+#' head(dat)
 #
 simdata_cont <- function(N=100, a=-0.05, f1=80, Q=2e-08, f=80, b=5, mu0=2e-05, theta=0.08,
                          step=1, tstart=30, tend=105, ystart=80, sd0=2, k=1) {

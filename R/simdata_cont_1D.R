@@ -1,19 +1,21 @@
 #' One-dimensional simulation function for continuous time (arbitrary intervals between observations).
 #' @param N Number of individuals.
-#' @param a A k by k matrix, which characterize the rate of the adaptive response.
-#' @param f1 A particular state, which if a deviation from the normal (or optimal). This is a vector with length of k.
-#' @param Q A matrix k by k, which is a non-negative-definite symmetric matrix.
-#' @param f A vector-function (with length k) of the normal (or optimal) state.
-#' @param b A diffusion coefficient, k by k matrix.
-#' @param mu0 mortality at start period of time.
-#' @param theta A displacement coefficient of the Gompertz function.
+#' @param aH A k by k matrix, which characterize the rate of the adaptive response.
+#' @param f1H A particular state, which if a deviation from the normal (or optimal). This is a vector with length of k.
+#' @param QH A matrix k by k, which is a non-negative-definite symmetric matrix.
+#' @param fH A vector-function (with length k) of the normal (or optimal) state.
+#' @param bH A diffusion coefficient, k by k matrix.
+#' @param mu0H mortality at start period of time.
+#' @param thetaH A displacement coefficient of the Gompertz function.
+#' @param step An interval between two observations, a random uniformally-distributed value is then added to this step.
 #' @param ystart A vector with length equal to number of dimensions used, defines starting values of covariates.
 #' @param tstart A number that defines starting time (30 by default).
 #' @param tend A number, defines final time (105 by default).
+#' @param sd0 A standard deviation for modelling the next covariate value.
 #' @return A table with simulated data.
 #' @examples
 #' library(spm)
-#' dat <- simdata_cont_1D(N=2500)
+#' dat <- simdata_cont_1D(N=250)
 #' dat
 simdata_cont_1D <- function(N=10, aH=-0.05, f1H=80, QH=2e-07, fH=80, bH=5, mu0H=2e-05, thetaH=0.08,
                          step=0.05, tstart=30, tend=105, ystart=80, sd0=4) {

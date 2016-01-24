@@ -2,7 +2,7 @@
 title: "spm: an R-infrastructure package for Stochastic Process Modeling of survival trajectories from longitudinal studies"
 author: "Ilya Y. Zhbannikov"
 date: "`r Sys.Date()`"
-output: rmarkdown::pdf_document
+output: rmarkdown::html_document
 vignette: >
   %\VignetteIndexEntry{spm}
   %\VignetteEngine{knitr::rmarkdown}

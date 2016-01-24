@@ -10,20 +10,20 @@
 #'(2) a list of model parameter estimates for the continuous model type described in "", Yashin et al, 2007.
 #'
 #'For the "time-dependent" model (model parameters depend on time): a set of model parameter estimates.
-#' @examples
-#'library(spm)
-#'#Prepare data for optimization
-#'data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"))
-#'#Parameters estimation (default model: discrete-time):
-#'p.discr.model <- spm(data)
-#'p.discr.model
-#'# Continuous-time model:
-#'p.cont.model <- spm(data, model="continuous")
-#'p.cont.model
-#'# Model with time-dependent coefficients:
-#'data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"), covariates="BMI")
-#'p.td.model <- spm(data, model="time-dependent")
-#'p.td.model
+#examples
+#library(spm)
+##Prepare data for optimization
+#data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"))
+##Parameters estimation (default model: discrete-time):
+#p.discr.model <- spm(data)
+#p.discr.model
+## Continuous-time model:
+#p.cont.model <- spm(data, model="continuous")
+#p.cont.model
+## Model with time-dependent coefficients:
+#data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"), covariates="BMI")
+#p.td.model <- spm(data, model="time-dependent")
+#p.td.model
 #'
 spm <- function(x, model="discrete", formulas = NULL, verbose=FALSE, tol=NULL) {
   
@@ -78,7 +78,7 @@ spm <- function(x, model="discrete", formulas = NULL, verbose=FALSE, tol=NULL) {
       res <- NA
     
     } else {
-      spm_continuous(data, 
+      spm_continuous(as.matrix(data), 
                     a=pars$pars2$a, 
                     f1=pars$pars2$f1, 
                     Q=pars$pars2$Q, 
@@ -139,7 +139,7 @@ spm <- function(x, model="discrete", formulas = NULL, verbose=FALSE, tol=NULL) {
     pars <- spm_discrete(dat=x[[2]],k=k)
     
     res.t <- spm_time_dep(x[[1]][,2:dim(x[[1]])[2]], 
-                            formulas = formulas.work,
+                            f = formulas.work,
                             start=list(a=pars$pars2$a, f1=pars$pars2$f1, Q=pars$pars2$Q, f=pars$pars2$f, b=pars$pars2$b, mu0=pars$pars2$mu0))
     
     res <- get("results",envir=.GlobalEnv)

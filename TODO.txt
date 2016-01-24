@@ -1,4 +1,0 @@
-TO DO:
-
-- Test bench (add unit tests)
-- Automatic determination of number of dimensions (k) from the input data
