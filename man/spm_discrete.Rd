@@ -29,6 +29,12 @@ Discrete multi-dimensional optimization
 \details{
 This function is way much faster that continuous \code{spm_continuous_MD(...)} (but less precise) and used mainly in 
 estimation a starting point for the \code{spm_continuous_MD(...)}.
-# Prepare data for optimization
+}
+\examples{
+library(spm)
+data <- simdata_discr(N=2000)
+#Parameters estimation
+pars <- spm_discrete(data)
+pars
 }
 
