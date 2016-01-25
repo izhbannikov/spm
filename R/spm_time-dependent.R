@@ -243,21 +243,11 @@ optimize <- function(data, starting_params,  formulas, verbose,
   maxlik_t <- function(params) {
     stopflag <- FALSE
     
-    #a <- params[1]
-    #f1 <- params[2]
-    #Q <- params[3]
-    #f <- params[4]
-    #b <- params[5] 
-    #mu0 <- params[6]
-    
-    
     if(verbose)
       cat("Iteration: ", iteration, "\n")
     
     names(params) <- names(stpar)
     
-    #print(stpar)
-    #print(params)
     for(p in names(stpar)) {
       assign(p, params[[p]], envir = globalenv())
       results[[p]] <<- params[[p]]
@@ -269,20 +259,17 @@ optimize <- function(data, starting_params,  formulas, verbose,
     sigma_sq <- function(t1, t2) {
       # t2 = t_{j}, t1 = t_{j-1}
       ans <- bt(t1)*(t2-t1)
-      #ans <- b*(t2-t1)
       ans
     }
   
     m <- function(y, t1, t2) {
       # y = y_{j-1}, t1 = t_{j-1}, t2 = t_{j}
       ans <- y + at(t1)*(y - f1t(t1))*(t2 - t1)
-      #ans <- y + a*(y - f1)*(t2 - t1)
       ans
     }
   
     mu <- function(y) {
       ans <- mu0t(t) + (y - ft(t))^2*Qt(t)
-      #ans <- mu0 + (y - f)^2*Q
       ans
     }
     

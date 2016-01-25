@@ -9,13 +9,12 @@
 #'from b and mu0 from the second list.
 #'@details This function is way much faster that continuous \code{spm_continuous_MD(...)} (but less precise) and used mainly in 
 #'estimation a starting point for the \code{spm_continuous_MD(...)}.
-#examples
-#library(spm)
-#'# Prepare data for optimization
-#data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"))
-## Parameters estimation
-#pars <- spm_discrete(data[[2]])
-#pars
+#'@examples
+#'library(spm)
+#'data <- simdata_discr(N=2000)
+#'#Parameters estimation
+#'pars <- spm_discrete(data)
+#'pars
 spm_discrete <- function(dat,k=1, theta_range=seq(0.02,0.1,by=0.001), tol=NULL, verbose=FALSE) {
   options(digits=10)
   # Logistic regression:
