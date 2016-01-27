@@ -14,13 +14,13 @@ setlb <- function(k, params) {
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){res=-1.5})))
   # f1H
   start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, 0.05*params[n], -0.05*params[n]) }))) 
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n]+ifelse(params[n] > 0, -0.05*params[n], 0.05*params[n]) }))) 
   # QH
   start=end+1; end=start+k^2-1
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ 0 })))
   # fH
   start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, 0.05*params[n], -0.05*params[n]) })) )
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.05*params[n], 0.05*params[n]) })) )
   # bH
   start=end+1; end=start+k-1
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] <= 0, 0.05*params[n], -0.05*params[n]) })) )
@@ -65,7 +65,7 @@ setub <- function(k, params) {
   upper_bound <- c( upper_bound, 0.1 )
   # theta
   start=end+1; end=start
-  upper_bound <- c( upper_bound, 0.1 )
+  upper_bound <- c( upper_bound, 0.5 )
   
   upper_bound
 }
