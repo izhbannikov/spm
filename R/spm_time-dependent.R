@@ -30,14 +30,14 @@ optimize <- function(data, starting_params,  formulas, verbose,
   # Current results:
   results <- list()
   
-  N <- dim(data)[1]
-  at <- NULL
-  f1t <- NULL
-  Qt <- NULL
-  ft <- NULL
-  bt <- NULL
-  mu0t <- NULL
-  variables <- c()
+  N <<- dim(data)[1]
+  at <<- NULL
+  f1t <<- NULL
+  Qt <<- NULL
+  ft <<- NULL
+  bt <<- NULL
+  mu0t <<- NULL
+  variables <<- c()
   
   # Assigning parameters:
   p.const.ind <- c()
@@ -268,7 +268,7 @@ optimize <- function(data, starting_params,  formulas, verbose,
       ans
     }
   
-    mu <- function(y) {
+    mu <- function(y,t) {
       ans <- mu0t(t) + (y - ft(t))^2*Qt(t)
       ans
     }
@@ -292,7 +292,7 @@ optimize <- function(data, starting_params,  formulas, verbose,
         delta <- data[i,1]
         t1 <- data[i, 2]; t2 <- data[i, 3]
         ind <- ifelse(is.na(data[i, 5]), 0, 1)
-        S <- exp(-1*mu(data[i, 4])*(t2-t1))
+        S <- exp(-1*mu(data[i, 4],t1)*(t2-t1))
         if(ind == 0) {
           L <- L + (1 - delta)*log(S) + delta*log(1-S)
         } else {
