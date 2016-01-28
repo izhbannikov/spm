@@ -58,9 +58,13 @@ spm_discrete <- function(dat,k=1, theta_range=seq(0.02,0.1,by=0.001), tol=NULL, 
     
     if(verbose) {cat(coef(res.pois))}
     
-    res <- glm(reg_formula, data=as.data.frame(newdat), family = binomial(link = log), 
-               start=coef(res.pois), 
-               control=list(maxit = 250, trace=verbose))
+    tryCatch({res <- glm(reg_formula, data=as.data.frame(newdat), family = binomial(link = log), 
+                         start=coef(res.pois), 
+                         control=list(maxit = 250, trace=verbose))
+             },  
+             error=function(e) {if(verbose  == TRUE) {print(e)}}, 
+             finally=res.pois
+             )
     
     coef <- -1*res$coefficients 
     result <- rbind(result, c(theta, coef, logLik(res)[1]))
