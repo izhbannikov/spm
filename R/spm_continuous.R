@@ -11,22 +11,22 @@ setlb <- function(k, params) {
   # Setting boundaries for coefficients:
   # aH
   start=1; end=k^2
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){res=-1.5})))
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.5*params[n], 0.5*params[n]) }))) 
   # f1H
   start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n]+ifelse(params[n] > 0, -0.05*params[n], 0.05*params[n]) }))) 
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.05*params[n], 0.05*params[n]) }))) 
   # QH
   start=end+1; end=start+k^2-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ 0 })))
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ ifelse(params[n] > 0, 0, params[n]+0.05*params[n]) })))
   # fH
   start=end+1; end=start+k-1
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.05*params[n], 0.05*params[n]) })) )
   # bH
   start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] <= 0, 0.05*params[n], -0.05*params[n]) })) )
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, -0.05*params[n], 0.05*params[n]) })) )
   # mu0
   start=end+1; end=start
-  lower_bound <- c( lower_bound, 0 )
+  lower_bound <- c( lower_bound, 1e-7 )
   # theta
   start=end+1; end=start
   lower_bound <- c( lower_bound, 1e-6 )
@@ -47,10 +47,10 @@ setub <- function(k, params) {
   # Setting boundaries for coefficients:
   # aH
   start=1; end=k^2
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){res=0})))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 0.5*params[n], 0*params[n]) })))
   # f1H
   start=end+1; end=start+k-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] >= 0, 0.05*params[n], -0.05*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 0.05*params[n], -0.05*params[n]) })))
   # QH
   start=end+1; end=start+k^2-1
   upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {params[n] + ifelse(params[n] > 0, 0.5*params[n], -0.5*params[n] )})))
@@ -218,10 +218,6 @@ spm_continuous <- function(dat,
         print(results_tmp)
       }
       
-    } else {
-      cat("Optimization stopped. Parametes achieved lower or upper bound.\nPerhaps you need more data or these returned parameters might be enough.\n")
-      print("###########################################################")
-      res <<- get("results",envir=.GlobalEnv)
     }
     
     res <- -1*res
@@ -240,34 +236,32 @@ spm_continuous <- function(dat,
                                               "xtol_rel"=1.0e-8),
                  lb = bounds$lower_bound, ub = bounds$upper_bound)
             
-            i <- 1
-            for(p in names(results)) {
-              results[[p]] <<- ans$solution[i]
-              i <- i + 1
-              if(verbose)
-                cat(paste(p, results[[p]]), " ")
-            }
-            
+            #for(p in names(results)) {
+            #  
+            #  results[[p]] <<- ans$solution
+            #  if(verbose)
+            #    cat(paste(p, results[[p]]), " ")
+            #}
            },  
            error=function(e) {if(verbose  == TRUE) {print(e)}}, 
            finally=NA)
   
   
   
-  res <- get("results",envir=.GlobalEnv)
+  final_results <- get("results",envir=.GlobalEnv)
   
   # Check if any parameter achieved upper/lower limit and report it:
   limit <- FALSE
-  for(i in 1:length(res)) {
-    if(length(intersect(res[[i]],c(bounds$lower_bound[i], bounds$upper_bound[i]))) >= 1) {
-      cat("Parameter", names(res)[i], "achieved lower/upper bound.\n")
-      cat(res[[i]],"\n")
+  for(i in 1:length(final_results)) {
+    if(length(intersect(final_results[[i]],c(bounds$lower_bound[i], bounds$upper_bound[i]))) >= 1) {
+      cat("Parameter", names(final_results)[i], "achieved lower/upper bound.\n")
+      cat(final_results[[i]],"\n")
       limit <- TRUE
     }
   }
-  res$limit <- limit
+  final_results$limit <- limit
   
-  invisible(res)
+  invisible(final_results)
 }
 
 
