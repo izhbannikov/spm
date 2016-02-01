@@ -31,8 +31,9 @@ simdata_discr <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, th
   u_ <- matrix((f1 %*% (-1*a)), nrow=k, byrow=T)
   R_ <- matrix((diag(k) + a), nrow=k, ncol=k, byrow=T)
   Sigma_ <- matrix(b, nrow=k, ncol=1, byrow=T)
-  mu0_ <- mu0 + (f %*% Q) %*% t(f)
-  b_ <- matrix((-1*f %*% Q - f %*% Q), nrow=k, ncol=1, byrow=T)
+  mu0_ <- mu0 + f %*% Q %*% t(f)
+  #b_ <- matrix((-1*f %*% Q - f %*% Q), nrow=k, ncol=1, byrow=T)
+  b_ <- matrix((-2*f %*% Q), nrow=k, ncol=1, byrow=T)
   Q_ <- matrix(Q, nrow=k, ncol=k, byrow=T)
   theta_ <- theta
   ystart = matrix(ystart, nrow=k, ncol=1)

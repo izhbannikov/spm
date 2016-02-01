@@ -15,7 +15,7 @@
 #'#Parameters estimation
 #'pars <- spm_discrete(data)
 #'pars
-spm_discrete <- function(dat,k=1, theta_range=seq(0.02,0.1,by=0.001), tol=NULL, verbose=FALSE) {
+spm_discrete <- function(dat,k=1, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verbose=FALSE) {
   options(digits=10)
   # Logistic regression:
   total_cols <- (1 + k + (k*(k+1))/2) + 2
@@ -120,7 +120,7 @@ spm_discrete <- function(dat,k=1, theta_range=seq(0.02,0.1,by=0.001), tol=NULL, 
   }
   for(i in 1:k) {
     for(j in i:k) {
-      Q[i,j] <- abs(Q[i,j])
+      #Q[i,j] <- abs(Q[i,j])
       Q[j,i] <- Q[i,j]
     }
   }
