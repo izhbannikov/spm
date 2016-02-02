@@ -6,7 +6,6 @@
 #include <vector>
 #include <math.h> 
 #include <iostream>
-//#include <Rcpp.h>
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 
@@ -43,19 +42,12 @@ double mu(double t, arma::mat y1, arma::mat gamma1, arma::mat fH, arma::mat f1H,
 void func1(arma::mat *res, double t, arma::mat *y, arma::mat fH, arma::mat f1H, arma::mat aH, 
           arma::mat bH, arma::mat QH, double theta) {
   
-  // y[0] = m, k by 1, y[1] = gamma, k by k, where k is # of dimensions
-  // dy1 = dm/dt, dy2 = dgamma/dt
-  
   arma::mat hfH, hf1H, dy1, dy2;
   hfH = fH.t() - y[0]; 
   hf1H = f1H.t() - y[0];
   
-  //dy1 = -1.00 * (aH*hf1H) + 2.00 * ((y[1]*Q(t, QH, theta))*hfH);
-  //dy2 = aH*y[1] + y[1]*aH.t() + bH*bH.t() - 2.00 * ((y[1]*Q(t, QH, theta))*y[1]);
   res[0] = -1.00 * (aH*hf1H) + 2.00 * ((y[1]*Q(t, QH, theta))*hfH);
   res[1] = aH*y[1] + y[1]*aH.t() + bH*bH.t() - 2.00 * ((y[1]*Q(t, QH, theta))*y[1]);
-  
-  //res[0] = dy1; res[1] = dy2;
   
 }
 
@@ -81,9 +73,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
     double thetaH  = as<double>(thetah);
     int dim = as<int>(k);
     //Actual data set
-    //std::cout << "1\n";
     arma::mat dd = as<arma::mat>(dat);  
-    //std::cout << "passed\n";
     double L; // Likelihood
     
     //End of data loading
@@ -102,15 +92,12 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
     
     L = 0;
     double  nsteps = 2;
-    //std::cout << N << std::endl;
-    
     
     for(int i=0; i<N; i++) {
       //Solving differential equations on intervals:
       double t1 = dd(i,1); 
       double t2 = dd(i,2);
-      //std::cout<< i << " " << t1 <<  " " << t2  << " " << M << std::endl;
-    
+      
       int jj=0;
       for(int ii=3; ii<M; ii+=2) {
         y1(jj,0) = dd(i,ii);
@@ -124,57 +111,38 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
       }
       
       double h = tdiff/nsteps;
-      //std::cout << h << std::endl;
+      
       //Integration:
       gamma1.zeros(); // set gamma1 to zero matrix
-      //std::cout << "2\n";
       double s = h/3.00*(-1.00)*mu(t1, y1, gamma1, fH, f1H, mu0H, thetaH, QH);
-      //std::cout << "passed 2\n";
       double t = t1;
       out[0] = y1;
       out[1] = gamma1;
-      //cout << "out0_1 =" << out[0] << " out1_1=" << out[1] << "\n";
       double ifactor;
       
       for(int j = 0; j < nsteps; j++) {
-        /*cout << "j=" << j << " h=" << h << endl;
-        cout << "y1 =" << y1 << " gamma1=" << gamma1 << "\n";
-        cout << "out0 =" << out[0] << " out1=" << out[1] << "\n";*/
          //Runge-Kutta method:
          func1(k1ar, t, out, fH, f1H, aH, bH, QH, thetaH);
          yfin[0] = out[0] + h/6.00*k1ar[0];
          yfin[1] = out[1] + h/6.00*k1ar[1];
          ytmp[0] = out[0] + h/2.00*k1ar[0];
          ytmp[1] = out[1] + h/2.00*k1ar[1];
-         /*cout << "k1ar0: " << k1ar[0] << " k1ar1=" << k1ar[1]  << "\n"; 
-         cout << "ytmp0: " << ytmp[0] << " ytmp1=" << ytmp[1]  << "\n"; 
-         cout << "k2ar0: " << k2ar[0] << " k2ar1=" << k2ar[1] << "\n"; */
          
          func1(k2ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
          yfin[0] = yfin[0] + h/3.00*k2ar[0];
          yfin[1] = yfin[1] + h/3.00*k2ar[1];
          ytmp[0] = out[0] + h/2.00*k2ar[0];
          ytmp[1] = out[1] + h/2.00*k2ar[1];
-         /*cout << "k2ar0: " << k2ar[0] << " k2ar1=" << k2ar[1] << "\n"; 
-         cout << "ytmp0: " << ytmp[0] << " ytmp1=" << ytmp[1]  << "\n";*/
          
          func1(k3ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
          yfin[0] = yfin[0] + h/3.00*k3ar[0];
          yfin[1] = yfin[1] + h/3.00*k3ar[1];
          ytmp[0] = out[0] + h*k3ar[0];
          ytmp[1] = out[1] + h*k3ar[1];
-         /*cout << "k3ar0: " << k3ar[0] << " k3ar1=" << k3ar[1] << "\n"; 
-         cout << "ytmp0: " << ytmp[0] << " ytmp1=" << ytmp[1]  << "\n";*/
          
          func1(k4ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
          out[0] = yfin[0] + h/6.00*k4ar[0];
          out[1] = yfin[1] + h/6.00*k4ar[1];
-         //if(isnan(out[1](0,0))) {
-        /* cout << "k4ar0: " << k4ar[0] << " k4ar1=" << k4ar[1] << " ytmp[0]: " << ytmp[0] << " ytmp[1]: " << ytmp[1] << "\n"; 
-         cout << "out0=" << out[0] << " out1=" << out[1]  << "\n";
-        cout << "t =" << t << " f=" << fH << " f1H=" << f1H << " " << aH << " " << bH << " " << QH << " " << thetaH << "\n";
-          */ 
-         //}
          
          t = t + h;
       
@@ -188,7 +156,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
             ifactor = 4.00;
           }
         }
-        //cout << ifactor << "\n";
+        
         s = s + ifactor*h/3.00*(-1.00)*mu(t,out[0],out[1], fH, f1H, mu0H, thetaH, QH);
         
       }
@@ -198,35 +166,12 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
       double pi = 3.141592654;
       
       if(dd(i,0) == 0) { 
-        
-        //cout << "QH:\n" << QH << "\n" << "gamma:\n" << gamma2 << "\nm:" << m2 << "\n" << y2 << "\nL:" << L << "\n";
         arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*pinv(gamma2,0.000000000001)*(m2-y2);
-        //arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*inv(gamma2)*(m2-y2);
         L += s + exp(0,0);
-        //cout << exp << endl;
-        /*if((det(gamma2) < 0) && (det(QH) > 0)) {
-          cout << "Det gamma < 0\n";
-          cout << "i:\n" << i << "\nt1:\n" << t1 << "\nt2:\n" << t2 << "\ny1:\n" << y1 << "\ny2:\n" << y2 << " "<< m2 << "\n";
-          cout << "QH:\n" << QH << ", det: " << det(QH) << "\ngamma:\n" << gamma2 << ", get: " << det(gamma2) << "\nbH:" << bH << "\n" << bH*bH.t() << "\nL:" << L << "\n";
-          cout << nsteps << "\n";
-          break;
-        }
-        if(isnan(exp(0,0))) {
-          cout << "Det gamma < 0\n";
-          cout << "i:\n" << i << "\nt1:\n" << t1 << "\nt2:\n" << t2 << "\ny1:\n" << y1 << "\ny2:\n" << y2 << "\n";
-          cout << "QH:\n" << QH << ", det: " << det(QH) << "\ngamma:\n" << gamma2 << ", get: " << det(gamma2) << "\nbH:" << bH << "\n" << bH*bH.t() << "\nL:" << L << "\n";
-          cout << nsteps << "\n";
-          break;
-        }*/
       } else {
-        //cout << "??\n";
         double logprobi = log(1.00 - exp(-1.00*mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH)));
-        //cout << s << " " << logprobi << " " << exp(-1.00*mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH))  <<"\n";
         L += s + logprobi;
-        //cout << s << " " << logprobi << " " << m2 << " " << gamma2 << "\n";
       }
-      
-      
     }
     
     delete[] out;
@@ -237,7 +182,6 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
     delete[] k3ar;
     delete[] k4ar;
     
-    //std::cout << L << "\n";
     return(Rcpp::wrap(L));
 }
 

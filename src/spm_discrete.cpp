@@ -24,8 +24,6 @@ double mu(double t, arma::mat bb, arma::mat y, double mu0, double theta, arma::m
 double mu(double t, arma::mat bb, arma::mat y, double mu0, double theta, arma::mat Q) {
   arma::mat mu_cmp;
   mu_cmp = (mu0 + bb*y + Q*(y*y))*exp(theta*t);
-  //mu_cmp = (mu0 + bb*y + Q*(y*y))*exp(theta);
-  //std::cout << mu0 << " " << bb << " " << Q << " " << y << " " << theta << " " << t << " " << mu_cmp  << std::endl;
   return mu_cmp(0,0);
 }
 
@@ -48,11 +46,9 @@ RcppExport SEXP complik_discrete(SEXP dat, SEXP n, SEXP m, SEXP mu0, SEXP q, SEX
     arma::mat y2(dim,1);
     
     L = 0;
-    //std::cout << N << " " << M << std::endl;
     for(int i=0; i<N; i++) {
       //Solving differential equations on intervals:
       double t1 = dd(i,1); 
-      //std::cout << t1 << " " << t2 << std::endl;
       int jj=0;
       for(int ii=3; ii<M; ii+=2) {
         y1(jj,0) = dd(i,ii);
@@ -61,7 +57,7 @@ RcppExport SEXP complik_discrete(SEXP dat, SEXP n, SEXP m, SEXP mu0, SEXP q, SEX
       }
       
       double mu_computed = mu(t1, bb, y1, mumu0, theta_opt, Q);
-      //std::cout << mu_computed << std::endl;
+      
       if(mu_computed < 0) 
         mu_computed = 1e-15;
       if(dd(i,0) == 0) { 
@@ -72,7 +68,7 @@ RcppExport SEXP complik_discrete(SEXP dat, SEXP n, SEXP m, SEXP mu0, SEXP q, SEX
       
     }
     
-    std::cout << L << "\n";
+    
     return(Rcpp::wrap(L));
 }
 
