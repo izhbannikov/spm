@@ -10,8 +10,5 @@ Vital (mortality) statistics.
 \author{
 Ilya Y Zhbannikov \email{ilya.zhbannikov@duke.edu}
 }
-\references{
-\url{}
-}
 \keyword{data}
 

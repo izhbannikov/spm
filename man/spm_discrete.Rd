@@ -31,10 +31,12 @@ This function is way much faster that continuous \code{spm_continuous_MD(...)} (
 estimation a starting point for the \code{spm_continuous_MD(...)}.
 }
 \examples{
+\dontrun{ 
 library(spm)
 data <- simdata_discr(N=2000)
 #Parameters estimation
 pars <- spm_discrete(data)
 pars
+}
 }
 

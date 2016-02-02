@@ -42,8 +42,10 @@ A table with simulated data.
 Multi-dimension simulation function
 }
 \examples{
+\dontrun{ 
 library(spm)
 data <- simdata_discr(N=1000, ystart=80, k=1)
 head(data)
+}
 }
 

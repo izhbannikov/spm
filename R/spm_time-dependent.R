@@ -30,14 +30,14 @@ optimize <- function(data, starting_params,  formulas, verbose,
   # Current results:
   results <- list()
   
-  N <<- dim(data)[1]
-  at <<- NULL
-  f1t <<- NULL
-  Qt <<- NULL
-  ft <<- NULL
-  bt <<- NULL
-  mu0t <<- NULL
-  variables <<- c()
+  N <- dim(data)[1]
+  at <- NULL
+  f1t <- NULL
+  Qt <- NULL
+  ft <- NULL
+  bt <- NULL
+  mu0t <- NULL
+  variables <- c()
   
   # Assigning parameters:
   p.const.ind <- c()
@@ -382,7 +382,7 @@ optimize <- function(data, starting_params,  formulas, verbose,
 #'@param ub Upper bound of parameters under estimation.
 #'@param verbose turns on verbosing output.
 #'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta.
-#'@examples
+#'@examples \dontrun{ 
 #'library(spm)
 #'#Data preparation:
 #'n <- 100
@@ -390,7 +390,7 @@ optimize <- function(data, starting_params,  formulas, verbose,
 #'# Estimation:
 #'opt.par <- spm_time_dep(data[,2:6])
 #'opt.par
-#'
+#'}
 spm_time_dep <- function(x, 
                          start=list(a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3),
                          f=list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"), 

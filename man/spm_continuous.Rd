@@ -48,12 +48,15 @@ Continuous multi-dimensional optimization
 \code{spm_continuous} runs much slower that discrete but more precise and can handle time intervals with different lengths.
 }
 \examples{
+\dontrun{ 
 library(spm)
 #Reading the data:
 data <- simdata_cont(N=100)
 head(data)
 #Parameters estimation:
-pars <- spm_continuous(dat=data[,2:6],a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08, k = 1)
+pars <- spm_continuous(dat=data[,2:6],a=-0.05, f1=80, 
+					 Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08, k = 1)
 pars
+}
 }
 

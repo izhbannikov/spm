@@ -13,10 +13,11 @@
 #' @param tend A number, defines final time (105 by default).
 #' @param dt A time step (1 by default).
 #' @return A table with simulated data.
-#' @examples
+#' @examples \dontrun{ 
 #' library(spm)
 #' data <- simdata_discr(N=1000, ystart=80, k=1)
 #' head(data)
+#'}
 simdata_discr <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart=80, tstart=30, tend=105, dt=1, k=1) {
   
   if ( (dim(as.data.frame(a))[1] != k) & (dim(as.data.frame(a))[2] != k) &
