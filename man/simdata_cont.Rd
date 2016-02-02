@@ -44,8 +44,10 @@ A table with simulated data.
 Multi-dimensional simulation function for continuous trait.
 }
 \examples{
+\dontrun{ 
 library(spm)
 dat <- simdata_cont(N=500)
 head(dat)
+}
 }
 

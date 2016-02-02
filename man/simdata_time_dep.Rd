@@ -30,8 +30,10 @@ A table with simulated data.
 Simulation function for continuous trait with time-dependant coefficients.
 }
 \examples{
+\dontrun{ 
 library(spm)
 dat <- simdata_time_dep(N=1000)
 head(dat)
+}
 }
 

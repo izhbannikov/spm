@@ -33,6 +33,7 @@ A set of estimated parameters a, f1, Q, f, b, mu0, theta.
 spm_time_dep : a function that estimates parameters from the model with time-dependent coefficients.
 }
 \examples{
+\dontrun{ 
 library(spm)
 #Data preparation:
 n <- 100
@@ -40,6 +41,6 @@ data <- simdata_time_dep(N=n)
 # Estimation:
 opt.par <- spm_time_dep(data[,2:6])
 opt.par
-
+}
 }
 

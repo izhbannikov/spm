@@ -10,10 +10,11 @@
 #'(2) a list of model parameter estimates for the continuous model type described in "", Yashin et al, 2007.
 #'
 #'For the "time-dependent" model (model parameters depend on time): a set of model parameter estimates.
-#'@examples
+#'@examples \dontrun{ 
 #'library(spm)
 #'#Prepare data for optimization
-#'data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"))
+#'data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), 
+#'					   y=system.file("data","vitstat.csv",package="spm"))
 #'#Parameters estimation (default model: discrete-time):
 #'p.discr.model <- spm(data)
 #'p.discr.model
@@ -21,10 +22,12 @@
 #'p.cont.model <- spm(data, model="continuous")
 #'p.cont.model
 #'#Model with time-dependent coefficients:
-#'data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"), covariates="BMI")
+#'data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), 
+#'					   y=system.file("data","vitstat.csv",package="spm"), 
+#'					   covariates="BMI")
 #'p.td.model <- spm(data, model="time-dependent")
 #'p.td.model
-#'
+#'}
 spm <- function(x, model="discrete", formulas = NULL, verbose=FALSE, tol=NULL) {
   
   # List of available models:
@@ -131,7 +134,7 @@ spm <- function(x, model="discrete", formulas = NULL, verbose=FALSE, tol=NULL) {
     formulas.work = list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
     
     if(!is.null(formulas)) {
-      for(f in formulas) {
+      for(item in formulas) {
         formulas.work[[item]] <- formulas[[item]]
       }
     }

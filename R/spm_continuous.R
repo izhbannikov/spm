@@ -89,14 +89,16 @@ setub <- function(k, params) {
 #'@param ub Upper bound of parameters under estimation.
 #'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta.
 #'@details \code{spm_continuous} runs much slower that discrete but more precise and can handle time intervals with different lengths.
-#'@examples
+#'@examples \dontrun{ 
 #'library(spm)
 #'#Reading the data:
 #'data <- simdata_cont(N=100)
 #'head(data)
 #'#Parameters estimation:
-#'pars <- spm_continuous(dat=data[,2:6],a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08, k = 1)
+#'pars <- spm_continuous(dat=data[,2:6],a=-0.05, f1=80, 
+#'						 Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08, k = 1)
 #'pars
+#'}
 spm_continuous <- function(dat, 
                            a=-0.05, 
                            f1=80, 
@@ -127,8 +129,8 @@ spm_continuous <- function(dat,
   
   parameters <- c(a, f1, Q, f, b, mu0, theta)
   # Current results:
-  results <<- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
-  results_tmp <<- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
+  results <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
+  results_tmp <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
   iteration <- 0
   
   bounds <- list()

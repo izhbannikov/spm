@@ -14,11 +14,11 @@
 #' @param sd0 a standard deviation for modelling the next covariate value.
 #' @param k number of dimensions (k = 1 by default).
 #' @return A table with simulated data.
-#' @examples
+#' @examples \dontrun{ 
 #' library(spm)
 #' dat <- simdata_cont(N=500)
 #' head(dat)
-#
+#'}
 simdata_cont <- function(N=100, a=-0.05, f1=80, Q=2e-08, f=80, b=5, mu0=2e-05, theta=0.08,
                          step=1, tstart=30, tend=105, ystart=80, sd0=2, k=1) {
   
