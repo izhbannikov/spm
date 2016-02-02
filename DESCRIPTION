@@ -10,7 +10,7 @@ License: GPL
 Imports:
     Rcpp (>= 0.11.1),
     RcppArmadillo (>= 0.4.200.0)
-LinkingTo: Rcpp, RcppArmadillo
+LinkingTo: Rcpp,RcppArmadillo
 Depends:
     mice,sas7bdat,RcppArmadillo,stats,nloptr,tools
 Suggests:
