@@ -4,7 +4,7 @@
 \alias{spm_discrete}
 \title{Discrete multi-dimensional optimization}
 \usage{
-spm_discrete(dat, k = 1, theta_range = seq(0.02, 0.1, by = 0.001),
+spm_discrete(dat, k = 1, theta_range = seq(0.02, 0.2, by = 0.001),
   tol = NULL, verbose = FALSE)
 }
 \arguments{
