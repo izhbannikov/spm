@@ -46,7 +46,8 @@ optimize <- function(data, starting_params,  formulas, verbose,
   #---
   parameters <- trim(unlist(strsplit(formulas$at,"[\\+\\*\\(\\)]",fixed=F)))
   parameters <- parameters[which(!(parameters %in% c("t","exp")))]
-  for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
+  #for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
+  for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);}
   variables <- unique(variables)
   p.constants <- c()
   p.coeffs <- c()
@@ -70,7 +71,8 @@ optimize <- function(data, starting_params,  formulas, verbose,
   #----
   parameters <- trim(unlist(strsplit(formulas$f1t,"[\\+\\*\\(\\)]",fixed=F)))
   parameters <- parameters[which(!(parameters %in% c("t","exp")))]
-  for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);} 
+  #for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);} 
+  for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);} 
   variables <- unique(variables)
   p.constants <- c()
   p.coeffs <- c()
@@ -94,7 +96,8 @@ optimize <- function(data, starting_params,  formulas, verbose,
   #---
   parameters <- trim(unlist(strsplit(formulas$Qt,"[\\+\\*\\(\\)]",fixed=F)))
   parameters <- parameters[which(!(parameters %in% c("t","exp")))]
-  for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
+  #for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
+  for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);}
   variables <- unique(variables)
   p.constants <- c()
   p.coeffs <- c()
@@ -119,7 +122,8 @@ optimize <- function(data, starting_params,  formulas, verbose,
   #---
   parameters <- trim(unlist(strsplit(formulas$ft,"[\\+\\*\\(\\)]",fixed=F)))
   parameters <- parameters[which(!(parameters %in% c("t","exp")))]
-  for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
+  #for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
+  for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);}
   variables <- unique(variables)
   p.constants <- c()
   p.coeffs <- c()
@@ -143,7 +147,8 @@ optimize <- function(data, starting_params,  formulas, verbose,
   #---
   parameters <- trim(unlist(strsplit(formulas$bt,"[\\+\\*\\(\\)]",fixed=F)))
   parameters <- parameters[which(!(parameters %in% c("t","exp")))]
-  for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
+  #for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
+  for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);}
   variables <- unique(variables)
   p.constants <- c()
   p.coeffs <- c()
@@ -167,7 +172,8 @@ optimize <- function(data, starting_params,  formulas, verbose,
   #---
   parameters <- trim(unlist(strsplit(formulas$mu0t,"[\\+\\*\\(\\)]",fixed=F)))
   parameters <- parameters[which(!(parameters %in% c("t","exp")))]
-  for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
+  #for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
+  for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);}
   variables <- unique(variables)
   p.constants <- c()
   p.coeffs <- c()
@@ -202,7 +208,8 @@ optimize <- function(data, starting_params,  formulas, verbose,
   
   for(p in names(stpar)) {
     results[[p]] <- stpar[p]
-    assign(p, stpar[p], envir = globalenv())
+    #assign(p, stpar[p], envir = globalenv())
+    assign(p, stpar[p], envir=baseenv())
   }
   
   # Lower and upper boundaries calculation:
@@ -249,7 +256,8 @@ optimize <- function(data, starting_params,  formulas, verbose,
     names(params) <- names(stpar)
     
     for(p in names(stpar)) {
-      assign(p, params[[p]], envir = globalenv())
+      #assign(p, params[[p]], envir = globalenv())
+      assign(p, params[[p]], envir=baseenv())
       results[[p]] <<- params[[p]]
       if(verbose)
         cat(paste(p, results[[p]]), " ")
@@ -303,7 +311,8 @@ optimize <- function(data, starting_params,  formulas, verbose,
         }
       }
       
-      assign("results", results, envir=.GlobalEnv)
+      #assign("results", results, envir=.GlobalEnv)
+      assign("results", results, envir=baseenv())
       
       iteration <<- iteration + 1
       L.prev <<- L

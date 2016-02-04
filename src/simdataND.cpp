@@ -62,7 +62,7 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
         
         double xi = 0; // case (0 - alive, 1 - dead) indicator
         
-        if(S > Rcpp::runif(1, 0.0, 1.0)[0]) { //if(S > uni_distr(generator)) {
+        if(S > Rcpp::runif(1, 0.0, 1.0)[0]) {
           xi = 0; // case (0 - alive, 1 - dead) indicator
           arma::mat eps(k,1);
           
