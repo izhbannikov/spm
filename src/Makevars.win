@@ -1,2 +1,1 @@
-# cran.r-project.org/doc/manuals/R-exts.pdf
 PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)

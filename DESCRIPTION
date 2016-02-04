@@ -2,17 +2,18 @@ Package: spm
 Type: Package
 Title: Stochastic Process Model (SPM)
 Version: 1.0
-Date: 2016-02-02
+Date: 2016-02-04
 Author: I. Y. Zhbannikov, I. V. Akushevich, K. G. Arbeev, A. I. Yashin.
 Maintainer: Ilya Y. Zhbannikov <zhbannikov.ilya@gmail.com>
-Description: Implements a Stochastic Process Model.
+Description: The Stochastic Process Model (SPM) represents a general framework for modeling 
+			joint evolution of repeatedly measured variables and time-to-event outcomes 
+			observed in longitudinal studies. SPM relates the stochastic dynamics of variables 
+			(for example physiological or biological measures) with probability of end points (e.g. death or system failure).
 License: GPL
 Imports:
     Rcpp (>= 0.11.1)
 LinkingTo: Rcpp,RcppArmadillo
 Depends:
-    mice,sas7bdat,RcppArmadillo,stats,nloptr,tools
-Suggests:
-    knitr
-VignetteBuilder: knitr
+    mice,sas7bdat,stats,nloptr,tools
+Suggests: knitr (>= 1.11)
 RoxygenNote: 5.0.1

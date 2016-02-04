@@ -212,7 +212,7 @@ spm_continuous <- function(dat,
     if(stopflag == F) {
       dims <- dim(dat)
       res <<- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k)
-      assign("results", results_tmp, envir=.GlobalEnv)
+      assign("results", results_tmp, , envir=baseenv())
       iteration <<- iteration + 1
       if(verbose) {
         cat("L = ", res,"\n")
@@ -238,12 +238,6 @@ spm_continuous <- function(dat,
                                               "xtol_rel"=1.0e-8),
                  lb = bounds$lower_bound, ub = bounds$upper_bound)
             
-            #for(p in names(results)) {
-            #  
-            #  results[[p]] <<- ans$solution
-            #  if(verbose)
-            #    cat(paste(p, results[[p]]), " ")
-            #}
            },  
            error=function(e) {if(verbose  == TRUE) {print(e)}}, 
            finally=NA)

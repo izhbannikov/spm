@@ -6,7 +6,6 @@ import(sas7bdat)
 import(mice) 
 import(tools)
 import(nloptr)
-import(RcppArmadillo)
 #Export R-functions:
 export(prepare_data)
 export(spm_discrete)
