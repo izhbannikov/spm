@@ -1,33 +1,34 @@
 
 ---
-title: "spm: an R-infrastructure package for Stochastic Process Modeling of survival trajectories from longitudinal studies"
+title: "stpm: a set of utilities for estimating stochastic process parameters and modeling survival data with stochastic process model"
 author: "Ilya Y. Zhbannikov"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_document
 vignette: >
   
-  %\VignetteIndexEntry{spm}
+  %\VignetteIndexEntry{stpm}
   %\VignetteEngine{knitr::r_markdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ## Overview
 
-The R-package \texttt{spm} (\url{https://github.com/izhbannikov/spm}) is developed for modeling trajectories from longitudinal data  and it allows (1) data simulation and (2) estimating the process parameters using maximum likelihood estimation by optimizing parameters used in the model. Specifically, developed R-package spm allows (i) one-dimensional SPM; (ii) multiple dimensional SPM; (iii) data simulation for one- and multiple dimensions.
+The Stochastic Process Model (SPM) was developed several decades ago [1,2], and applied for analyses of clinical, demographic, epidemiologic longitudinal data as well as in many other studies that relate stochastic dynamics of repeated measures to the probability of end-points (outcomes). SPM links the dynamic of stochastical variables with a hazard rate as a quadratic function of the state variables [3]. The R-package, "stpm", is a set of utilities to estimate parameters of stochastic process and modeling survival trajectories and time-to-event outcomes observed from longitudinal studies. It is a general framework for studying and modeling survival (censored) traits depending on random trajectories (stochastic paths) of variables.
+
 
 ## Installation
 
 ```{r,eval=FALSE}
 require(devtools)
-devtools::install_github("izhbannikov/spm")
+devtools::install_github("izhbannikov/stpm")
 ```
 
-If you experience errors during installation, please download a binary file from the following url: \url{https://github.com/izhbannikov/spm/blob/master/bin/win/spm_1.0.zip}
+If you experience errors during installation, please download a binary file from the following url: \url{https://github.com/izhbannikov/stpm/blob/master/bin/win/stpm_1.0.zip}
 
 Than, execute this command (from R environment):
 
 ```{r,eval=FALSE}
-install.packages("<path to the downloaded r-package spm>", repos=NULL, type="binary")
+install.packages("<path to the downloaded r-package stpm>", repos=NULL, type="binary")
 ```
 
 
@@ -36,11 +37,11 @@ install.packages("<path to the downloaded r-package spm>", repos=NULL, type="bin
 Data represents a typical longitudinal data in form of two datasets: longitudinal dataset (follow-up studies), in which one record represents a single observation, and vital (survival) statistics, where one record represents all information about the subject. Longitudinal dataset cat contain a subject ID (identification number), status (event(1)/no event(0)), time and measurements across the variables. The \texttt{spm} can handle an infinite number of variables but in practice, 5-7 variables is enough.
 
 ```{r,results='hide',warning=FALSE,echo=FALSE,message=FALSE}
-library(spm)
+library(stpm)
 # Reading longitude data:
-longdat <- read.csv(system.file("data","longdat.csv",package="spm"))
+longdat <- read.csv(system.file("data","longdat.csv",package="stpm"))
 # Prepare data for optimization:
-vitstat <- read.csv(system.file("data","vitstat.csv",package="spm"))
+vitstat <- read.csv(system.file("data","vitstat.csv",package="stpm"))
 ```
 
 Below there is an example of clinical data that can be used in \texttt{spm} and we will discuss the field later.
@@ -66,12 +67,12 @@ head(vitstat)
 * IsDead - death indicator, 0 - alive, 1 - dead.
 * LSmort - age at death of stopping observations.
 
-## Discrete and Continuous cases
+## Discrete- and Continuous-time models
 
-There are two main SPM types in the package: discrete model and continuous model. Discrete model assumes equal intervals between follow-up observations. The example of discrete dataset is given below.
+There are two main SPM types in the package: discrete-time model [4] and continuous-time model [3]. Discrete model assumes equal intervals between follow-up observations. The example of discrete dataset is given below.
 
 ```{r}
-library(spm)
+library(stpm)
 data <- simdata_discr(N=10, ystart=c(80), k=1)
 head(data)
 ```
@@ -80,15 +81,15 @@ In this case there are equal intervals between t1 and t2 (Age and Age.next).
 The opposite is continuous case, in which intervals between observations are not equal. The example of continuous case dataset is shown below:
 
 ```{r}
-library(spm)
+library(stpm)
 data <- simdata_cont(N=5,ystart = c(50))
 head(data)
 ```
 
 
 
-### Discrete case
-In discrete case, we use the following assumptions:
+### Discrete model
+In discrete model, we use the following assumptions:
 $$ \bar{y}(t+1) = \bar{u} + \bar{R} \times \bar{y}(t) + \bar{\epsilon} $$ (1)
 $$ \mu(t) = \mu_0(t) + \bar{b}(t) \times \bar{y}(t) + \bar{Q} \times \bar{y}(t)^2 $$ (2)
 
@@ -97,16 +98,37 @@ $$ \mu_0(t) = \mu_0 e^{\theta t} $$
 $$ \bar{b}(t) = \bar{b} e^{\theta t} $$
 $$ \bar{Q}(t) = \bar{Q} e^{\theta t} $$
 
+### Example
 
+```{r}
+library(stpm)
+data <- simdata_discr(N=2000)
+#Parameters estimation
+pars <- spm_discrete(data)
+pars
+```
 
-## Continuous case
+## Continuous model
 
 $$ \mu(u) = \mu_0(u) + (\bar{m}(u) - \bar{f}(u)^* \times \bar{Q}(u) \times (\bar{m}(u) - \bar{f}(u)) + Tr(\bar{Q}(u) \times \bar{\gamma}(u)) $$ (3)
 
 $$ dm(t)/dt = \bar{a}(t) \times (\bar{m}(t) - \bar{f_1}(t)) - 2 \bar{\gamma}(t) \times \bar{Q}(t) \times (\bar{m}(t) - \bar{f}(t)) $$ (4)
 $$ d\bar{\gamma}(t)/dt = \bar{a}(t) \times \bar{\gamma}(t) +  \bar{\gamma}(t) \times \bar{a}(t)^* + \bar{b}(t) \times \bar{b}(t)^* - 2 \bar{\gamma}{t} \times \bar{Q}(t) \times \bar{\gamma}(t) $$ (5)
 
-## Coefficient conversion between continuous and discrete cases
+### Example
+
+```{r}
+library(stpm)
+#Reading the data:
+data <- simdata_cont(N=100)
+head(data)
+#Parameters estimation:
+pars <- spm_continuous(dat=data[,2:6],a=-0.05, f1=80, 
+                       Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08, k = 1)
+pars
+```
+
+## Coefficient conversion between continuous- and discrete-time models
 
 $$ Q = Q $$
 $$ \bar{a} = \bar{R} - diag(k) $$
@@ -116,19 +138,32 @@ $$ \bar{f} = -0.5 \times \bar{b} \times \bar{Q^{-1}} $$
 $$ mu_0 = mu_0 - \bar{f} \times \bar{Q} \times t(\bar{f}) $$
 $$ \theta = \theta $$
 
-## Case with time-dependent coefficients
+## Model with time-dependent coefficients
 
-In two previous cases, we assumed that coefficients is sort of time-dependant: we multiplied them on to $$e^{\theta t}$$. In general, this may not be the case. We extend this to a general case, i.e. (we consider one-dimensional case):
+In previous models, we assumed that coefficients is sort of time-dependant: we multiplied them on to $$e^{\theta t}$$. In general, this may not be the case [5]. We extend this to a general case, i.e. (we consider one-dimensional case):
 
 $$ \bar{a(t)} = par_1 t + par_2 $$ - linear function. 
 
 The corresponding equations will be equivalent to one-dimensional continuous case described above.
 
-## Simulation
+### Example
+```{r}
+library(stpm)
+#Data preparation:
+n <- 500
+data <- simdata_time_dep(N=n)
+# Estimation:
+opt.par <- spm_time_dep(data[,2:6], 
+                        start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0 = 0.001), 
+                        f = list(at = "a", f1t = "f1", Qt = "Q", ft = "f", bt = "b", mu0t= "mu0"))
+opt.par
+```
+
+## Simulation (trajectory projection)
 
 We added one- and multi- dimensional simulation to be able to generate test data for hyphotesis testing. Data,  which can be simulated can be discrete (equal intervals between observations) and continuous (with arbitrary intervals).
 
-## Discrete
+## Discrete-time
 
 The corresponding function is:
 
@@ -166,12 +201,12 @@ Here:
 This function returns a table with simulated data, as shown in example below:
 
 ```{r}
-library(spm)
+library(stpm)
 data <- simdata_discr(N=10, ystart=c(75, 94), k=2)
 head(data)
 ```
 
-## Continuous
+## Continuous-time
 
 The correstonding function is:
 
@@ -206,7 +241,7 @@ Here:
 This function returns a table with simulated data, as shown in example below:
 
 ```{r}
-library(spm)
+library(stpm)
 data <- simdata_cont(N=10)
 head(data)
 ```
@@ -265,3 +300,15 @@ In this case we use equal intervals ```dt``` between observations and survival f
 $S = e^{-1\mu(t_1)}$
 
 The rest of the discrete simulation routine is the same as in continuous-time simulation case.
+
+## References
+
+[1] Woodbury M.A., Manton K.G., Random-Walk of Human Mortality and Aging. Theoretical Population Biology, 1977 11:37-48.
+
+[2] Yashin, A.I., Manton K.G., Vaupel J.W. Mortality and aging in a heterogeneous population: a stochastic process model with observed and unobserved varia-bles. Theor Pop Biology, 1985 27.
+
+[3] Yashin, A.I. et al. Stochastic model for analysis of longitudinal data on aging and mortality. Mathematical Biosciences, 2007 208(2) 538-551.
+
+[4] Akushevich I., Kulminski A. and Manton K.: Life tables with covariates: Dynamic model for Nonlinear Analysis of Longitudinal Data. 2005. Mathematical Popu-lation Studies, 12(2), pp.: 51-80.
+
+[5] Yashin, A. et al.  Health decline, aging and mortality: how are they related? Biogerontology, 2007 8(3), 291-302.

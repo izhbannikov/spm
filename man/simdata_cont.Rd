@@ -44,10 +44,13 @@ A table with simulated data.
 Multi-dimensional simulation function for continuous trait.
 }
 \examples{
-\dontrun{ 
-library(spm)
-dat <- simdata_cont(N=500)
+library(stpm)
+dat <- simdata_cont(N=50)
 head(dat)
+
 }
+\references{
+Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
+and mortality. Mathematical Biosciences, 208(2), 538-551.
 }
 

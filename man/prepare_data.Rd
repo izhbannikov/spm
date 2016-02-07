@@ -43,9 +43,9 @@ Data pre-processing for analysis with stochastic process model methodology.
 }
 \examples{
 \dontrun{ 
-library(spm)
-data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), 
-				   y=system.file("data","vitstat.csv",package="spm"))
+library(stpm) 
+data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"), 
+				   y=system.file("data","vitstat.csv",package="stpm"))
 head(data[[1]])
 head(data[[2]])
 }

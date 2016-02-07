@@ -2,7 +2,7 @@
 % Please edit documentation in R/spm.R
 \name{spm}
 \alias{spm}
-\title{A central function that estimates Stochastic Process Model (SPM) parameters a from given dataset.}
+\title{A central function that estimates Stochastic Process Model parameters a from given dataset.}
 \usage{
 spm(x, model = "discrete", formulas = NULL, verbose = FALSE, tol = NULL)
 }
@@ -20,20 +20,24 @@ spm(x, model = "discrete", formulas = NULL, verbose = FALSE, tol = NULL)
 }
 \value{
 For "discrete" and "continuous" model types: 
-(1) a list of model parameter estimates for the discrete model type described in "", Akushevich et al, 2005 and  
-(2) a list of model parameter estimates for the continuous model type described in "", Yashin et al, 2007.
+(1) a list of model parameter estimates for the discrete model type described in 
+"Life tables with covariates: Dynamic Model for Nonlinear Analysis of Longitudinal Data", 
+Akushevich et al, 2005,  and  
+(2) a list of model parameter estimates for the continuous model type described in 
+"Stochastic model for analysis of longitudinal data on aging and mortality", 
+Yashin et al, 2007, Math Biosci.
 
 For the "time-dependent" model (model parameters depend on time): a set of model parameter estimates.
 }
 \description{
-A central function that estimates Stochastic Process Model (SPM) parameters a from given dataset.
+A central function that estimates Stochastic Process Model parameters a from given dataset.
 }
 \examples{
 \dontrun{ 
-library(spm)
+library(stpm)
 #Prepare data for optimization
-data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), 
-				   y=system.file("data","vitstat.csv",package="spm"))
+data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"), 
+				   y=system.file("data","vitstat.csv",package="stpm"))
 #Parameters estimation (default model: discrete-time):
 p.discr.model <- spm(data)
 p.discr.model
@@ -41,11 +45,21 @@ p.discr.model
 p.cont.model <- spm(data, model="continuous")
 p.cont.model
 #Model with time-dependent coefficients:
-data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), 
-				   y=system.file("data","vitstat.csv",package="spm"), 
+data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"), 
+				   y=system.file("data","vitstat.csv",package="stpm"), 
 				   covariates="BMI")
 p.td.model <- spm(data, model="time-dependent")
 p.td.model
 }
+}
+\references{
+Yashin, A. et al (2007), Stochastic model for analysis of longitudinal data on aging 
+and mortality. Mathematical Biosciences, 208(2), 538-551.
+
+Akushevich I., Kulminski A. and Manton K. (2005). Life tables with covariates: Dynamic model 
+for Nonlinear Analysis of Longitudinal Data. Mathematical Popu-lation Studies, 12(2), pp.: 51-80.
+
+Yashin, A. et al (2007), Health decline, aging and mortality: how are they related? 
+Biogerontology, 8(3), 291-302.
 }
 

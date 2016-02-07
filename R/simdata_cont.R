@@ -1,4 +1,6 @@
 #' Multi-dimensional simulation function for continuous trait.
+#'@references Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
+#'and mortality. Mathematical Biosciences, 208(2), 538-551.
 #' @param N Number of individuals.
 #' @param a A k by k matrix, which characterize the rate of the adaptive response.
 #' @param f1 A particular state, which if a deviation from the normal (or optimal). This is a vector with length of k.
@@ -14,11 +16,11 @@
 #' @param sd0 a standard deviation for modelling the next covariate value.
 #' @param k number of dimensions (k = 1 by default).
 #' @return A table with simulated data.
-#' @examples \dontrun{ 
-#' library(spm)
-#' dat <- simdata_cont(N=500)
+#' @examples
+#' library(stpm)
+#' dat <- simdata_cont(N=50)
 #' head(dat)
-#'}
+#'
 simdata_cont <- function(N=100, a=-0.05, f1=80, Q=2e-08, f=80, b=5, mu0=2e-05, theta=0.08,
                          step=1, tstart=30, tend=105, ystart=80, sd0=2, k=1) {
   
