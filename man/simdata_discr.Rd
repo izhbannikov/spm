@@ -42,10 +42,13 @@ A table with simulated data.
 Multi-dimension simulation function
 }
 \examples{
-\dontrun{ 
-library(spm)
-data <- simdata_discr(N=1000, ystart=80, k=1)
+library(stpm)
+data <- simdata_discr(N=100, ystart=80, k=1)
 head(data)
+
 }
+\references{
+Akushevich I., Kulminski A. and Manton K. (2005), Life tables with covariates: Dynamic model 
+for Nonlinear Analysis of Longitudinal Data. Mathematical Population Studies, 12(2), pp.: 51-80.
 }
 

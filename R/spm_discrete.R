@@ -1,4 +1,6 @@
 #'Discrete multi-dimensional optimization
+#'@references Akushevich I., Kulminski A. and Manton K. (2005), Life tables with covariates: Dynamic model 
+#'for Nonlinear Analysis of Longitudinal Data. Mathematical Population Studies, 12(2), pp.: 51-80.
 #'@param dat A data table.
 #'@param k A number of dimensions.
 #'@param theta_range A range of theta parameter (axe displacement of Gompertz function), default: from 0.001 to 0.09 with step of 0.001.
@@ -9,13 +11,13 @@
 #'from b and mu0 from the second list.
 #'@details This function is way much faster that continuous \code{spm_continuous_MD(...)} (but less precise) and used mainly in 
 #'estimation a starting point for the \code{spm_continuous_MD(...)}.
-#'@examples \dontrun{ 
-#'library(spm)
-#'data <- simdata_discr(N=2000)
+#'@examples
+#'library(stpm)
+#'data <- simdata_discr(N=10)
 #'#Parameters estimation
 #'pars <- spm_discrete(data)
 #'pars
-#'}
+#'
 spm_discrete <- function(dat,k=1, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verbose=FALSE) {
   options(digits=10)
   # Logistic regression:

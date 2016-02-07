@@ -47,19 +47,19 @@ setub <- function(k, params) {
   # Setting boundaries for coefficients:
   # aH
   start=1; end=k^2
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 0.5*params[n], 0*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.5*params[n], 0*params[n]) })))
   # f1H
   start=end+1; end=start+k-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 0.05*params[n], -0.05*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.05*params[n], params[n]- 0.05*params[n]) })))
   # QH
   start=end+1; end=start+k^2-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {params[n] + ifelse(params[n] > 0, 0.5*params[n], -0.5*params[n] )})))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {ifelse(params[n] > 0, params[n] + 0.5*params[n], params[n]-0.5*params[n] )})))
   # fH
   start=end+1; end=start+k-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 0.05*params[n], -0.05*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.05*params[n], params[n]-0.05*params[n]) })))
   # bH
   start=end+1; end=start+k-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, 0.05*params[n], -0.05*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.05*params[n], params[n]-0.05*params[n]) })))
   # mu0
   start=end+1; end=start
   upper_bound <- c( upper_bound, 0.1 )
@@ -73,6 +73,8 @@ setub <- function(k, params) {
 
 
 #'Continuous multi-dimensional optimization
+#'@references Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
+#'and mortality. Mathematical Biosciences, 208(2), 538-551.
 #'@param dat A data table.
 #'@param a A starting value of the rate of adaptive response to any deviation of Y from f1(t).
 #'@param f1 A starting value of the average age trajectories of the variables which process is forced to follow. 
@@ -89,16 +91,16 @@ setub <- function(k, params) {
 #'@param ub Upper bound of parameters under estimation.
 #'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta.
 #'@details \code{spm_continuous} runs much slower that discrete but more precise and can handle time intervals with different lengths.
-#'@examples \dontrun{ 
-#'library(spm)
+#'@examples
+#'library(stpm)
 #'#Reading the data:
-#'data <- simdata_cont(N=100)
+#'data <- simdata_cont(N=10)
 #'head(data)
 #'#Parameters estimation:
 #'pars <- spm_continuous(dat=data[,2:6],a=-0.05, f1=80, 
 #'						 Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08, k = 1)
 #'pars
-#'}
+#'
 spm_continuous <- function(dat, 
                            a=-0.05, 
                            f1=80, 
@@ -150,25 +152,25 @@ spm_continuous <- function(dat,
   # Reading parameters:
   start=1; end=k^2
   a <- matrix(parameters[start:end],ncol=k, byrow=F)
-  results$a <<- a
+  results$a <- a
   start=end+1; end=start+k-1
   f1 <- matrix(parameters[start:end],ncol=k, byrow=F)
-  results$f1 <<- f1
+  results$f1 <- f1
   start=end+1; end=start+k^2-1
   Q <- matrix(parameters[start:end],ncol=k, byrow=F)
-  results$Q <<- Q
+  results$Q <- Q
   start=end+1; end=start+k-1
   f <- matrix(parameters[start:end],ncol=k, byrow=F)
-  results$f <<- f
+  results$f <- f
   start=end+1; end=start+k-1
   b <- matrix(parameters[start:end],nrow=k)
-  results$b <<- b
+  results$b <- b
   start=end+1; end=start
   mu0 <- parameters[start:end]
-  results$mu0 <<- mu0
+  results$mu0 <- mu0
   start=end+1; end=start
   theta <- parameters[start:end]
-  results$theta <<- theta
+  results$theta <- theta
   # End of reading parameters
   
   maxlik <- function(par) {
@@ -212,7 +214,7 @@ spm_continuous <- function(dat,
     if(stopflag == F) {
       dims <- dim(dat)
       res <<- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k)
-      assign("results", results_tmp, , envir=baseenv())
+      assign("results", results_tmp, envir=baseenv())
       iteration <<- iteration + 1
       if(verbose) {
         cat("L = ", res,"\n")
@@ -235,7 +237,7 @@ spm_continuous <- function(dat,
   }
   tryCatch({ans <- nloptr(x0 = parameters, 
                  eval_f = maxlik, opts = list("algorithm"=algorithm, 
-                                              "xtol_rel"=1.0e-8),
+                                              "xtol_rel"=1.0e-6, "maxeval"=5000),
                  lb = bounds$lower_bound, ub = bounds$upper_bound)
             
            },  
@@ -244,7 +246,7 @@ spm_continuous <- function(dat,
   
   
   
-  final_results <- get("results",envir=.GlobalEnv)
+  final_results <- get("results",envir=baseenv())
   
   # Check if any parameter achieved upper/lower limit and report it:
   limit <- FALSE
