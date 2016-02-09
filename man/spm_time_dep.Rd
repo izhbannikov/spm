@@ -42,4 +42,8 @@ opt.par <- spm_time_dep(data[,2:6])
 opt.par
 
 }
+\references{
+Yashin, A. et al (2007), Health decline, aging and mortality: how are they related? 
+Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
+}
 

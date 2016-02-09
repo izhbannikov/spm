@@ -1,6 +1,6 @@
 #' Multi-dimensional simulation function for continuous trait.
 #'@references Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
-#'and mortality. Mathematical Biosciences, 208(2), 538-551.
+#'and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.
 #' @param N Number of individuals.
 #' @param a A k by k matrix, which characterize the rate of the adaptive response.
 #' @param f1 A particular state, which if a deviation from the normal (or optimal). This is a vector with length of k.
@@ -33,11 +33,11 @@ simdata_cont <- function(N=100, a=-0.05, f1=80, Q=2e-08, f=80, b=5, mu0=2e-05, t
   }  
   
   aH<-matrix(a,nrow=k,ncol=k,byrow=TRUE)
-  f1H<-matrix(f1,nrow=k,ncol=1,byrow=TRUE)
+  f1H<-matrix(f1,nrow=k,ncol=1,byrow=FALSE)
   QH<-matrix(Q,nrow=k,ncol=k,byrow=TRUE)
-  fH<-matrix(f,nrow=k,ncol=1,byrow=TRUE)
-  bH<-matrix(b,nrow=k,ncol=1,byrow=TRUE)
-  ystart<-matrix(ystart,nrow=k,ncol=1,byrow=TRUE)
+  fH<-matrix(f,nrow=k,ncol=1,byrow=FALSE)
+  bH<-matrix(b,nrow=k,ncol=1,byrow=FALSE)
+  ystart<-matrix(ystart,nrow=k,ncol=1,byrow=FALSE)
   
   Q <- function(t) {
     Q <- QH*exp(theta*t)
@@ -139,7 +139,7 @@ simdata_cont <- function(N=100, a=-0.05, f1=80, Q=2e-08, f=80, b=5, mu0=2e-05, t
       if (S > runif(1,0,1)) {
         xi <- 0
         y2 <- matrix(unlist(lapply(1:k, function(n) {rnorm(1,mean=m[n,1], sd=sqrt(gamma[n,n]))} )), 
-                     nrow=k, ncol=1, byrow=T)
+                     nrow=k, ncol=1, byrow=FALSE)
         new_person <- FALSE
         cov <- unlist(lapply(seq(1,k), function(n) {c(y1[n,1], y2[n,1])}))
         data <- rbind(data, c(id, xi, t1, t2, cov))

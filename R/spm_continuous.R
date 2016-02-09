@@ -74,7 +74,7 @@ setub <- function(k, params) {
 
 #'Continuous multi-dimensional optimization
 #'@references Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
-#'and mortality. Mathematical Biosciences, 208(2), 538-551.
+#'and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.
 #'@param dat A data table.
 #'@param a A starting value of the rate of adaptive response to any deviation of Y from f1(t).
 #'@param f1 A starting value of the average age trajectories of the variables which process is forced to follow. 
@@ -89,12 +89,14 @@ setub <- function(k, params) {
 #'@param algorithm An optimization algorithm used, can be one of those: NLOPT_LN_NEWUOA,NLOPT_LN_NEWUOA_BOUND or NLOPT_LN_NELDERMEAD. Default: NLOPT_LN_NELDERMEAD
 #'@param lb Lower bound of parameters under estimation.
 #'@param ub Upper bound of parameters under estimation.
-#'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta.
+#'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta and
+#'additional variable \code{limit} which indicates if any parameter 
+#'achieved lower or upper boundary conditions (FALSE by default).
 #'@details \code{spm_continuous} runs much slower that discrete but more precise and can handle time intervals with different lengths.
 #'@examples
 #'library(stpm)
 #'#Reading the data:
-#'data <- simdata_cont(N=10)
+#'data <- simdata_cont(N=2)
 #'head(data)
 #'#Parameters estimation:
 #'pars <- spm_continuous(dat=data[,2:6],a=-0.05, f1=80, 
@@ -105,13 +107,13 @@ spm_continuous <- function(dat,
                            a=-0.05, 
                            f1=80, 
                            Q=2e-8,
-                           f=81,
+                           f=80,
                            b=5,
                            mu0=2e-5,
                            theta=0.08,
                            k=1, 
                            stopifbound=FALSE, 
-                           algorithm="NLOPT_LN_NEWUOA_BOUND",
+                           algorithm="NLOPT_LN_NELDERMEAD",
                            lb=NULL, ub=NULL,
                            verbose=FALSE) {
   
@@ -151,26 +153,33 @@ spm_continuous <- function(dat,
   
   # Reading parameters:
   start=1; end=k^2
-  a <- matrix(parameters[start:end],ncol=k, byrow=F)
+  a <- matrix(parameters[start:end],ncol=k, nrow=k, byrow=T)
   results$a <- a
+  #print(results$a)
   start=end+1; end=start+k-1
-  f1 <- matrix(parameters[start:end],ncol=k, byrow=F)
+  f1 <- matrix(parameters[start:end],ncol=1, nrow=k, byrow=T)
   results$f1 <- f1
+  #print(results$f1)
   start=end+1; end=start+k^2-1
-  Q <- matrix(parameters[start:end],ncol=k, byrow=F)
+  Q <- matrix(parameters[start:end],ncol=k, nrow=k, byrow=T)
   results$Q <- Q
+  #print(results$Q)
   start=end+1; end=start+k-1
-  f <- matrix(parameters[start:end],ncol=k, byrow=F)
+  f <- matrix(parameters[start:end],ncol=1, nrow=k, byrow=F)
   results$f <- f
+  #print(results$f)
   start=end+1; end=start+k-1
-  b <- matrix(parameters[start:end],nrow=k)
+  b <- matrix(parameters[start:end],nrow=k, ncol=1, byrow=F)
   results$b <- b
+  #print(results$b)
   start=end+1; end=start
   mu0 <- parameters[start:end]
   results$mu0 <- mu0
+  #print(results$mu0)
   start=end+1; end=start
   theta <- parameters[start:end]
   results$theta <- theta
+  #print(results$theta)
   # End of reading parameters
   
   maxlik <- function(par) {
@@ -178,19 +187,19 @@ spm_continuous <- function(dat,
     stopflag <- F
     # Reading parameters:
     start=1; end=k^2
-    a <- matrix(par[start:end],ncol=k, byrow=F)
+    a <- matrix(par[start:end],ncol=k, , nrow=k, byrow=TRUE)
     results_tmp$a <<- a
     start=end+1; end=start+k-1
-    f1 <- matrix(par[start:end],ncol=k, byrow=F)
+    f1 <- matrix(par[start:end],ncol=1, nrow=k, byrow=FALSE)
     results_tmp$f1 <<- f1
     start=end+1; end=start+k^2-1
-    Q <- matrix(par[start:end],ncol=k, byrow=F)
+    Q <- matrix(par[start:end],ncol=k, nrow=k, byrow=TRUE)
     results_tmp$Q <<- Q
     start=end+1; end=start+k-1
-    f <- matrix(par[start:end],ncol=k, byrow=F)
+    f <- matrix(par[start:end],ncol=1, nrow=k, byrow=FALSE)
     results_tmp$f <<- f
     start=end+1; end=start+k-1
-    b <- matrix(par[start:end],nrow=k)
+    b <- matrix(par[start:end],nrow=k, ncol=1, byrow=FALSE)
     results_tmp$b <<- b
     start=end+1; end=start
     mu0 <- par[start:end]
@@ -211,7 +220,7 @@ spm_continuous <- function(dat,
       }
     }
     
-    if(stopflag == F) {
+    if(stopflag == FALSE) {
       dims <- dim(dat)
       res <<- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k)
       assign("results", results_tmp, envir=baseenv())

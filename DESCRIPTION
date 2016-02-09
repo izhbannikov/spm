@@ -2,14 +2,15 @@ Package: stpm
 Type: Package
 Title: Stochastic Model for Analysis of Longitudinal Data
 Version: 1.0
-Date: 2016-02-07
+Date: 2016-02-08
 Author: I. Y. Zhbannikov, I. V. Akushevich, K. G. Arbeev, A. I. Yashin.
 Maintainer: Ilya Y. Zhbannikov <ilya.zhbannikov@duke.edu>
 Description: Utilities to estimate parameters of stochastic process and modeling survival trajectories
              and time-to-event outcomes observed from longitudinal studies. 
              Miscellaneous function for data preparation is also provided.
              For more information, see: "Stochastic model for analysis of longitudinal data on aging 
-             and mortality" by Yashin A. et al, 2007, Mathematical Biosciences, 208(2), 538-551.
+             and mortality" by Yashin A. et al, 2007, Mathematical Biosciences, 208(2), 538-551 
+	     <DOI:10.1016/j.mbs.2006.11.006>.
 License: GPL
 Imports:
     Rcpp (>= 0.11.1)
