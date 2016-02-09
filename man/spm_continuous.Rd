@@ -4,9 +4,9 @@
 \alias{spm_continuous}
 \title{Continuous multi-dimensional optimization}
 \usage{
-spm_continuous(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 81, b = 5,
+spm_continuous(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
   mu0 = 2e-05, theta = 0.08, k = 1, stopifbound = FALSE,
-  algorithm = "NLOPT_LN_NEWUOA_BOUND", lb = NULL, ub = NULL,
+  algorithm = "NLOPT_LN_NELDERMEAD", lb = NULL, ub = NULL,
   verbose = FALSE)
 }
 \arguments{
@@ -39,7 +39,9 @@ spm_continuous(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 81, b = 5,
 \item{verbose}{An indicator of verbosing output.}
 }
 \value{
-A set of estimated parameters a, f1, Q, f, b, mu0, theta.
+A set of estimated parameters a, f1, Q, f, b, mu0, theta and
+additional variable \code{limit} which indicates if any parameter 
+achieved lower or upper boundary conditions (FALSE by default).
 }
 \description{
 Continuous multi-dimensional optimization
@@ -50,7 +52,7 @@ Continuous multi-dimensional optimization
 \examples{
 library(stpm)
 #Reading the data:
-data <- simdata_cont(N=10)
+data <- simdata_cont(N=2)
 head(data)
 #Parameters estimation:
 pars <- spm_continuous(dat=data[,2:6],a=-0.05, f1=80, 
@@ -60,6 +62,6 @@ pars
 }
 \references{
 Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
-and mortality. Mathematical Biosciences, 208(2), 538-551.
+and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.
 }
 

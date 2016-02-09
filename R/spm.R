@@ -1,10 +1,11 @@
 #'A central function that estimates Stochastic Process Model parameters a from given dataset.
 #'@references Yashin, A. et al (2007), Stochastic model for analysis of longitudinal data on aging 
-#'and mortality. Mathematical Biosciences, 208(2), 538-551. 
+#'and mortality. Mathematical Biosciences, 208(2), 538-551.
 #'@references Akushevich I., Kulminski A. and Manton K. (2005). Life tables with covariates: Dynamic model 
 #'for Nonlinear Analysis of Longitudinal Data. Mathematical Popu-lation Studies, 12(2), pp.: 51-80.
+#'<DOI: 10.1080/08898480590932296>.
 #'@references Yashin, A. et al (2007), Health decline, aging and mortality: how are they related? 
-#'Biogerontology, 8(3), 291-302.
+#'Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
 #'@param x A dataset: is the output from prepare_data(...) function and consists of two separate data tables:
 #'(1) a data table for continuous-time model and (2) a data table for discrete-time model.
 #'@param model A model type. Choices are: "discrete", "continuous" or "time-dependent".
@@ -14,10 +15,10 @@
 #'@return For "discrete" and "continuous" model types: 
 #'(1) a list of model parameter estimates for the discrete model type described in 
 #'"Life tables with covariates: Dynamic Model for Nonlinear Analysis of Longitudinal Data", 
-#'Akushevich et al, 2005,  and  
+#'Akushevich et al, 2005.<DOI:10.1080/08898480590932296>,  and  
 #'(2) a list of model parameter estimates for the continuous model type described in 
 #'"Stochastic model for analysis of longitudinal data on aging and mortality", 
-#'Yashin et al, 2007, Math Biosci.
+#'Yashin et al, 2007, Math Biosci.<DOI:10.1016/j.mbs.2006.11.006>.
 #'
 #'For the "time-dependent" model (model parameters depend on time): a set of model parameter estimates.
 #'@examples \dontrun{ 

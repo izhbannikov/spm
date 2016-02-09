@@ -391,6 +391,8 @@ optimize <- function(data, starting_params,  formulas, verbose,
 #'@param ub Upper bound of parameters under estimation.
 #'@param verbose turns on verbosing output.
 #'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta.
+#'@references Yashin, A. et al (2007), Health decline, aging and mortality: how are they related? 
+#'Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
 #'@examples
 #'library(stpm)
 #'#Data preparation:

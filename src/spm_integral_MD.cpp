@@ -28,8 +28,10 @@ double mu(double t, arma::mat y1, arma::mat gamma1, arma::mat fH, arma::mat f1H,
   double mu0Ht;
   arma::mat mu;
   
-  hfH = fH.t() - y1; //fH-y1;  
-  hf1H = f1H.t() - y1; //f1H-y1;  
+  //hfH = fH.t() - y1; //fH-y1;  
+  //hf1H = f1H.t() - y1; //f1H-y1;  
+  hfH = fH - y1; //fH-y1;  
+  hf1H = f1H - y1; //f1H-y1;  
   mu0Ht = mu0H*exp(thetaH*t);
   arma::mat QH_gamma1 = QH*gamma1;
   mu = mu0Ht + (hfH.t()*QH)*hfH + arma::sum((QH_gamma1).diag());
@@ -43,8 +45,10 @@ void func1(arma::mat *res, double t, arma::mat *y, arma::mat fH, arma::mat f1H, 
           arma::mat bH, arma::mat QH, double theta) {
   
   arma::mat hfH, hf1H, dy1, dy2;
-  hfH = fH.t() - y[0]; 
-  hf1H = f1H.t() - y[0];
+  //hfH = fH.t() - y[0]; 
+  //hf1H = f1H.t() - y[0];
+  hfH = fH - y[0]; 
+  hf1H = f1H - y[0];
   
   res[0] = -1.00 * (aH*hf1H) + 2.00 * ((y[1]*Q(t, QH, theta))*hfH);
   res[1] = aH*y[1] + y[1]*aH.t() + bH*bH.t() - 2.00 * ((y[1]*Q(t, QH, theta))*y[1]);
