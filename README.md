@@ -11,7 +11,7 @@
 
 ## How to use
 ```
-library(spm)
+library(stpm)
 #Prepare data for optimization
 data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"))
 #Parameters estimation (default model: discrete-time):
