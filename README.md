@@ -1,4 +1,4 @@
-# Stochastic Process Modeling (SPM)
+# Stochastic Process Model (SPM)
 ## Features
 ### Data simulation
 * Continuous (one- and multiple-dimensions)
