@@ -261,7 +261,7 @@ spm_continuous <- function(dat,
     
     if(stopflag == FALSE) {
       dims <- dim(dat)
-      res <<- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k)
+      res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k)
       assign("results", results_tmp, envir=baseenv())
       iteration <<- iteration + 1
       if(verbose) {
@@ -272,7 +272,6 @@ spm_continuous <- function(dat,
       
     }
     
-    #res <- -1*res
     return(as.numeric(-1*res))
   }
 
