@@ -86,9 +86,13 @@ setub <- function(k, params) {
 #'@param k A number of variables (dimension).
 #'@param verbose An indicator of verbosing output.
 #'@param stopifbound Estimation stops if at least one parameter achieves lower or upper boundaries.
-#'@param algorithm An optimization algorithm used, can be one of those: NLOPT_LN_NEWUOA,NLOPT_LN_NEWUOA_BOUND or NLOPT_LN_NELDERMEAD. Default: NLOPT_LN_NELDERMEAD
+#'@param algorithm An optimization algorithm used, can be one of those: NLOPT_LN_NEWUOA,NLOPT_LN_NEWUOA_BOUND or NLOPT_LN_NELDERMEAD. 
+#'#'Check the NLopt website for a description of
+#'the algorithms. Default: NLOPT_LN_NELDERMEAD
 #'@param lb Lower bound of parameters under estimation.
 #'@param ub Upper bound of parameters under estimation.
+#'@param maxeval Maximum number of iterations of the algorithm for \code{nloptr} optimization. 
+#'The program stops when the number of function evaluations exceeds maxeval. Default: 500. 
 #'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta and
 #'additional variable \code{limit} which indicates if any parameter 
 #'achieved lower or upper boundary conditions (FALSE by default).
@@ -115,15 +119,50 @@ spm_continuous <- function(dat,
                            stopifbound=FALSE, 
                            algorithm="NLOPT_LN_NELDERMEAD",
                            lb=NULL, ub=NULL,
+                           maxeval=500,
                            verbose=FALSE) {
   
-  avail_algorithms <- c("NLOPT_GN_DIRECT_L_RAND",
-                        "NLOPT_LN_NEWUOA",
-                        "NLOPT_LN_NEWUOA_BOUND",
-                        "NLOPT_LN_NELDERMEAD")
+  ###=======For DEBUG========###
+  #dat = dat
+  #
+  #a=matrix(c(-0.05,  0.001, 0.001, -0.05), nrow = 2, ncol = 2, byrow = T)
+  #f1=t(matrix(c(100, 200), nrow = 2, ncol = 1, byrow = F))
+  #Q=matrix(c(1e-06, 1e-7, 1e-7,  1e-06), nrow = 2, ncol = 2, byrow = T)
+  #f=t(matrix(c(100, 200), nrow = 2, ncol = 1, byrow = F))
+  #b=matrix(c(2, 5), nrow = 2, ncol = 1, byrow = F)
+  #mu0=1e-4
+  #theta=0.08
+  #k=2
+  #
+  #stopifbound=FALSE
+  #algorithm="NLOPT_LN_NELDERMEAD"
+  #lb=NULL
+  #ub=NULL
+  #verbose=FALSE
+  ###=========================###
+  
+  avail_algorithms <- c("NLOPT_GN_DIRECT", "NLOPT_GN_DIRECT_L",
+                        "NLOPT_GN_DIRECT_L_RAND", "NLOPT_GN_DIRECT_NOSCAL",
+                        "NLOPT_GN_DIRECT_L_NOSCAL",
+                        "NLOPT_GN_DIRECT_L_RAND_NOSCAL",
+                        "NLOPT_GN_ORIG_DIRECT", "NLOPT_GN_ORIG_DIRECT_L",
+                        "NLOPT_GD_STOGO", "NLOPT_GD_STOGO_RAND",
+                        "NLOPT_LD_SLSQP", "NLOPT_LD_LBFGS_NOCEDAL",
+                        "NLOPT_LD_LBFGS", "NLOPT_LN_PRAXIS", "NLOPT_LD_VAR1",
+                        "NLOPT_LD_VAR2", "NLOPT_LD_TNEWTON",
+                        "NLOPT_LD_TNEWTON_RESTART",
+                        "NLOPT_LD_TNEWTON_PRECOND",
+                        "NLOPT_LD_TNEWTON_PRECOND_RESTART",
+                        "NLOPT_GN_CRS2_LM", "NLOPT_GN_MLSL", "NLOPT_GD_MLSL",
+                        "NLOPT_GN_MLSL_LDS", "NLOPT_GD_MLSL_LDS",
+                        "NLOPT_LD_MMA", "NLOPT_LN_COBYLA", "NLOPT_LN_NEWUOA",
+                        "NLOPT_LN_NEWUOA_BOUND", "NLOPT_LN_NELDERMEAD",
+                        "NLOPT_LN_SBPLX", "NLOPT_LN_AUGLAG", "NLOPT_LD_AUGLAG",
+                        "NLOPT_LN_AUGLAG_EQ", "NLOPT_LD_AUGLAG_EQ",
+                        "NLOPT_LN_BOBYQA", "NLOPT_GN_ISRES")
   
   if(!(algorithm %in% avail_algorithms)) {
-  #  stop(cat("Provided algorithm", algorithm, "not in the list of available optimization methods."))
+    stop(cat("Provided algorithm", algorithm, "not in the list of available optimization methods."))
   }
   
   dat <<- as.matrix(dat)
@@ -233,8 +272,8 @@ spm_continuous <- function(dat,
       
     }
     
-    res <- -1*res
-    res
+    #res <- -1*res
+    return(as.numeric(-1*res))
   }
 
   # Optimization:
@@ -246,7 +285,7 @@ spm_continuous <- function(dat,
   }
   tryCatch({ans <- nloptr(x0 = parameters, 
                  eval_f = maxlik, opts = list("algorithm"=algorithm, 
-                                              "xtol_rel"=1.0e-6, "maxeval"=5000),
+                                              "xtol_rel"=1.0e-4, "maxeval"=maxeval),
                  lb = bounds$lower_bound, ub = bounds$upper_bound)
             
            },  

@@ -7,7 +7,7 @@
 spm_continuous(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
   mu0 = 2e-05, theta = 0.08, k = 1, stopifbound = FALSE,
   algorithm = "NLOPT_LN_NELDERMEAD", lb = NULL, ub = NULL,
-  verbose = FALSE)
+  maxeval = 500, verbose = FALSE)
 }
 \arguments{
 \item{dat}{A data table.}
@@ -30,11 +30,16 @@ spm_continuous(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
 
 \item{stopifbound}{Estimation stops if at least one parameter achieves lower or upper boundaries.}
 
-\item{algorithm}{An optimization algorithm used, can be one of those: NLOPT_LN_NEWUOA,NLOPT_LN_NEWUOA_BOUND or NLOPT_LN_NELDERMEAD. Default: NLOPT_LN_NELDERMEAD}
+\item{algorithm}{An optimization algorithm used, can be one of those: NLOPT_LN_NEWUOA,NLOPT_LN_NEWUOA_BOUND or NLOPT_LN_NELDERMEAD. 
+#'Check the NLopt website for a description of
+the algorithms. Default: NLOPT_LN_NELDERMEAD}
 
 \item{lb}{Lower bound of parameters under estimation.}
 
 \item{ub}{Upper bound of parameters under estimation.}
+
+\item{maxeval}{Maximum number of iterations of the algorithm for \code{nloptr} optimization. 
+The program stops when the number of function evaluations exceeds maxeval. Default: 500.}
 
 \item{verbose}{An indicator of verbosing output.}
 }
