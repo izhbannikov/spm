@@ -71,7 +71,7 @@ simdata_cont <- function(N=100, a=-0.05, f1=80, Q=2e-08, f=80, b=5, mu0=2e-05, t
     t2 <- runif(1,tstart, tend) # Starting time
     # Starting point
     new_person <- FALSE
-    y2 <- matrix(unlist(lapply(1:k, function(n) {rnorm(1,mean=ystart[n,1], sd=sd0)} )), 
+    y2 <- matrix(unlist(lapply(1:k, function(n) {rnorm(1,mean=ystart[n,1], sd=sd0[n])} )), 
                  nrow=k, ncol=1, byrow=T)
     #out <- list(y2,matrix(0,nrow=k,ncol=k))
     yfin <- list()
@@ -79,7 +79,7 @@ simdata_cont <- function(N=100, a=-0.05, f1=80, Q=2e-08, f=80, b=5, mu0=2e-05, t
     
     while(new_person == FALSE){
       t1 <- t2
-      t2 <- t1 + 2*runif(1,0,1) + step
+      t2 <- t1 + step + runif(1,0,1)
       y1 <- y2
         
       nsteps <- 2
@@ -133,6 +133,7 @@ simdata_cont <- function(N=100, a=-0.05, f1=80, Q=2e-08, f=80, b=5, mu0=2e-05, t
       m <- out[[1]]
       gamma <- out[[2]]
       
+      #S <- exp(s*(t2-t1))
       S <- exp(s)
         
       xi <- 0
@@ -140,6 +141,10 @@ simdata_cont <- function(N=100, a=-0.05, f1=80, Q=2e-08, f=80, b=5, mu0=2e-05, t
         xi <- 0
         y2 <- matrix(unlist(lapply(1:k, function(n) {rnorm(1,mean=m[n,1], sd=sqrt(gamma[n,n]))} )), 
                      nrow=k, ncol=1, byrow=FALSE)
+        #print(paste(m[1,1], gamma[1,1])) 
+        #y2 <- matrix(unlist(lapply(1:k, function(n) {rnorm(1,mean=ystart[n,1], sd=sd0[n])} )), 
+        #             nrow=k, ncol=1, byrow=FALSE)
+        
         new_person <- FALSE
         cov <- unlist(lapply(seq(1,k), function(n) {c(y1[n,1], y2[n,1])}))
         data <- rbind(data, c(id, xi, t1, t2, cov))
@@ -169,3 +174,41 @@ simdata_cont <- function(N=100, a=-0.05, f1=80, Q=2e-08, f=80, b=5, mu0=2e-05, t
   rownames(data) <- 1:dim(data)[1]
   invisible(data)
 }
+
+
+simdata_cont2 <- function(N=10, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart=80, tstart=30, tend=105, dt=1, k=1, sd0=1) {
+  
+  if ( (dim(as.data.frame(a))[1] != k) & (dim(as.data.frame(a))[2] != k) &
+       (dim(as.data.frame(Q))[1] != k) & (dim(as.data.frame(Q))[2] != k) & 
+       (dim(as.data.frame(f1))[1] != k) & (dim(as.data.frame(f))[1] != k) &
+       (dim(as.data.frame(b))[1] != k) & 
+       (dim(as.data.frame(ystart))[1] != k) ) {
+    stop("Dimenstions of provided parameters are not equal.")
+  }  
+  
+  if ( (dim(as.data.frame(a))[1] != k) & (dim(as.data.frame(a))[2] != k) &
+       (dim(as.data.frame(Q))[1] != k) & (dim(as.data.frame(Q))[2] != k) & 
+       (dim(as.data.frame(f1))[1] != k) & (dim(as.data.frame(f))[1] != k) &
+       (dim(as.data.frame(b))[1] != k) & 
+       (dim(as.data.frame(ystart))[1] != k) ) {
+    stop("Dimenstions of provided parameters are not equal.")
+  }  
+  
+  aH<-matrix(a,nrow=k,ncol=k,byrow=TRUE)
+  f1H<-matrix(f1,nrow=k,ncol=1,byrow=FALSE)
+  QH<-matrix(Q,nrow=k,ncol=k,byrow=TRUE)
+  fH<-matrix(f,nrow=k,ncol=1,byrow=FALSE)
+  bH<-matrix(b,nrow=k,ncol=1,byrow=FALSE)
+  ystart<-matrix(ystart,nrow=k,ncol=1,byrow=FALSE)
+  
+  simulated = .Call("simCont", N, aH, f1H, QH, fH, bH, mu0, theta, tstart, ystart, tend, k, dt, sd0);
+  
+  data_names <- c()
+  for(n in 1:k) {
+    data_names <- c(data_names, paste("y",n, sep=''), paste("y",n, ".next", sep=''))
+  }
+  colnames(simulated) <- c("id", "xi", "t1", "t2", data_names)
+  
+  invisible(simulated)
+}
+

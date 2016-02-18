@@ -11,25 +11,25 @@ setlb <- function(k, params) {
   # Setting boundaries for coefficients:
   # aH
   start=1; end=k^2
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.5*params[n], 0.5*params[n]) }))) 
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) }))) 
   # f1H
   start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.05*params[n], 0.05*params[n]) }))) 
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) }))) 
   # QH
   start=end+1; end=start+k^2-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ ifelse(params[n] > 0, 0, params[n]+0.05*params[n]) })))
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ ifelse(params[n] > 0, 0, params[n]+0.1*params[n]) })))
   # fH
   start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.05*params[n], 0.05*params[n]) })) )
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) })) )
   # bH
   start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, -0.05*params[n], 0.05*params[n]) })) )
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) })) )
   # mu0
   start=end+1; end=start
-  lower_bound <- c( lower_bound, 1e-7 )
+  lower_bound <- c( lower_bound, params[start:end] - 0.1*params[start:end])
   # theta
   start=end+1; end=start
-  lower_bound <- c( lower_bound, 1e-6 )
+  lower_bound <- c( lower_bound, params[start:end] - 0.1*params[start:end])
   
   lower_bound
 }
@@ -47,25 +47,25 @@ setub <- function(k, params) {
   # Setting boundaries for coefficients:
   # aH
   start=1; end=k^2
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.5*params[n], 0*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.1*params[n], 0*params[n]) })))
   # f1H
   start=end+1; end=start+k-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.05*params[n], params[n]- 0.05*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.1*params[n], params[n]- 0.1*params[n]) })))
   # QH
   start=end+1; end=start+k^2-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {ifelse(params[n] > 0, params[n] + 0.5*params[n], params[n]-0.5*params[n] )})))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {ifelse(params[n] > 0, params[n] + 0.1*params[n], params[n]-0.1*params[n] )})))
   # fH
   start=end+1; end=start+k-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.05*params[n], params[n]-0.05*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.1*params[n], params[n]-0.1*params[n]) })))
   # bH
   start=end+1; end=start+k-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.05*params[n], params[n]-0.05*params[n]) })))
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.1*params[n], params[n]-0.1*params[n]) })))
   # mu0
   start=end+1; end=start
-  upper_bound <- c( upper_bound, 0.1 )
+  upper_bound <- c( upper_bound, params[start:end] + 0.1*params[start:end])
   # theta
   start=end+1; end=start
-  upper_bound <- c( upper_bound, 0.5 )
+  upper_bound <- c( upper_bound, params[start:end] + 0.1*params[start:end])
   
   upper_bound
 }
@@ -86,9 +86,9 @@ setub <- function(k, params) {
 #'@param k A number of variables (dimension).
 #'@param verbose An indicator of verbosing output.
 #'@param stopifbound Estimation stops if at least one parameter achieves lower or upper boundaries.
-#'@param algorithm An optimization algorithm used, can be one of those: NLOPT_LN_NEWUOA,NLOPT_LN_NEWUOA_BOUND or NLOPT_LN_NELDERMEAD. 
+#'@param algorithm An optimization algorithm used, can be one of those provided by \code{nloptr}. 
 #'#'Check the NLopt website for a description of
-#'the algorithms. Default: NLOPT_LN_NELDERMEAD
+#'the algorithms. Default: NLOPT_LN_COBYLA
 #'@param lb Lower bound of parameters under estimation.
 #'@param ub Upper bound of parameters under estimation.
 #'@param maxeval Maximum number of iterations of the algorithm for \code{nloptr} optimization. 
@@ -117,7 +117,7 @@ spm_continuous <- function(dat,
                            theta=0.08,
                            k=1, 
                            stopifbound=FALSE, 
-                           algorithm="NLOPT_LN_NELDERMEAD",
+                           algorithm="NLOPT_LN_COBYLA",
                            lb=NULL, ub=NULL,
                            maxeval=500,
                            verbose=FALSE) {
@@ -172,7 +172,7 @@ spm_continuous <- function(dat,
   
   parameters <- c(a, f1, Q, f, b, mu0, theta)
   # Current results:
-  results <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
+  #results <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
   results_tmp <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
   iteration <- 0
   
@@ -191,35 +191,35 @@ spm_continuous <- function(dat,
   }
   
   # Reading parameters:
-  start=1; end=k^2
-  a <- matrix(parameters[start:end],ncol=k, nrow=k, byrow=T)
-  results$a <- a
-  #print(results$a)
-  start=end+1; end=start+k-1
-  f1 <- matrix(parameters[start:end],ncol=1, nrow=k, byrow=T)
-  results$f1 <- f1
-  #print(results$f1)
-  start=end+1; end=start+k^2-1
-  Q <- matrix(parameters[start:end],ncol=k, nrow=k, byrow=T)
-  results$Q <- Q
-  #print(results$Q)
-  start=end+1; end=start+k-1
-  f <- matrix(parameters[start:end],ncol=1, nrow=k, byrow=F)
-  results$f <- f
-  #print(results$f)
-  start=end+1; end=start+k-1
-  b <- matrix(parameters[start:end],nrow=k, ncol=1, byrow=F)
-  results$b <- b
-  #print(results$b)
-  start=end+1; end=start
-  mu0 <- parameters[start:end]
-  results$mu0 <- mu0
-  #print(results$mu0)
-  start=end+1; end=start
-  theta <- parameters[start:end]
-  results$theta <- theta
-  #print(results$theta)
-  # End of reading parameters
+  #start=1; end=k^2
+  #a <- matrix(parameters[start:end],ncol=k, nrow=k, byrow=T)
+  #results$a <- a
+  ##print(results$a)
+  #start=end+1; end=start+k-1
+  #f1 <- matrix(parameters[start:end],ncol=1, nrow=k, byrow=T)
+  #results$f1 <- f1
+  ##print(results$f1)
+  #start=end+1; end=start+k^2-1
+  #Q <- matrix(parameters[start:end],ncol=k, nrow=k, byrow=T)
+  #results$Q <- Q
+  ##print(results$Q)
+  #start=end+1; end=start+k-1
+  #f <- matrix(parameters[start:end],ncol=1, nrow=k, byrow=F)
+  #results$f <- f
+  ##print(results$f)
+  #start=end+1; end=start+k-1
+  #b <- matrix(parameters[start:end],nrow=k, ncol=1, byrow=F)
+  #results$b <- b
+  ##print(results$b)
+  #start=end+1; end=start
+  #mu0 <- parameters[start:end]
+  #results$mu0 <- mu0
+  ##print(results$mu0)
+  #start=end+1; end=start
+  #theta <- parameters[start:end]
+  #results$theta <- theta
+  ##print(results$theta)
+  ## End of reading parameters
   
   maxlik <- function(par) {
     
@@ -251,7 +251,7 @@ spm_continuous <- function(dat,
     if(stopifbound) {
       for(i in 1:length(results_tmp)) {
         if(length(intersect(results_tmp[[i]],c(bounds$lower_bound[i], bounds$upper_bound[i]))) >= 1) {
-          cat("Parameter", names(results)[i], "achieved lower/upper bound. Process stopped.\n")
+          cat("Parameter", names(results_tmp)[i], "achieved lower/upper bound. Process stopped.\n")
           cat(results_tmp[[i]],"\n")
           stopflag <- T
           break
@@ -262,7 +262,7 @@ spm_continuous <- function(dat,
     if(stopflag == FALSE) {
       dims <- dim(dat)
       res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k)
-      assign("results", results_tmp, envir=baseenv())
+      #assign("results", results_tmp, envir=baseenv())
       iteration <<- iteration + 1
       if(verbose) {
         cat("L = ", res,"\n")
@@ -282,18 +282,20 @@ spm_continuous <- function(dat,
     cat("Upper bound:\n")
     print(bounds$upper_bound)
   }
-  tryCatch({ans <- nloptr(x0 = parameters, 
-                 eval_f = maxlik, opts = list("algorithm"=algorithm, 
-                                              "xtol_rel"=1.0e-4, "maxeval"=maxeval),
-                 lb = bounds$lower_bound, ub = bounds$upper_bound)
-            
-           },  
-           error=function(e) {if(verbose  == TRUE) {print(e)}}, 
-           finally=NA)
+  #tryCatch({ans <- nloptr(x0 = parameters, 
+  #               eval_f = maxlik, opts = list("algorithm"=algorithm, 
+  #                                            "xtol_rel"=1.0e-4, "maxeval"=maxeval),
+  #               lb = bounds$lower_bound, ub = bounds$upper_bound)
+  #          
+  #         },  
+  #         error=function(e) {if(verbose  == TRUE) {print(e)}}, 
+  #         finally=NA)
   
+  nloptr(x0 = parameters, 
+  		 eval_f = maxlik, opts = list("algorithm"=algorithm, "xtol_rel"=1.0e-4, "maxeval"=maxeval),
+         lb = bounds$lower_bound, ub = bounds$upper_bound)
   
-  
-  final_results <- get("results",envir=baseenv())
+  final_results <- results_tmp #get("results",envir=baseenv())
   
   # Check if any parameter achieved upper/lower limit and report it:
   limit <- FALSE

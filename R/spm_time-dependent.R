@@ -18,12 +18,14 @@ trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 #'@param lb lower bound.
 #'@param ub upper bound.
 #'@param algorithm some optimization algorithm, for example, NLOPT_LN_NEWUOA.
-#'@param stopifbound if TRUE then algorithm stops when at least one parameter
+#'@param stopifbound if TRUE then algorithm stops when at least one parameter.
+#'@param maxeval maximum number of evaluations of the algorithm.
 #' achieved boundaries.
 optimize <- function(data, starting_params,  formulas, verbose, 
                      lb, ub, 
                      algorithm,
-                     stopifbound) {
+                     stopifbound,
+                     maxeval=maxeval) {
   
   final_res <- list()
   
@@ -362,7 +364,7 @@ optimize <- function(data, starting_params,  formulas, verbose,
   }
   tryCatch({ans <- nloptr(x0 = unlist(stpar), 
                   eval_f = maxlik_t, opts = list("algorithm"=algorithm, 
-                                               "xtol_rel"=1.0e-8),
+                                               "xtol_rel"=1.0e-8, maxeval=maxeval),
                   lb = lower_bound, ub = upper_bound)
             i <- 1
             for(p in names(stpar)) {
@@ -383,14 +385,15 @@ optimize <- function(data, starting_params,  formulas, verbose,
 
 #'spm_time_dep : a function that estimates parameters from the model with time-dependent coefficients.
 #'@param x : input data table.
-#'@param start : a list of starting parameters, default: llist(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),
+#'@param start : a list of starting parameters, default: list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),
 #'@param f : a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
 #'@param stopifbound Estimation stops if at least one parameter achieves lower or upper boundaries.
 #'@param algorithm An optimization algorithm used, can be one of those: NLOPT_LN_NEWUOA,NLOPT_LN_NEWUOA_BOUND or NLOPT_LN_NELDERMEAD. Default: NLOPT_LN_NELDERMEAD
 #'@param lb Lower bound of parameters under estimation.
 #'@param ub Upper bound of parameters under estimation.
 #'@param verbose turns on verbosing output.
-#'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta.
+#'@param maxeval maximum number of iterations of optimization algorithm.
+#'@return a set of estimated coefficients of a, f1, Q, f, b, mu0 and (if used) theta.
 #'@references Yashin, A. et al (2007), Health decline, aging and mortality: how are they related? 
 #'Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
 #'@examples
@@ -408,7 +411,7 @@ spm_time_dep <- function(x,
                          stopifbound=FALSE, 
                          algorithm="NLOPT_LN_NELDERMEAD",
                          lb=NULL, ub=NULL,
-                         verbose=FALSE) {
+                         verbose=FALSE, maxeval=100) {
   formulas <- f
   data <- as.matrix(x)
   formulas.work = list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
@@ -417,6 +420,6 @@ spm_time_dep <- function(x,
   }
   
   # Optimization:
-  res = optimize(data, start, formulas.work, verbose, lb, ub, algorithm, stopifbound)
+  res = optimize(data, start, formulas.work, verbose, lb, ub, algorithm, stopifbound, maxeval)
   invisible(res)
 }
