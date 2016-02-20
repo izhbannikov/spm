@@ -239,8 +239,9 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
     	// Starting point
     	//t1 = Rcpp::runif(1, tstart, tend)[0];
     	t1 = R::runif(tstart, tstart+10);
-      	//t2 = t1 + dt + R::runif(0.0,1.0); 
-      	t2 = t1 + R::runif(0.0,dt); 
+      	
+      	//t2 = t1 + R::runif(0.0,dt); 
+      	t2 = t1 + dt + R::runif(0.0,1); 
       	
       	new_person = false;
     	
@@ -348,8 +349,8 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
         	if(new_person == false) {
         		y1 = y2;
         		t1 = t2;
-        		//t2 = t1 + dt + R::runif(0.0,1.0);
-        		t2 = t1 + R::runif(0.0,dt);
+        		//t2 = t1 + R::runif(0.0,dt);
+        		t2 = t1 + dt + R::runif(0.0,1); 
     			if(t2 > tend) {
         			new_person = true;
         			break;
