@@ -62,7 +62,7 @@ arma::mat Q(double t, arma::mat QH, double theta) {
 }
 
 
-RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SEXP bh, SEXP fh, SEXP mu0h, SEXP thetah, SEXP k) {
+RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SEXP bh, SEXP fh, SEXP mu0h, SEXP thetah, SEXP k, SEXP pinv_tol) {
     
     long N = as<long>(n); // Number of rows
     long M = as<long>(m); // Number of columns
@@ -77,6 +77,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
     int dim = as<int>(k);
     //Actual data set
     arma::mat dd = as<arma::mat>(dat);  
+    double ptol = as<double>(pinv_tol);
     double L; // Likelihood
     
     //End of data loading
@@ -169,7 +170,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
       double pi = 3.141592654;
       
       if(dd(i,0) == 0) { 
-        arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*pinv(gamma2,0.001)*(m2-y2);
+        arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*pinv(gamma2,ptol)*(m2-y2);
         //arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*inv(gamma2)*(m2-y2); // inv() fails very ofter
         L += s + exp(0,0);
       } else {
@@ -203,7 +204,7 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
     double mu0H = as<double>(mu0h); 
     double thetaH  = as<double>(thetah);
     int dim = as<int>(k_);
-    double sd = as<double>(sd_);
+    Rcpp::NumericVector sd = Rcpp::NumericVector(sd_);
     
     // Supporting variables
     arma::mat *out, *k1ar, *yfin, *ytmp, *k2ar, *k3ar, *k4ar;
@@ -253,7 +254,7 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
       	new_person = false;
     	
     	for(int ii=0; ii < dim; ii++) {
-    		y1(ii,0) = Rcpp::rnorm(1, ystart(ii,0), sd)[0];
+    		y1(ii,0) = Rcpp::rnorm(1, ystart(ii,0), sd[ii])[0];
     	}
     	
     	new_person = false;
