@@ -227,45 +227,32 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
     
     double tend  = as<double>(tend_);
     //End of data loading
-    double id = 0;
     double t1;
     double t2;
     double dt=as<double>(dt_);
     bool new_person = false;
-    /*
-    cout << N << endl;
-    cout << aH << endl;
-    cout << f1H << endl;
-    cout << QH << endl;
-    cout << fH << endl;
-    cout << bH << endl;
-    cout << mu0H << endl;
-    cout << thetaH << endl;
-    cout << dim << endl;
-    cout << ystart << endl;
-    */
+    
     std::vector< std::vector<double> > data;
     double S;
   
     for(int i=0; i<N; i++) {
     	// Starting point
-    	t1 = Rcpp::runif(1, tstart, tend)[0];
-      	t2 = t1 + dt + Rcpp::runif(1,0.0,1.0)[0]; 
+    	//t1 = Rcpp::runif(1, tstart, tend)[0];
+    	t1 = R::runif(tstart, tstart+10);
+      	//t2 = t1 + dt + R::runif(0.0,1.0); 
+      	t2 = t1 + R::runif(0.0,dt); 
+      	
       	new_person = false;
     	
     	for(int ii=0; ii < dim; ii++) {
-    		y1(ii,0) = Rcpp::rnorm(1, ystart(ii,0), sd[ii])[0];
+    		y1(ii,0) = R::rnorm(ystart(ii,0), sd[ii]);
     	}
     	
     	new_person = false;
-    	id = id + 1;
     	
     	while(new_person == false) {
         	nsteps = 10;
         	double tdiff = t2-t1;
-        	/*if(tdiff > 2) {
-        		nsteps = 2*tdiff;
-      		}*/
         	
         	double h = tdiff/nsteps;
         	
@@ -322,21 +309,20 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
       		arma::mat m2 = out[0];
       		arma::mat gamma2 = out[1];
       		
-      		//S = exp(s*(t2-t1));
       		S = exp(s);
       		
       		double xi = 0; // case (0 - alive, 1 - dead) indicator
       		
-      		if(S > Rcpp::runif(1, 0.0, 1.0)[0]) {
+      		if(S > R::runif(0.0, 1.0)) {
+      			new_person = false;
+          		
       			xi = 0; // case (0 - alive, 1 - dead) indicator
       			
-      			for(int ii = 0; ii < dim; ii++) {
-      				
-      				y2(ii,0) = Rcpp::rnorm(1,m2(ii,0), sqrt(gamma2(ii,ii)))[0];
+      			// New y2:
+        		for(int ii = 0; ii < dim; ii++) {
+      				y2(ii,0) = R::rnorm(m2(ii,0), sqrt(gamma2(ii,ii)));
       			}
-      			
-          		new_person = false;
-          	} 
+      		} 
         	else {
           		xi = 1;
           		y2 = arma::mat(dim,1);
@@ -345,12 +331,11 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
             		y2(ii,0) = NumericVector::get_na();
           		}
           
-          		t2 = t1 + dt + Rcpp::runif(1, 0.0, 1.0)[0];
           		new_person = true;
         	}
         	
         	std::vector<double> row; row.resize(4+2*dim);
-        	row[0] = id; row[1] = xi; row[2] = t1; row[3] = t2;
+        	row[0] = i; row[1] = xi; row[2] = t1; row[3] = t2;
         	
         	int jj=0;
         	for(int ii=4; ii<(4 + 2*dim-1); ii+=2) {
@@ -358,19 +343,18 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
             	row[ii+1] = y2(jj,0);
             	jj += 1;
         	}
-        	
         	data.push_back(row);
         	
-        	if (new_person == false) {
+        	if(new_person == false) {
+        		y1 = y2;
         		t1 = t2;
-        		t2 = t1 + dt + Rcpp::runif(1,0.0,1.0)[0];
-    		
-        		if(t2 > tend) {
+        		//t2 = t1 + dt + R::runif(0.0,1.0);
+        		t2 = t1 + R::runif(0.0,dt);
+    			if(t2 > tend) {
         			new_person = true;
         			break;
         		}
-        		y1 = y2;
-        	}
+      		}
         }
     }
     
