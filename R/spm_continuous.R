@@ -92,7 +92,9 @@ setub <- function(k, params) {
 #'@param lb Lower bound of parameters under estimation.
 #'@param ub Upper bound of parameters under estimation.
 #'@param maxeval Maximum number of iterations of the algorithm for \code{nloptr} optimization. 
-#'The program stops when the number of function evaluations exceeds maxeval. Default: 500. 
+#'The program stops when the number of function evaluations exceeds maxeval. Default: 500.
+#'@param pinv.tol A tolerance value for pseudo-inverse of matrix gamma (see Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
+#'and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.)
 #'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta and
 #'additional variable \code{limit} which indicates if any parameter 
 #'achieved lower or upper boundary conditions (FALSE by default).
@@ -120,7 +122,8 @@ spm_continuous <- function(dat,
                            algorithm="NLOPT_LN_COBYLA",
                            lb=NULL, ub=NULL,
                            maxeval=500,
-                           verbose=FALSE) {
+                           verbose=FALSE,
+                           pinv.tol=0.01) {
   
   ###=======For DEBUG========###
   #dat = dat
@@ -261,7 +264,7 @@ spm_continuous <- function(dat,
     
     if(stopflag == FALSE) {
       dims <- dim(dat)
-      res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k)
+      res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k, pinv.tol)
       #assign("results", results_tmp, envir=baseenv())
       iteration <<- iteration + 1
       if(verbose) {
@@ -284,7 +287,7 @@ spm_continuous <- function(dat,
   }
   #tryCatch({ans <- nloptr(x0 = parameters, 
   #               eval_f = maxlik, opts = list("algorithm"=algorithm, 
-  #                                            "xtol_rel"=1.0e-4, "maxeval"=maxeval),
+  #                                            "xtol_rel"=1.0e-1, "maxeval"=maxeval),
   #               lb = bounds$lower_bound, ub = bounds$upper_bound)
   #          
   #         },  
