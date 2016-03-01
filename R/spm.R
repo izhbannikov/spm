@@ -116,9 +116,9 @@ spm <- function(x, model="discrete", formulas = NULL, tol=NULL,
       Q.c <- res.t$Q
       R.c <- res.t$a + diag(k)
       Sigma.c <- as.matrix(res.t$b)
-      u.c <- (-1)*(res.t$f1 %*% res.t$a)
-      b.c <- -2*res.t$f %*% res.t$Q
-      mu0.c <- res.t$mu0 + res.t$f %*% res.t$Q %*% t(res.t$f)
+      u.c <- (-1)*(t(res.t$f1) %*% res.t$a)
+      b.c <- -2*t(res.t$f) %*% res.t$Q
+      mu0.c <- res.t$mu0 + t(res.t$f) %*% res.t$Q %*% res.t$f
       theta.c <- res.t$theta
       
       res <- list(Ak2005=list(u=u.c, 
