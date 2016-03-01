@@ -95,7 +95,7 @@ spm <- function(x, model="discrete", formulas = NULL, tol=NULL,
       res <- NA
     
     } else {
-      spm_continuous(as.matrix(data), 
+      res.t <- spm_continuous(as.matrix(data), 
                     a=pars$pars2$a, 
                     f1=pars$pars2$f1, 
                     Q=pars$pars2$Q, 
@@ -111,7 +111,7 @@ spm <- function(x, model="discrete", formulas = NULL, tol=NULL,
                     pinv.tol = pinv.tol,
                     verbose = verbose)
   
-      res.t <- get("results",envir=.GlobalEnv)
+      #res.t <- get("results",envir=.GlobalEnv)
       
       Q.c <- res.t$Q
       R.c <- res.t$a + diag(k)
@@ -160,12 +160,11 @@ spm <- function(x, model="discrete", formulas = NULL, tol=NULL,
     
     pars <- spm_discrete(dat=x[[2]],k=k)
     
-    res.t <- spm_time_dep(x[[1]][,2:dim(x[[1]])[2]], 
+    res <- spm_time_dep(x[[1]][,2:dim(x[[1]])[2]], 
                             f = formulas.work,
                             start=list(a=pars$pars2$a, f1=pars$pars2$f1, Q=pars$pars2$Q, f=pars$pars2$f, b=pars$pars2$b, mu0=pars$pars2$mu0))
     
-    res <- get("results",envir=.GlobalEnv)
-  
+    #res <- get("results",envir=.GlobalEnv)
   }
   
   invisible(res)
