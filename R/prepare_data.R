@@ -100,12 +100,13 @@ prepare_data <- function(x, y,
   }
   
   if(!is.null(covariates)) {
+    col.covar.ind <- c()
     for(c in covariates) {
       if( !(c %in% colnames(longdat)) ) {
         stop(paste("Covariate",c, "not found. Aborting."))
       }
+      col.covar.ind <- c(col.covar.ind, grep(paste("\\b", c, "\\b", sep=""), colnames(longdat)))
     }
-    col.covar.ind <- grep(paste("\\b", covariates, "\\b", sep=""), colnames(longdat))
   } else if(is.null(covariates)) {
     col.covar.ind <- 4:dim(longdat)[2]
   }
