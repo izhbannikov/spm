@@ -39,7 +39,10 @@
 #'p.td.model <- spm(data, model="time-dependent")
 #'p.td.model
 #'}
-spm <- function(x, model="discrete", formulas = NULL, verbose=FALSE, tol=NULL) {
+spm <- function(x, model="discrete", formulas = NULL, tol=NULL, 
+                stopifbound=FALSE, algorithm="NLOPT_LN_NELDERMEAD", 
+                lb=NULL, ub=NULL, maxeval=500, verbose=FALSE, 
+                pinv.tol = 0.01) {
   
   # List of available models:
   models <- c("discrete", "continuous", "time-dependent")
@@ -100,8 +103,12 @@ spm <- function(x, model="discrete", formulas = NULL, verbose=FALSE, tol=NULL) {
                     b=pars$pars2$b, 
                     mu0=pars$pars2$mu0, 
                     theta=pars$pars2$theta, 
-                    k, 
-                    verbose)
+                    stopifbound = stopifbound,
+                    algorithm = algorithm, 
+                    lb = lb, ub = ub,
+                    maxeval = maxeval, 
+                    pinv.tol = pinv.tol,
+                    verbose = verbose)
   
       res.t <- get("results",envir=.GlobalEnv)
       
