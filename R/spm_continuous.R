@@ -265,7 +265,7 @@ spm_continuous <- function(dat,
     if(stopflag == FALSE) {
       dims <- dim(dat)
       res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k, pinv.tol)
-      #assign("results", results_tmp, envir=baseenv())
+      assign("results", results_tmp, envir=baseenv())
       iteration <<- iteration + 1
       if(verbose) {
         cat("L = ", res,"\n")
@@ -298,7 +298,7 @@ spm_continuous <- function(dat,
   		 eval_f = maxlik, opts = list("algorithm"=algorithm, "xtol_rel"=1.0e-4, "maxeval"=maxeval),
          lb = bounds$lower_bound, ub = bounds$upper_bound)
   
-  final_results <- results_tmp #get("results",envir=baseenv())
+  final_results <- get("results",envir=baseenv())
   
   # Check if any parameter achieved upper/lower limit and report it:
   limit <- FALSE
@@ -310,7 +310,7 @@ spm_continuous <- function(dat,
     }
   }
   final_results$limit <- limit
-  
+  #assign("results", final_results, envir=baseenv())
   invisible(final_results)
 }
 
