@@ -10,8 +10,17 @@
 #'(1) a data table for continuous-time model and (2) a data table for discrete-time model.
 #'@param model A model type. Choices are: "discrete", "continuous" or "time-dependent".
 #'@param formulas A list of parameter formulas used in the "time-dependent" model.
-#'@param verbose A verbosing output indicator (FALSE by default).
 #'@param tol A tolerance threshold for matrix inversion (NULL by default).
+#'@param stopifbound A flag (default=FALSE) if it is set then the optimization stops 
+#'when any of the parametrs achives lower or upper boundary.
+#'@param algorithm An optimization algorithm used in \code{nloptr} package.
+#'Default: \code{NLOPTR_NL_NELDERMEAD}.
+#'@param lb Lower boundary, default \code{NULL}.
+#'@param up Upper boundary, default \code{NULL}.
+#'@param maxeval Maximum number of evaluations of optimization algorithm. 
+#'Default 100.
+#'@param verbose A verbosing output indicator (FALSE by default).
+#'@param pinv.tol A tolerance threshold for matrix pseudo-inverse. Default: 0.01.
 #'@return For "discrete" and "continuous" model types: 
 #'(1) a list of model parameter estimates for the discrete model type described in 
 #'"Life tables with covariates: Dynamic Model for Nonlinear Analysis of Longitudinal Data", 
@@ -41,7 +50,7 @@
 #'}
 spm <- function(x, model="discrete", formulas = NULL, tol=NULL, 
                 stopifbound=FALSE, algorithm="NLOPT_LN_NELDERMEAD", 
-                lb=NULL, ub=NULL, maxeval=500, verbose=FALSE, 
+                lb=NULL, ub=NULL, maxeval=100, verbose=FALSE, 
                 pinv.tol = 0.01) {
   
   # List of available models:
