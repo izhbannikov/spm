@@ -23,22 +23,27 @@
 #'
 simdata_discr <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart=80, tstart=30, tend=105, dt=1, k=1) {
   
-  if ( (dim(as.data.frame(a))[1] != k) & (dim(as.data.frame(a))[2] != k) &
-       (dim(as.data.frame(Q))[1] != k) & (dim(as.data.frame(Q))[2] != k) & 
-       (dim(as.data.frame(f1))[1] != k) & (dim(as.data.frame(f))[1] != k) &
-       (dim(as.data.frame(b))[1] != k) & 
-       (dim(as.data.frame(ystart))[1] != k) ) {
-    stop("Dimenstions of provided parameters are not equal.")
-  }  
+  if ( (dim(as.data.frame(a))[1] != k) & (dim(as.data.frame(a))[2] != k) ) {
+    stop("Dimenstions if \'a\' are not equal to k. It must be a k x k matrix.")
+  } else if( (dim(as.data.frame(Q))[1] != k) & (dim(as.data.frame(Q))[2] != k) ) {
+    stop("Dimenstions of \'Q\' are not equal to k. It must be a k x k matrix.")
+  } else if((dim(as.data.frame(f1))[2] != k)) { 
+    stop("\'f1'\ must be a 1 x k matrix")
+  } else if( (dim(as.data.frame(f1))[2] != k)){ 
+    stop("\'f'\ must be a 1 x k matrix")
+  } else if(dim(as.data.frame(b))[1] != k) {
+    stop("\'b'\ must be a 1 x k matrix")
+  } else if((dim(as.data.frame(ystart))[1] != k) ) {
+    stop("\'y'\ must be a 1 x k vector")
+  }
   
   # Re-calculating parameters:
-  u_ <- matrix((f1 %*% (-1*a)), nrow=k, byrow=TRUE)
-  R_ <- matrix((diag(k) + a), nrow=k, ncol=k, byrow=TRUE)
-  Sigma_ <- matrix(b, nrow=k, ncol=1, byrow=TRUE)
+  u_ <- matrix((f1 %*% (-1*a)), nrow=k, ncol=1)
+  R_ <- matrix((diag(k) + a), nrow=k, ncol=k)
+  Sigma_ <- matrix(b, nrow=k, ncol=1)
   mu0_ <- mu0 + f %*% Q %*% t(f)
-  #b_ <- matrix((-1*f %*% Q - f %*% Q), nrow=k, ncol=1, byrow=TRUE)
-  b_ <- matrix((-2*f %*% Q), nrow=k, ncol=1, byrow=TRUE)
-  Q_ <- matrix(Q, nrow=k, ncol=k, byrow=TRUE)
+  b_ <- matrix((-2*f %*% Q), nrow=k, ncol=1)
+  Q_ <- matrix(Q, nrow=k, ncol=k)
   theta_ <- theta
   ystart = matrix(ystart, nrow=k, ncol=1)
   simulated = .Call("simdata_ND", N, u_, R_, Sigma_, mu0_, b_, Q_, theta_, tstart, ystart, tend, k, dt);

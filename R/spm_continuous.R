@@ -173,7 +173,7 @@ spm_continuous <- function(dat,
   
   if(mu0 < 0) {mu0 <- 0}
   
-  parameters <- c(a, f1, Q, f, b, mu0, theta)
+  parameters <- c(t(a), f1, t(Q), f, b, mu0, theta)
   # Current results:
   #results <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
   results_tmp <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)

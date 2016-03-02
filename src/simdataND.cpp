@@ -35,7 +35,6 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
     double theta  = as<double>(theta_);
     double tstart  = as<double>(tstart_);
     arma::mat ystart = as<arma::mat>(ystart_);
-    
     double tend  = as<double>(tend_);
     //End of data loading
     double id = 0;
