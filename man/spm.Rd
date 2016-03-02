@@ -6,7 +6,8 @@
 \usage{
 spm(x, model = "discrete", formulas = NULL, tol = NULL,
   stopifbound = FALSE, algorithm = "NLOPT_LN_NELDERMEAD", lb = NULL,
-  ub = NULL, maxeval = 100, verbose = FALSE, pinv.tol = 0.01)
+  ub = NULL, maxeval = 100, pinv.tol = 0.01, theta.range = seq(0.01,
+  0.2, by = 0.001), verbose = FALSE)
 }
 \arguments{
 \item{x}{A dataset: is the output from prepare_data(...) function and consists of two separate data tables:
@@ -29,9 +30,12 @@ Default: \code{NLOPTR_NL_NELDERMEAD}.}
 \item{maxeval}{Maximum number of evaluations of optimization algorithm. 
 Default 100.}
 
-\item{verbose}{A verbosing output indicator (FALSE by default).}
-
 \item{pinv.tol}{A tolerance threshold for matrix pseudo-inverse. Default: 0.01.}
+
+\item{theta.range}{A user-defined range of the parameter \code{theta} used in 
+discrete-time optimization and estimating of starting point for continuous-time optimization.}
+
+\item{verbose}{A verbosing output indicator (FALSE by default).}
 
 \item{up}{Upper boundary, default \code{NULL}.}
 }
