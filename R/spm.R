@@ -19,8 +19,10 @@
 #'@param up Upper boundary, default \code{NULL}.
 #'@param maxeval Maximum number of evaluations of optimization algorithm. 
 #'Default 100.
-#'@param verbose A verbosing output indicator (FALSE by default).
 #'@param pinv.tol A tolerance threshold for matrix pseudo-inverse. Default: 0.01.
+#'@param theta.range A user-defined range of the parameter \code{theta} used in 
+#'discrete-time optimization and estimating of starting point for continuous-time optimization.
+#'@param verbose A verbosing output indicator (FALSE by default).
 #'@return For "discrete" and "continuous" model types: 
 #'(1) a list of model parameter estimates for the discrete model type described in 
 #'"Life tables with covariates: Dynamic Model for Nonlinear Analysis of Longitudinal Data", 
@@ -50,8 +52,10 @@
 #'}
 spm <- function(x, model="discrete", formulas = NULL, tol=NULL, 
                 stopifbound=FALSE, algorithm="NLOPT_LN_NELDERMEAD", 
-                lb=NULL, ub=NULL, maxeval=100, verbose=FALSE, 
-                pinv.tol = 0.01) {
+                lb=NULL, ub=NULL, maxeval=100,
+                pinv.tol = 0.01,
+                theta.range=seq(0.01, 0.2, by=0.001),
+                verbose=FALSE) {
   
   # List of available models:
   models <- c("discrete", "continuous", "time-dependent")
@@ -66,7 +70,7 @@ spm <- function(x, model="discrete", formulas = NULL, tol=NULL,
   
   if(model == "discrete") {
     # Estimation of starting point with discrete optimization:
-    pars <- spm_discrete(dat=x[[2]],k=k, verbose = verbose, tol = tol)
+    pars <- spm_discrete(dat=x[[2]],k=k, verbose = verbose, tol = tol, theta_range=theta.range)
     res <- list(Ak2005=list(u=pars$pars1$u, 
                             R=pars$pars1$R, 
                             b=pars$pars1$b, 
