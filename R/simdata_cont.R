@@ -32,9 +32,9 @@ simdata_cont <- function(N=100, a=-0.05, f1=80, Q=2e-08, f=80, b=5, mu0=2e-05, t
     stop("Dimenstions of provided parameters are not equal.")
   }  
   
-  aH<-matrix(a,nrow=k,ncol=k,byrow=TRUE)
+  aH<-matrix(a,nrow=k,ncol=k)
   f1H<-matrix(f1,nrow=k,ncol=1,byrow=FALSE)
-  QH<-matrix(Q,nrow=k,ncol=k,byrow=TRUE)
+  QH<-matrix(Q,nrow=k,ncol=k)
   fH<-matrix(f,nrow=k,ncol=1,byrow=FALSE)
   bH<-matrix(b,nrow=k,ncol=1,byrow=FALSE)
   ystart<-matrix(ystart,nrow=k,ncol=1,byrow=FALSE)
@@ -194,9 +194,9 @@ simdata_cont2 <- function(N=10, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, the
     stop("Dimenstions of provided parameters are not equal.")
   }  
   
-  aH<-matrix(a,nrow=k,ncol=k,byrow=TRUE)
+  aH<-matrix(a,nrow=k,ncol=k)
   f1H<-matrix(f1,nrow=k,ncol=1,byrow=FALSE)
-  QH<-matrix(Q,nrow=k,ncol=k,byrow=TRUE)
+  QH<-matrix(Q,nrow=k,ncol=k)
   fH<-matrix(f,nrow=k,ncol=1,byrow=FALSE)
   bH<-matrix(b,nrow=k,ncol=1,byrow=FALSE)
   ystart<-matrix(ystart,nrow=k,ncol=1,byrow=FALSE)
