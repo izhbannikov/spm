@@ -5,7 +5,7 @@
 \title{A sub-finction that corresponds to the spm_time_dep(...)}
 \usage{
 optimize(data, starting_params, formulas, verbose, lb, ub, algorithm,
-  stopifbound)
+  stopifbound, maxeval = maxeval)
 }
 \arguments{
 \item{data}{a data matrix.}
@@ -22,7 +22,9 @@ optimize(data, starting_params, formulas, verbose, lb, ub, algorithm,
 
 \item{algorithm}{some optimization algorithm, for example, NLOPT_LN_NEWUOA.}
 
-\item{stopifbound}{if TRUE then algorithm stops when at least one parameter
+\item{stopifbound}{if TRUE then algorithm stops when at least one parameter.}
+
+\item{maxeval}{maximum number of evaluations of the algorithm.
 achieved boundaries.}
 }
 \description{

@@ -7,12 +7,12 @@
 spm_time_dep(x, start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0
   = 0.001), f = list(at = "a", f1t = "f1", Qt = "Q", ft = "f", bt = "b", mu0t
   = "mu0"), stopifbound = FALSE, algorithm = "NLOPT_LN_NELDERMEAD",
-  lb = NULL, ub = NULL, verbose = FALSE)
+  lb = NULL, ub = NULL, verbose = FALSE, maxeval = 100)
 }
 \arguments{
 \item{x}{: input data table.}
 
-\item{start}{: a list of starting parameters, default: llist(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),}
+\item{start}{: a list of starting parameters, default: list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),}
 
 \item{f}{: a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")}
 
@@ -25,9 +25,11 @@ spm_time_dep(x, start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0
 \item{ub}{Upper bound of parameters under estimation.}
 
 \item{verbose}{turns on verbosing output.}
+
+\item{maxeval}{maximum number of iterations of optimization algorithm.}
 }
 \value{
-A set of estimated parameters a, f1, Q, f, b, mu0, theta.
+a set of estimated coefficients of a, f1, Q, f, b, mu0 and (if used) theta.
 }
 \description{
 spm_time_dep : a function that estimates parameters from the model with time-dependent coefficients.
