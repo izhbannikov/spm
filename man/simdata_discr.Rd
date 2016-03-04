@@ -6,7 +6,7 @@
 \usage{
 simdata_discr(N = 100, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
   mu0 = 1e-05, theta = 0.08, ystart = 80, tstart = 30, tend = 105,
-  dt = 1, k = 1)
+  dt = 1)
 }
 \arguments{
 \item{N}{Number of individuals}
@@ -32,8 +32,6 @@ simdata_discr(N = 100, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
 \item{tend}{A number, defines final time (105 by default).}
 
 \item{dt}{A time step (1 by default).}
-
-\item{k}{number of dimensions (k = 1 by default).}
 }
 \value{
 A table with simulated data.

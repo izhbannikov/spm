@@ -3,7 +3,6 @@
 #'for Nonlinear Analysis of Longitudinal Data. Mathematical Population Studies, 12(2), pp.: 51-80.
 #'<DOI:10.1080/08898480590932296>.
 #' @param N Number of individuals
-#' @param k number of dimensions (k = 1 by default).
 #' @param a A k by k matrix, which characterize the rate of the adaptive response.
 #' @param f1 A particular state, which is a deviation from the normal (or optimal). This is a vector with length of k.
 #' @param Q A matrix k by k, which is a non-negative-definite symmetric matrix.
@@ -21,7 +20,9 @@
 #' data <- simdata_discr(N=100, ystart=80, k=1)
 #' head(data)
 #'
-simdata_discr <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart=80, tstart=30, tend=105, dt=1, k=1) {
+simdata_discr <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart=80, tstart=30, tend=105, dt=1) {
+  
+  k <- length(ystart)
   
   if ( (dim(as.data.frame(a))[1] != k) & (dim(as.data.frame(a))[2] != k) ) {
     stop("Dimenstions if \'a\' are not equal to k. It must be a k x k matrix.")

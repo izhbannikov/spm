@@ -311,6 +311,7 @@ spm_continuous <- function(dat,
   }
   final_results$limit <- limit
   #assign("results", final_results, envir=baseenv())
+  class(final_results) <- "spm.continuous"
   invisible(final_results)
 }
 
