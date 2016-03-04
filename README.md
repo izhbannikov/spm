@@ -9,19 +9,20 @@
 * Discrete (one- and multiple-dimensions)
 * Time-dependant coefficients (one-dimensional optimisation)
 
+### How to install:
+```
+install.packages("devtools")
+library(devtools)
+install_github("izhbannikov/spm")
+```
+
 ## How to use
 ```
 library(stpm)
 #Prepare data for optimization
-data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"))
+data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"), 
+				   y=system.file("data","vitstat.csv",package="stpm"))
 #Parameters estimation (default model: discrete-time):
 p.discr.model <- spm(data)
 p.discr.model
-# Continuous-time model:
-p.cont.model <- spm(data, model="continuous")
-p.cont.model
-# Model with time-dependent coefficients:
-data <- prepare_data(x=system.file("data","longdat.csv",package="spm"), y=system.file("data","vitstat.csv",package="spm"), covariates="BMI")
-p.td.model <- spm(data, model="time-dependent")
-p.td.model
 ```
