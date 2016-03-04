@@ -36,10 +36,10 @@
 #'# Projection
 #'# Discrete-time model
 #'data.proj.discrete <- spm_projection(model.par, N=5000, ystart=c(80, 27))
-#'plot(data.proj.discrete)
+#'plot(data.proj.discrete$stat$srv.prob)
 #'# Continuous-time model
 #'data.proj.continuous <- spm_projection(model.par, N=5000, ystart=c(80, 27), model="continuous")
-#'plot(data.proj.continuous)
+#'plot(data.proj.continuous$stat$srv.prob)
 #'}
 spm_projection <- function(x, 
                            N=100, 
