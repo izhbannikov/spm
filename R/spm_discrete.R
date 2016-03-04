@@ -7,7 +7,7 @@
 #'@param theta_range A range of theta parameter (axe displacement of Gompertz function), default: from 0.001 to 0.09 with step of 0.001.
 #'@param tol A tolerance threshold for matrix inversion (NULL by default).
 #'@param verbose An indicator of verbosing output.
-#'@return A list of two elements: (1) estimated parameters u, R, b, Sigma, Q, mu0, theta and
+#'@return A list of two elements ("Ak205", "Ya2007"): (1) estimated parameters u, R, b, Sigma, Q, mu0, theta and
 #'(2) estimated parameters a, f1, Q, f, b, mu0, theta. Note: b and mu0 from first list are different 
 #'from b and mu0 from the second list.
 #'@details This function is way much faster that continuous \code{spm_continuous_MD(...)} (but less precise) and used mainly in 
@@ -157,7 +157,8 @@ spm_discrete <- function(dat,k=1, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, 
   thetaH <- theta
   pars2 <- list(a=aH, f1=f1H, Q=QH, f=fH, b=bH, mu0=mu0H, theta=thetaH)
   
-  pars <- list(pars1=pars1, pars2=pars2)
+  pars <- list(Ak2005=pars1, Ya2007=pars2)
+  class(pars) <- "spm.discrete"
   invisible(pars)
 }
 

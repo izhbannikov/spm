@@ -71,20 +71,20 @@ spm <- function(x, model="discrete", formulas = NULL, tol=NULL,
   if(model == "discrete") {
     # Estimation of starting point with discrete optimization:
     pars <- spm_discrete(dat=x[[2]],k=k, verbose = verbose, tol = tol, theta_range=theta.range)
-    res <- list(Ak2005=list(u=pars$pars1$u, 
-                            R=pars$pars1$R, 
-                            b=pars$pars1$b, 
-                            Q=pars$pars1$Q, 
-                            Sigma=pars$pars1$Sigma,
-                            mu0=pars$pars1$mu0,
-                            theta=pars$pars1$theta), 
-                Ya2007=list(a=pars$pars2$a, 
-                            f1=pars$pars2$f1,
-                            Q=pars$pars2$Q,
-                            f=pars$pars2$f, 
-                            b=pars$pars2$b, 
-                            mu0=pars$pars2$mu0, 
-                            theta=pars$pars2$theta))
+    res <- list(Ak2005=list(u=pars$Ak2005$u, 
+                            R=pars$Ak2005$R, 
+                            b=pars$Ak2005$b, 
+                            Q=pars$Ak2005$Q, 
+                            Sigma=pars$Ak2005$Sigma,
+                            mu0=pars$Ak2005$mu0,
+                            theta=pars$Ak2005$theta), 
+                Ya2007=list(a=pars$Ya2007$a, 
+                            f1=pars$Ya2007$f1,
+                            Q=pars$Ya2007$Q,
+                            f=pars$Ya2007$f, 
+                            b=pars$Ya2007$b, 
+                            mu0=pars$Ya2007$mu0, 
+                            theta=pars$Ya2007$theta))
     
   }
   
@@ -98,24 +98,24 @@ spm <- function(x, model="discrete", formulas = NULL, tol=NULL,
       print(pars)
     }
     
-    if(det(pars$pars2$Q) < 0) {
+    if(det(pars$Ya2007$Q) < 0) {
       cat("Error: determinant of Q < 0\n")
       cat("Q:\n")
-      print(pars$pars2$Q)
+      print(pars$Ya2007$Q)
       cat("Det(Q):\n")
-      print(det(pars$pars2$Q))
+      print(det(pars$Ya2007$Q))
       
       res <- NA
     
     } else {
       res.t <- spm_continuous(as.matrix(data), 
-                    a=pars$pars2$a, 
-                    f1=pars$pars2$f1, 
-                    Q=pars$pars2$Q, 
-                    f=pars$pars2$f, 
-                    b=pars$pars2$b, 
-                    mu0=pars$pars2$mu0, 
-                    theta=pars$pars2$theta, 
+                    a=pars$Ya2007$a, 
+                    f1=pars$Ya2007$f1, 
+                    Q=pars$Ya2007$Q, 
+                    f=pars$Ya2007$f, 
+                    b=pars$Ya2007$b, 
+                    mu0=pars$Ya2007$mu0, 
+                    theta=pars$Ya2007$theta, 
                     k=k,
                     stopifbound = stopifbound,
                     algorithm = algorithm, 
@@ -171,14 +171,17 @@ spm <- function(x, model="discrete", formulas = NULL, tol=NULL,
       }
     }
     
-    pars <- spm_discrete(dat=x[[2]],k=k)
-    
+    # Raw parameters estimates
+    pars <- spm_discrete(dat=x[[2]],k=k, verbose = verbose, tol = tol, theta_range=theta.range)
+    # Parameter optimization for time-dependent model
     res <- spm_time_dep(x[[1]][,2:dim(x[[1]])[2]], 
                             f = formulas.work,
-                            start=list(a=pars$pars2$a, f1=pars$pars2$f1, Q=pars$pars2$Q, f=pars$pars2$f, b=pars$pars2$b, mu0=pars$pars2$mu0))
+                            start=list(a=pars$Ya2007$a, f1=pars$Ya2007$f1, 
+                                       Q=pars$Ya2007$Q, f=pars$Ya2007$f, 
+                                       b=pars$Ya2007$b, mu0=pars$Ya2007$mu0))
     
     #res <- get("results",envir=.GlobalEnv)
   }
-  
+  class(res) <- "spm"
   invisible(res)
 }

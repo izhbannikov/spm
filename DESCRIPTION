@@ -16,6 +16,6 @@ Imports:
     Rcpp (>= 0.11.1)
 LinkingTo: Rcpp,RcppArmadillo
 Depends:
-    mice,sas7bdat,stats,nloptr,tools
+    mice,sas7bdat,stats,nloptr,survival,tools
 Suggests: knitr (>= 1.11)
 RoxygenNote: 5.0.1
