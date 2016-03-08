@@ -17,7 +17,7 @@
 #' @return A table with simulated data.
 #' @examples
 #' library(stpm)
-#' data <- simdata_discr(N=100, ystart=80, k=1)
+#' data <- simdata_discr(N=100, ystart=80)
 #' head(data)
 #'
 simdata_discr <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart=80, tstart=30, tend=105, dt=1) {

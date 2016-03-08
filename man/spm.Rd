@@ -27,6 +27,8 @@ Default: \code{NLOPTR_NL_NELDERMEAD}.}
 
 \item{lb}{Lower boundary, default \code{NULL}.}
 
+\item{ub}{Upper boundary, default \code{NULL}.}
+
 \item{maxeval}{Maximum number of evaluations of optimization algorithm. 
 Default 100.}
 
@@ -36,8 +38,6 @@ Default 100.}
 discrete-time optimization and estimating of starting point for continuous-time optimization.}
 
 \item{verbose}{A verbosing output indicator (FALSE by default).}
-
-\item{up}{Upper boundary, default \code{NULL}.}
 }
 \value{
 For "discrete" and "continuous" model types: 

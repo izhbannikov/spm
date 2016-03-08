@@ -16,7 +16,7 @@
 #'@param algorithm An optimization algorithm used in \code{nloptr} package.
 #'Default: \code{NLOPTR_NL_NELDERMEAD}.
 #'@param lb Lower boundary, default \code{NULL}.
-#'@param up Upper boundary, default \code{NULL}.
+#'@param ub Upper boundary, default \code{NULL}.
 #'@param maxeval Maximum number of evaluations of optimization algorithm. 
 #'Default 100.
 #'@param pinv.tol A tolerance threshold for matrix pseudo-inverse. Default: 0.01.
@@ -70,7 +70,7 @@ spm <- function(x, model="discrete", formulas = NULL, tol=NULL,
   
   if(model == "discrete") {
     # Estimation of starting point with discrete optimization:
-    pars <- spm_discrete(dat=x[[2]],k=k, verbose = verbose, tol = tol, theta_range=theta.range)
+    pars <- spm_discrete(dat=x[[2]],verbose = verbose, tol = tol, theta_range=theta.range)
     res <- list(Ak2005=list(u=pars$Ak2005$u, 
                             R=pars$Ak2005$R, 
                             b=pars$Ak2005$b, 
@@ -90,8 +90,9 @@ spm <- function(x, model="discrete", formulas = NULL, tol=NULL,
   
   
   if(model == "continuous") {
-    pars <- spm_discrete(dat=x[[2]],k=k, verbose = verbose, tol = tol)
-    data <- as.matrix(x[[1]][,2:dim(x[[1]])[2]])
+
+    pars <- spm_discrete(dat=x[[2]],verbose = verbose, tol = tol)
+    data <- data.frame(x[[1]])
   
     if(verbose) {
       cat("Starting parameters:\n")
@@ -116,7 +117,6 @@ spm <- function(x, model="discrete", formulas = NULL, tol=NULL,
                     b=pars$Ya2007$b, 
                     mu0=pars$Ya2007$mu0, 
                     theta=pars$Ya2007$theta, 
-                    k=k,
                     stopifbound = stopifbound,
                     algorithm = algorithm, 
                     lb = lb, ub = ub,
@@ -153,7 +153,6 @@ spm <- function(x, model="discrete", formulas = NULL, tol=NULL,
   }
   
   if(model == "time-dependent") {
-    data <- x[[1]][,2:dim(x[[1]])[2]]
     
     if(k > 1) {
       stop("Number of variables > 1. Model with time-dependent parameters can be used only with one variable!")
@@ -172,9 +171,9 @@ spm <- function(x, model="discrete", formulas = NULL, tol=NULL,
     }
     
     # Raw parameters estimates
-    pars <- spm_discrete(dat=x[[2]],k=k, verbose = verbose, tol = tol, theta_range=theta.range)
+    pars <- spm_discrete(dat=x[[2]],verbose = verbose, tol = tol, theta_range=theta.range)
     # Parameter optimization for time-dependent model
-    res <- spm_time_dep(x[[1]][,2:dim(x[[1]])[2]], 
+    res <- spm_time_dep(x[[1]], 
                             f = formulas.work,
                             start=list(a=pars$Ya2007$a, f1=pars$Ya2007$f1, 
                                        Q=pars$Ya2007$Q, f=pars$Ya2007$f, 

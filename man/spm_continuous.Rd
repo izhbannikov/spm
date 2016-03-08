@@ -5,7 +5,7 @@
 \title{Continuous multi-dimensional optimization}
 \usage{
 spm_continuous(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
-  mu0 = 2e-05, theta = 0.08, k = 1, stopifbound = FALSE,
+  mu0 = 2e-05, theta = 0.08, stopifbound = FALSE,
   algorithm = "NLOPT_LN_COBYLA", lb = NULL, ub = NULL, maxeval = 500,
   verbose = FALSE, pinv.tol = 0.01)
 }
@@ -25,8 +25,6 @@ spm_continuous(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
 \item{mu0}{A starting value of the baseline hazard.}
 
 \item{theta}{A starting value of the parameter theta (axe displacement of Gompertz function).}
-
-\item{k}{A number of variables (dimension).}
 
 \item{stopifbound}{Estimation stops if at least one parameter achieves lower or upper boundaries.}
 
@@ -63,8 +61,8 @@ library(stpm)
 data <- simdata_cont(N=2)
 head(data)
 #Parameters estimation:
-pars <- spm_continuous(dat=data[,2:6],a=-0.05, f1=80, 
-					 Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08, k = 1)
+pars <- spm_continuous(dat=data,a=-0.05, f1=80, 
+					 Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08)
 pars
 
 }

@@ -414,6 +414,7 @@ spm_time_dep <- function(x,
                          verbose=FALSE, maxeval=100) {
   formulas <- f
   data <- as.matrix(x)
+  data <- data[, 2:dim(data)[2]]
   formulas.work = list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
   for(item in formulas) {
     formulas.work[[item]] <- formulas[[item]]

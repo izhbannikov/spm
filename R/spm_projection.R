@@ -64,7 +64,7 @@ spm_projection <- function(x,
     
     if (!is.null(f)) {
       for(item in f) {
-        formulas.work[[item]] <- formulas[[item]]
+        formulas.work[[item]] <- f[[item]]
       }
     }
     
@@ -74,8 +74,7 @@ spm_projection <- function(x,
                                     tstart=tstart, 
                                     tend=tend, 
                                     ystart=ystart, 
-                                    sd0=sd0, 
-                                    k=1)
+                                    sd0=sd0)
     #Compute summary statistics:
     # Statistics
     stat <- list()
