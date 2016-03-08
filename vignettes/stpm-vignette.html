@@ -10,7 +10,7 @@
 
 <meta name="author" content="Ilya Y. Zhbannikov" />
 
-<meta name="date" content="2016-02-07" />
+<meta name="date" content="2016-03-09" />
 
 <title>stpm: a set of utilities for estimating stochastic process parameters and modeling survival data with stochastic process model</title>
 
@@ -64,7 +64,7 @@ img {
 <div id="header">
 <h1 class="title">stpm: a set of utilities for estimating stochastic process parameters and modeling survival data with stochastic process model</h1>
 <h4 class="author"><em>Ilya Y. Zhbannikov</em></h4>
-<h4 class="date"><em>2016-02-07</em></h4>
+<h4 class="date"><em>2016-03-09</em></h4>
 </div>
 
 
@@ -125,27 +125,27 @@ devtools::install_github(&quot;izhbannikov/stpm&quot;)</code></pre>
 <h2>Discrete- and Continuous-time models</h2>
 <p>There are two main SPM types in the package: discrete-time model [4] and continuous-time model [3]. Discrete model assumes equal intervals between follow-up observations. The example of discrete dataset is given below.</p>
 <pre class="r"><code>library(stpm)
-data &lt;- simdata_discr(N=10, ystart=c(80), k=1)
+data &lt;- simdata_discr(N=10, ystart=80)
 head(data)</code></pre>
 <pre><code>##      id xi t1 t2       y1  y1.next
-## [1,]  1  0 30 31 80.00000 83.11505
-## [2,]  1  0 31 32 83.11505 82.44254
-## [3,]  1  0 32 33 82.44254 84.26288
-## [4,]  1  0 33 34 84.26288 74.32822
-## [5,]  1  0 34 35 74.32822 66.50182
-## [6,]  1  0 35 36 66.50182 68.22564</code></pre>
+## [1,]  1  0 30 31 80.00000 77.97124
+## [2,]  1  0 31 32 77.97124 72.75948
+## [3,]  1  0 32 33 72.75948 78.30266
+## [4,]  1  0 33 34 78.30266 83.51840
+## [5,]  1  0 34 35 83.51840 83.69369
+## [6,]  1  0 35 36 83.69369 79.87638</code></pre>
 <p>In this case there are equal intervals between t1 and t2 (Age and Age.next).</p>
 <p>The opposite is continuous case, in which intervals between observations are not equal. The example of continuous case dataset is shown below:</p>
 <pre class="r"><code>library(stpm)
-data &lt;- simdata_cont(N=5,ystart = c(50))
+data &lt;- simdata_cont2(N=5,ystart = 50)
 head(data)</code></pre>
-<pre><code>##   id xi       t1       t2       y1  y1.next
-## 1  1  0 34.64537 35.88450 48.93623 50.04893
-## 2  1  0 35.88450 37.52373 50.04893 43.54601
-## 3  1  0 37.52373 40.50541 43.54601 43.71541
-## 4  1  0 40.50541 43.31533 43.71541 41.48778
-## 5  1  0 43.31533 44.97644 41.48778 44.79841
-## 6  1  0 44.97644 46.32351 44.79841 37.87642</code></pre>
+<pre><code>##      id xi       t1       t2       y1  y1.next
+## [1,]  0  0 37.91828 39.04887 50.99913 51.12754
+## [2,]  0  0 39.04887 40.66078 51.12754 55.65004
+## [3,]  0  0 40.66078 41.75316 55.65004 63.54484
+## [4,]  0  0 41.75316 43.71354 63.54484 67.56044
+## [5,]  0  0 43.71354 45.69289 67.56044 60.13357
+## [6,]  0  0 45.69289 46.74288 60.13357 67.28961</code></pre>
 <div id="discrete-model" class="section level3">
 <h3>Discrete model</h3>
 <p>In discrete model, we use the following assumptions: <span class="math display">\[ \bar{y}(t+1) = \bar{u} + \bar{R} \times \bar{y}(t) + \bar{\epsilon} \]</span> (1) <span class="math display">\[ \mu(t) = \mu_0(t) + \bar{b}(t) \times \bar{y}(t) + \bar{Q} \times \bar{y}(t)^2 \]</span> (2)</p>
@@ -154,61 +154,65 @@ head(data)</code></pre>
 <div id="example" class="section level3">
 <h3>Example</h3>
 <pre class="r"><code>library(stpm)
-data &lt;- simdata_discr(N=2000)
+data &lt;- simdata_discr(N=200)
 #Parameters estimation
 pars &lt;- spm_discrete(data)
 pars</code></pre>
-<pre><code>## $pars1
-## $pars1$theta
-## [1] 0.082
+<pre><code>## $Ak2005
+## $Ak2005$theta
+## [1] 0.083
 ## 
-## $pars1$mu0
-## [1] 0.0001255953378
+## $Ak2005$mu0
+## [1] 8.369318058e-05
 ## 
-## $pars1$b
-## [1] -2.933038626e-06
+## $Ak2005$b
+## [1] -2.069622929e-06
 ## 
-## $pars1$Q
-##                 [,1]
-## [1,] 1.826654965e-08
-## 
-## $pars1$u
-## [1] 3.991961635
-## 
-## $pars1$R
-## [1] 0.9501822089
-## 
-## $pars1$Sigma
-## [1] 4.997780501
-## 
-## 
-## $pars2
-## $pars2$a
+## $Ak2005$Q
 ##                [,1]
-## [1,] -0.04981779111
+## [1,] 1.39043211e-08
 ## 
-## $pars2$f1
+## $Ak2005$u
+## [1] 4.0695147
+## 
+## $Ak2005$R
+## [1] 0.9497498373
+## 
+## $Ak2005$Sigma
+## [1] 5.033107967
+## 
+## 
+## $Ya2007
+## $Ya2007$a
+##                [,1]
+## [1,] -0.05025016273
+## 
+## $Ya2007$f1
+##            [,1]
+## [1,] 80.9851049
+## 
+## $Ya2007$Q
+##                [,1]
+## [1,] 1.39043211e-08
+## 
+## $Ya2007$f
 ##             [,1]
-## [1,] 80.13124522
+## [1,] 74.42373178
 ## 
-## $pars2$Q
+## $Ya2007$b
+##             [,1]
+## [1,] 5.033107967
+## 
+## $Ya2007$mu0
 ##                 [,1]
-## [1,] 1.826654965e-08
+## [1,] 6.678649707e-06
 ## 
-## $pars2$f
-##             [,1]
-## [1,] 80.28441829
+## $Ya2007$theta
+## [1] 0.083
 ## 
-## $pars2$b
-##             [,1]
-## [1,] 4.997780501
 ## 
-## $pars2$mu0
-##                 [,1]
-## [1,] 7.856687818e-06
-## 
-## $pars2$theta
-## [1] 0.082</code></pre>
+## attr(,&quot;class&quot;)
+## [1] &quot;spm.discrete&quot;</code></pre>
 </div>
 </div>
 <div id="continuous-model" class="section level2">
@@ -219,52 +223,58 @@ pars</code></pre>
 <h3>Example</h3>
 <pre class="r"><code>library(stpm)
 #Reading the data:
-data &lt;- simdata_cont(N=100)
+data &lt;- simdata_cont2(N=100)
 head(data)</code></pre>
-<pre><code>##   id xi          t1          t2          y1     y1.next
-## 1  1  0 48.71323423 51.61380979 81.56853722 81.38800629
-## 2  1  0 51.61380979 54.48693801 81.38800629 82.69331064
-## 3  1  0 54.48693801 56.67844415 82.69331064 78.73080120
-## 4  1  0 56.67844415 58.56543745 78.73080120 79.64379327
-## 5  1  0 58.56543745 61.16421601 79.64379327 74.06096143
-## 6  1  0 61.16421601 62.93750423 74.06096143 81.39526528</code></pre>
+<pre><code>##      id xi          t1          t2          y1      y1.next
+## [1,]  0  0 35.69370874 37.07987729 80.39139407  83.11449873
+## [2,]  0  0 37.07987729 38.25836416 83.11449873  83.27321760
+## [3,]  0  0 38.25836416 39.40633274 83.27321760  89.73567427
+## [4,]  0  0 39.40633274 40.97531492 89.73567427  94.70807684
+## [5,]  0  0 40.97531492 42.72154746 94.70807684  96.47615846
+## [6,]  0  0 42.72154746 44.63677688 96.47615846 100.89649668</code></pre>
 <pre class="r"><code>#Parameters estimation:
-pars &lt;- spm_continuous(dat=data[,2:6],a=-0.05, f1=80, 
-                       Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08, k = 1)
-pars</code></pre>
+pars &lt;- spm_continuous(dat=data,a=-0.05, f1=80, 
+                       Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08)</code></pre>
+<pre><code>## Parameter theta achieved lower/upper bound.
+## 0.072</code></pre>
+<pre class="r"><code>pars</code></pre>
 <pre><code>## $a
-##       [,1]
-## [1,] -0.05
+##                [,1]
+## [1,] -0.05453693777
 ## 
 ## $f1
-##      [,1]
-## [1,]   80
+##             [,1]
+## [1,] 79.39475939
 ## 
 ## $Q
-##                [,1]
-## [1,] 2.83213213e-08
+##                 [,1]
+## [1,] 2.160177469e-08
 ## 
 ## $f
-##      [,1]
-## [1,]   80
+##             [,1]
+## [1,] 83.73782074
 ## 
 ## $b
-##      [,1]
-## [1,]    5
+##             [,1]
+## [1,] 5.025732121
 ## 
 ## $mu0
-## [1] 2.000000614e-05
+## [1] 1.839933512e-05
 ## 
 ## $theta
-## [1] 0.08000000001
+## [1] 0.072
 ## 
 ## $limit
-## [1] FALSE</code></pre>
+## [1] TRUE
+## 
+## attr(,&quot;class&quot;)
+## [1] &quot;spm.continuous&quot;</code></pre>
 </div>
 </div>
 <div id="coefficient-conversion-between-continuous--and-discrete-time-models" class="section level2">
 <h2>Coefficient conversion between continuous- and discrete-time models</h2>
 <p><span class="math display">\[ Q = Q \]</span> <span class="math display">\[ \bar{a} = \bar{R} - diag(k) \]</span> <span class="math display">\[ \bar{b} = \bar{\epsilon} \]</span> <span class="math display">\[ \bar{f1} = -1 \times \bar{u} \times \bar{a^{-1}} \]</span> <span class="math display">\[ \bar{f} = -0.5 \times \bar{b} \times \bar{Q^{-1}} \]</span> <span class="math display">\[ mu_0 = mu_0 - \bar{f} \times \bar{Q} \times t(\bar{f}) \]</span> <span class="math display">\[ \theta = \theta \]</span></p>
+<p>Here <span class="math display">\[k\]</span> is a number of variables (covariates), which is equal to model’s dimension.</p>
 </div>
 <div id="model-with-time-dependent-coefficients" class="section level2">
 <h2>Model with time-dependent coefficients</h2>
@@ -278,28 +288,28 @@ pars</code></pre>
 n &lt;- 500
 data &lt;- simdata_time_dep(N=n)
 # Estimation:
-opt.par &lt;- spm_time_dep(data[,2:6], 
+opt.par &lt;- spm_time_dep(data, 
                         start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0 = 0.001), 
                         f = list(at = &quot;a&quot;, f1t = &quot;f1&quot;, Qt = &quot;Q&quot;, ft = &quot;f&quot;, bt = &quot;b&quot;, mu0t= &quot;mu0&quot;))
 opt.par</code></pre>
 <pre><code>## [[1]]
 ## [[1]]$a
-## [1] -0.04653639696
+## [1] -0.03904617932
 ## 
 ## [[1]]$f1
-## [1] 79.0433917
+## [1] 79.36413946
 ## 
 ## [[1]]$Q
-## [1] 1.729348342e-08
+## [1] 2.22664768e-08
 ## 
 ## [[1]]$f
-## [1] 99.51038054
+## [1] 100
 ## 
 ## [[1]]$b
-## [1] 3.75
+## [1] 3.750239397
 ## 
 ## [[1]]$mu0
-## [1] 0.001249983971</code></pre>
+## [1] 0.001249916021</code></pre>
 </div>
 </div>
 <div id="simulation-trajectory-projection" class="section level2">
@@ -308,8 +318,8 @@ opt.par</code></pre>
 </div>
 <div id="discrete-time" class="section level2">
 <h2>Discrete-time</h2>
-<p>The corresponding function is:</p>
-<p><code>simdata_discr(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart=80, tstart=30, tend=105, dt=1, k=1)</code></p>
+<p>The corresponding function is (<span class="math display">\[k\]</span> - a number of variables(covariates), equal to model’s dimension):</p>
+<p><code>simdata_discr(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart=80, tstart=30, tend=105, dt=1)</code></p>
 <p>Here:</p>
 <p><code>N</code> - Number of individuals</p>
 <p><code>a</code> - A matrix of <code>k</code>x<code>k</code>, which characterize the rate of the adaptive response</p>
@@ -323,23 +333,22 @@ opt.par</code></pre>
 <p><code>tstart</code> - A number that defines a start time (30 by default)</p>
 <p><code>tend</code> - A number, defines a final time (105 by default)</p>
 <p><code>dt</code> - A time interval between observations.</p>
-<p><code>k</code> - number of dimensions (1 by default)</p>
 <p>This function returns a table with simulated data, as shown in example below:</p>
 <pre class="r"><code>library(stpm)
-data &lt;- simdata_discr(N=10, ystart=c(75, 94), k=2)
+data &lt;- simdata_discr(N=10, ystart=75)
 head(data)</code></pre>
-<pre><code>##      id xi t1 t2          y1     y1.next          y2     y2.next
-## [1,]  1  0 30 31 75.00000000 75.57777849 94.00000000 92.93744262
-## [2,]  1  0 31 32 75.57777849 72.37334305 92.93744262 81.42440622
-## [3,]  1  0 32 33 72.37334305 66.24409359 81.42440622 75.78225644
-## [4,]  1  0 33 34 66.24409359 64.73618361 75.78225644 81.40334435
-## [5,]  1  0 34 35 64.73618361 57.31958608 81.40334435 80.47101445
-## [6,]  1  0 35 36 57.31958608 49.85973915 80.47101445 73.23008213</code></pre>
+<pre><code>##      id xi t1 t2          y1     y1.next
+## [1,]  1  0 30 31 75.00000000 67.86573623
+## [2,]  1  0 31 32 67.86573623 73.07974659
+## [3,]  1  0 32 33 73.07974659 73.75880023
+## [4,]  1  0 33 34 73.75880023 75.95539487
+## [5,]  1  0 34 35 75.95539487 77.53082484
+## [6,]  1  0 35 36 77.53082484 75.35931813</code></pre>
 </div>
 <div id="continuous-time" class="section level2">
 <h2>Continuous-time</h2>
-<p>The correstonding function is:</p>
-<p><code>simdata_cont(N=100, a=-0.05, f1=80, Q=2e-07, f=80, b=5, mu0=2e-05, theta=0.08, ystart=80, tstart=30, tend=105, k=1)</code></p>
+<p>The correstonding function is (<span class="math display">\[k\]</span> - a number of variables(covariates), equal to model’s dimension):</p>
+<p><code>simdata_cont2(N=100, a=-0.05, f1=80, Q=2e-07, f=80, b=5, mu0=2e-05, theta=0.08, ystart=80, tstart=30, tend=105)</code></p>
 <p>Here:</p>
 <p><code>N</code> - Number of individuals</p>
 <p><code>a</code> - A matrix of <code>k</code>x<code>k</code>, which characterize the rate of the adaptive response</p>
@@ -352,18 +361,17 @@ head(data)</code></pre>
 <p><code>ystart</code> - A vector with length equal to number of dimensions used, defines starting values of covariates</p>
 <p><code>tstart</code> - A number that defines a start time (30 by default)</p>
 <p><code>tend</code> - A number, defines a final time (105 by default)</p>
-<p><code>k</code> - number of dimensions (1 by default)</p>
 <p>This function returns a table with simulated data, as shown in example below:</p>
 <pre class="r"><code>library(stpm)
 data &lt;- simdata_cont(N=10)
 head(data)</code></pre>
 <pre><code>##   id xi          t1          t2          y1     y1.next
-## 1  1  0 72.84077415 73.88064023 78.66128757 70.16129802
-## 2  1  0 73.88064023 75.38970150 70.16129802 69.19208254
-## 3  1  0 75.38970150 78.06740699 69.19208254 69.46322879
-## 4  1  0 78.06740699 80.41219847 69.46322879 66.96488916
-## 5  1  0 80.41219847 82.39449764 66.96488916 70.84761650
-## 6  1  0 82.39449764 84.72271349 70.84761650 63.54851804</code></pre>
+## 1  1  0 84.19505282 85.19873357 79.91748242 75.59100104
+## 2  1  0 85.19873357 86.98758681 75.59100104 72.91514416
+## 3  1  0 86.98758681 88.94467380 72.91514416 83.63339466
+## 4  1  0 88.94467380 89.98709535 83.63339466 85.38250169
+## 5  1  0 89.98709535 91.61485582 85.38250169 87.87385700
+## 6  1  1 91.61485582 92.78031357 87.87385700          NA</code></pre>
 </div>
 <div id="simulation-strategies" class="section level2">
 <h2>Simulation strategies</h2>

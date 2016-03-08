@@ -4,13 +4,11 @@
 \alias{spm_discrete}
 \title{Discrete multi-dimensional optimization}
 \usage{
-spm_discrete(dat, k = 1, theta_range = seq(0.02, 0.2, by = 0.001),
-  tol = NULL, verbose = FALSE)
+spm_discrete(dat, theta_range = seq(0.02, 0.2, by = 0.001), tol = NULL,
+  verbose = FALSE)
 }
 \arguments{
 \item{dat}{A data table.}
-
-\item{k}{A number of dimensions.}
 
 \item{theta_range}{A range of theta parameter (axe displacement of Gompertz function), default: from 0.001 to 0.09 with step of 0.001.}
 

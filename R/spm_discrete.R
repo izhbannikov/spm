@@ -3,7 +3,6 @@
 #'for Nonlinear Analysis of Longitudinal Data. Mathematical Population Studies, 12(2), pp.: 51-80.
 #'<DOI:10.1080/08898480590932296>.
 #'@param dat A data table.
-#'@param k A number of dimensions.
 #'@param theta_range A range of theta parameter (axe displacement of Gompertz function), default: from 0.001 to 0.09 with step of 0.001.
 #'@param tol A tolerance threshold for matrix inversion (NULL by default).
 #'@param verbose An indicator of verbosing output.
@@ -19,12 +18,9 @@
 #'pars <- spm_discrete(data)
 #'pars
 #'
-spm_discrete <- function(dat,k=1, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verbose=FALSE) {
-  #dat = d
-  #k=2
-  #theta_range=seq(0.02,0.2,by=0.001)
-  #tol=NULL
-  #verbose=TRUE
+spm_discrete <- function(dat, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verbose=FALSE) {
+  
+  k <- (dim(dat)[2] - 4)/2
   
   options(digits=10)
   # Logistic regression:

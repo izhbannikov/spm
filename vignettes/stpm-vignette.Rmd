@@ -73,7 +73,7 @@ There are two main SPM types in the package: discrete-time model [4] and continu
 
 ```{r}
 library(stpm)
-data <- simdata_discr(N=10, ystart=c(80), k=1)
+data <- simdata_discr(N=10, ystart=80)
 head(data)
 ```
 In this case there are equal intervals between t1 and t2 (Age and Age.next).
@@ -82,7 +82,7 @@ The opposite is continuous case, in which intervals between observations are not
 
 ```{r}
 library(stpm)
-data <- simdata_cont(N=5,ystart = c(50))
+data <- simdata_cont2(N=5,ystart = 50)
 head(data)
 ```
 
@@ -102,7 +102,7 @@ $$ \bar{Q}(t) = \bar{Q} e^{\theta t} $$
 
 ```{r}
 library(stpm)
-data <- simdata_discr(N=2000)
+data <- simdata_discr(N=200)
 #Parameters estimation
 pars <- spm_discrete(data)
 pars
@@ -120,11 +120,11 @@ $$ d\bar{\gamma}(t)/dt = \bar{a}(t) \times \bar{\gamma}(t) +  \bar{\gamma}(t) \t
 ```{r}
 library(stpm)
 #Reading the data:
-data <- simdata_cont(N=100)
+data <- simdata_cont2(N=100)
 head(data)
 #Parameters estimation:
-pars <- spm_continuous(dat=data[,2:6],a=-0.05, f1=80, 
-                       Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08, k = 1)
+pars <- spm_continuous(dat=data,a=-0.05, f1=80, 
+                       Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08)
 pars
 ```
 
@@ -137,6 +137,8 @@ $$ \bar{f1} = -1 \times \bar{u} \times \bar{a^{-1}} $$
 $$ \bar{f} = -0.5 \times \bar{b} \times \bar{Q^{-1}} $$
 $$ mu_0 = mu_0 - \bar{f} \times \bar{Q} \times t(\bar{f}) $$
 $$ \theta = \theta $$
+
+Here $$k$$ is a number of variables (covariates), which is equal to model's dimension.
 
 ## Model with time-dependent coefficients
 
@@ -153,7 +155,7 @@ library(stpm)
 n <- 500
 data <- simdata_time_dep(N=n)
 # Estimation:
-opt.par <- spm_time_dep(data[,2:6], 
+opt.par <- spm_time_dep(data, 
                         start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0 = 0.001), 
                         f = list(at = "a", f1t = "f1", Qt = "Q", ft = "f", bt = "b", mu0t= "mu0"))
 opt.par
@@ -165,9 +167,9 @@ We added one- and multi- dimensional simulation to be able to generate test data
 
 ## Discrete-time
 
-The corresponding function is:
+The corresponding function is ($$k$$ - a number of variables(covariates), equal to model's dimension):
 
-```simdata_discr(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart=80, tstart=30, tend=105, dt=1, k=1)```
+```simdata_discr(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart=80, tstart=30, tend=105, dt=1)```
 
 Here:
 
@@ -195,22 +197,19 @@ Here:
 
 ```dt``` - A time interval between observations.
 
-```k``` - number of dimensions (1 by default)
-
-
 This function returns a table with simulated data, as shown in example below:
 
 ```{r}
 library(stpm)
-data <- simdata_discr(N=10, ystart=c(75, 94), k=2)
+data <- simdata_discr(N=10, ystart=75)
 head(data)
 ```
 
 ## Continuous-time
 
-The correstonding function is:
+The correstonding function is ($$k$$ - a number of variables(covariates), equal to model's dimension):
 
-```simdata_cont(N=100, a=-0.05, f1=80, Q=2e-07, f=80, b=5, mu0=2e-05, theta=0.08, ystart=80, tstart=30, tend=105, k=1)```
+```simdata_cont2(N=100, a=-0.05, f1=80, Q=2e-07, f=80, b=5, mu0=2e-05, theta=0.08, ystart=80, tstart=30, tend=105)```
 
 Here:
 
@@ -236,7 +235,6 @@ Here:
 
 ```tend``` - A number, defines a final time (105 by default)
 
-```k``` - number of dimensions (1 by default)
 
 This function returns a table with simulated data, as shown in example below:
 

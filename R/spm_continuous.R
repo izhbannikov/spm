@@ -83,7 +83,6 @@ setub <- function(k, params) {
 #'@param b A starting value of a diffusion coefficient representing a strength of the random disturbance from Wiener Process.
 #'@param mu0 A starting value of the baseline hazard.
 #'@param theta A starting value of the parameter theta (axe displacement of Gompertz function).
-#'@param k A number of variables (dimension).
 #'@param verbose An indicator of verbosing output.
 #'@param stopifbound Estimation stops if at least one parameter achieves lower or upper boundaries.
 #'@param algorithm An optimization algorithm used, can be one of those provided by \code{nloptr}. 
@@ -105,8 +104,8 @@ setub <- function(k, params) {
 #'data <- simdata_cont(N=2)
 #'head(data)
 #'#Parameters estimation:
-#'pars <- spm_continuous(dat=data[,2:6],a=-0.05, f1=80, 
-#'						 Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08, k = 1)
+#'pars <- spm_continuous(dat=data,a=-0.05, f1=80, 
+#'						 Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08)
 #'pars
 #'
 spm_continuous <- function(dat, 
@@ -117,7 +116,6 @@ spm_continuous <- function(dat,
                            b=5,
                            mu0=2e-5,
                            theta=0.08,
-                           k=1, 
                            stopifbound=FALSE, 
                            algorithm="NLOPT_LN_COBYLA",
                            lb=NULL, ub=NULL,
@@ -144,6 +142,8 @@ spm_continuous <- function(dat,
   #verbose=FALSE
   ###=========================###
   
+  
+  
   avail_algorithms <- c("NLOPT_GN_DIRECT", "NLOPT_GN_DIRECT_L",
                         "NLOPT_GN_DIRECT_L_RAND", "NLOPT_GN_DIRECT_NOSCAL",
                         "NLOPT_GN_DIRECT_L_NOSCAL",
@@ -168,7 +168,9 @@ spm_continuous <- function(dat,
     stop(cat("Provided algorithm", algorithm, "not in the list of available optimization methods."))
   }
   
-  dat <<- as.matrix(dat)
+  dat <- as.matrix(dat[, 2:dim(dat)[2]])
+  
+  k <- dim(as.matrix(a))[1]
   final_res <- list()
   
   if(mu0 < 0) {mu0 <- 0}
