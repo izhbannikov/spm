@@ -40,7 +40,7 @@ library(stpm)
 n <- 10
 data <- simdata_time_dep(N=n)
 # Estimation:
-opt.par <- spm_time_dep(data[,2:6])
+opt.par <- spm_time_dep(data)
 opt.par
 
 }
