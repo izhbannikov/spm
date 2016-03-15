@@ -9,7 +9,12 @@
 * Discrete (one- and multiple-dimensions)
 * Time-dependant coefficients (one-dimensional optimisation)
 
-### How to install:
+### How to install
+#### Stable version
+```
+install.packages("stpm")
+```
+#### The most recent version
 ```
 install.packages("devtools")
 library(devtools)
