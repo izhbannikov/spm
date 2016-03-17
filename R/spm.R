@@ -90,7 +90,6 @@ spm <- function(x, model="discrete", formulas = NULL, tol=NULL,
   
   
   if(model == "continuous") {
-
     pars <- spm_discrete(dat=x[[2]],verbose = verbose, tol = tol)
     data <- data.frame(x[[1]])
   
