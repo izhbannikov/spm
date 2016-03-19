@@ -26,13 +26,13 @@
 #'library(stpm)
 #'# Setting up the model
 #'model.par <- list()
-#'model.par[["Ya2007"]]$a <- matrix(c(-0.05, 1e-3, 2e-3, -0.05), nrow=2, ncol=2, byrow=TRUE)
-#'model.par[["Ya2007"]]$f1 <- matrix(c(90, 35), nrow=1, ncol=2)
-#'model.par[["Ya2007"]]$Q <- matrix(c(1e-8, 1e-9, 1e-9, 1e-8), nrow=2, ncol=2, byrow=TRUE)
-#'model.par[["Ya2007"]]$f <- matrix(c(80, 27), nrow=1, ncol=2)
-#'model.par[["Ya2007"]]$b <- matrix(c(6, 2), nrow=2, ncol=2)
-#'model.par[["Ya2007"]]$mu0 <- 1e-6
-#'model.par[["Ya2007"]]$theta <- 0.09
+#'model.par$a <- matrix(c(-0.05, 1e-3, 2e-3, -0.05), nrow=2, ncol=2, byrow=TRUE)
+#'model.par$f1 <- matrix(c(90, 35), nrow=1, ncol=2)
+#'model.par$Q <- matrix(c(1e-8, 1e-9, 1e-9, 1e-8), nrow=2, ncol=2, byrow=TRUE)
+#'model.par$f <- matrix(c(80, 27), nrow=1, ncol=2)
+#'model.par$b <- matrix(c(6, 2), nrow=2, ncol=2)
+#'model.par$mu0 <- 1e-6
+#'model.par$theta <- 0.09
 #'# Projection
 #'# Discrete-time model
 #'data.proj.discrete <- spm_projection(model.par, N=5000, ystart=c(80, 27))
@@ -95,18 +95,18 @@ spm_projection <- function(x,
     
   } else if(model == "discrete") {
     
-    if(dim(x[["Ya2007"]]$a)[1] != length(ystart)) {
+    if(length(x$a) != length(ystart)^2) {
       stop("Number of dimensions does not match with the number of values provided in ystart.")
     }
     
     res.discr <- simdata_discr(N=N, 
-                               a=x[["Ya2007"]]$a, 
-                               f1=x[["Ya2007"]]$f1, 
-                               Q=x[["Ya2007"]]$Q, 
-                               f=x[["Ya2007"]]$f, 
-                               b=x[["Ya2007"]]$b, 
-                               mu0=x[["Ya2007"]]$mu0, 
-                               theta=x[["Ya2007"]]$theta, 
+                               a=x$a, 
+                               f1=x$f1, 
+                               Q=x$Q, 
+                               f=x$f, 
+                               b=x$b, 
+                               mu0=x$mu0, 
+                               theta=x$theta, 
                                ystart=ystart, 
                                tstart=tstart, tend=tend, 
                                dt=dt)
@@ -130,19 +130,19 @@ spm_projection <- function(x,
     
   } else if(model == "continuous") {
     
-    if(dim(x[["Ya2007"]]$a)[1] != length(ystart)) {
+    if(length(x$a) != length(ystart)^2) {
       stop("Number of dimensions does not match with the number of values provided in ystart.")
     }
     
     # Data simulation for discrete and continuous models
     res.cont <- simdata_cont2(N=N, 
-                             a=x[["Ya2007"]]$a, 
-                             f1=x[["Ya2007"]]$f1, 
-                             Q=x[["Ya2007"]]$Q, 
-                             f=x[["Ya2007"]]$f, 
-                             b=x[["Ya2007"]]$b, 
-                             mu0=x[["Ya2007"]]$mu0, 
-                             theta=x[["Ya2007"]]$theta,
+                             a=x$a, 
+                             f1=x$f1, 
+                             Q=x$Q, 
+                             f=x$f, 
+                             b=x$b, 
+                             mu0=x$mu0, 
+                             theta=x$theta,
                              dt=dt, 
                              ystart=ystart,
                              tstart=tstart, tend=tend, 
