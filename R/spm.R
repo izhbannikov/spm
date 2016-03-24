@@ -50,7 +50,7 @@
 #'p.td.model <- spm(data, model="time-dependent")
 #'p.td.model
 #'}
-spm <- function(x, model="discrete", formulas = NULL, tol=NULL, 
+spm <- function(x, model="discrete", formulas = NULL, start=NULL, tol=NULL, 
                 stopifbound=FALSE, algorithm="NLOPT_LN_NELDERMEAD", 
                 lb=NULL, ub=NULL, maxeval=100,
                 pinv.tol = 0.01,
@@ -161,22 +161,19 @@ spm <- function(x, model="discrete", formulas = NULL, tol=NULL,
     #  stop("It must be 6 equations for corresponding coefficients.")
     #}
     
-    formulas.work = list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
-    
-    if(!is.null(formulas)) {
-      for(item in formulas) {
-        formulas.work[[item]] <- formulas[[item]]
-      }
+    # Raw parameters estimates
+    #pars <- spm_discrete(dat=x[[2]],verbose = verbose, tol = tol, theta_range=theta.range)
+    # Parameter optimization for time-dependent model
+    if(is.null(start)) {
+      stop("Specify starting values.")
     }
     
-    # Raw parameters estimates
-    pars <- spm_discrete(dat=x[[2]],verbose = verbose, tol = tol, theta_range=theta.range)
-    # Parameter optimization for time-dependent model
     res <- spm_time_dep(x[[1]], 
-                            f = formulas.work,
-                            start=list(a=pars$Ya2007$a, f1=pars$Ya2007$f1, 
-                                       Q=pars$Ya2007$Q, f=pars$Ya2007$f, 
-                                       b=pars$Ya2007$b, mu0=pars$Ya2007$mu0))
+                        f=formulas,
+                        start=start,
+                        algorithm=algorithm,
+                        lb=lb, ub=ub,
+                        verbose=verbose, maxeval=maxeval)
     
     #res <- get("results",envir=.GlobalEnv)
   }

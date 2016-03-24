@@ -202,9 +202,11 @@ optimize <- function(data, starting_params,  formulas, verbose,
   p.coeff.ind <- unique(p.coeff.ind)
   
   #variables <- unique(variables)
+  
   stpar <- rep(0, length(variables))
   for(i in 1:length(stpar)) {
-    stpar[p.const.ind[i]] <- unlist(starting_params, use.names = FALSE)[i]
+    #stpar[p.const.ind[i]] <- unlist(starting_params, use.names = FALSE)[i]
+    stpar[i] <- unlist(starting_params, use.names = FALSE)[i]
   }
   names(stpar) <- variables
   
@@ -217,6 +219,7 @@ optimize <- function(data, starting_params,  formulas, verbose,
   # Lower and upper boundaries calculation:
   
   lower_bound <- c()
+  print(stpar)
   if(is.null(lb)) {
     for(i in 1:length(stpar)) {
       if(stpar[[i]] == 0) {stpar[[i]] = 1e-12}
@@ -416,10 +419,9 @@ spm_time_dep <- function(x,
   data <- as.matrix(x)
   data <- data[, 2:dim(data)[2]]
   formulas.work = list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
-  for(item in formulas) {
+  for(item in names(formulas)) {
     formulas.work[[item]] <- formulas[[item]]
   }
-  
   # Optimization:
   res = optimize(data, start, formulas.work, verbose, lb, ub, algorithm, stopifbound, maxeval)
   invisible(res)
