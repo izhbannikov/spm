@@ -23,92 +23,94 @@ double mu(double t, double mu0, arma::mat b, arma::mat Q, double theta, arma::ma
     return res(0,0);
 }
 
+
+
 RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, SEXP b_, SEXP Q_, SEXP theta_, SEXP tstart_, SEXP ystart_, SEXP tend_, SEXP k_, SEXP dt_) {
-    long N = as<long>(n); // Number of individuals
-    int k = as<long>(k_); // Number of dimensions
-    arma::mat u = as<arma::mat>(u_);
-    arma::mat R = as<arma::mat>(R_);
-    arma::mat epsilon = as<arma::mat>(epsilon_);
-    double mu0 = as<double>(mu0_);
-    arma::mat b = as<arma::mat>(b_);
-    arma::mat Q = as<arma::mat>(Q_);
-    double theta  = as<double>(theta_);
-    double tstart  = as<double>(tstart_);
-    arma::mat ystart = as<arma::mat>(ystart_);
-    double tend  = as<double>(tend_);
-    //End of data loading
-    double id = 0;
-    double t1;
-    double t2;
-    double dt=as<double>(dt_);
-    arma::mat y1;
-    arma::mat y2;
-    bool new_person = false;
-    double S; 
+  long N = as<long>(n); // Number of individuals
+  int k = as<long>(k_); // Number of dimensions
+  arma::mat u = as<arma::mat>(u_);
+  arma::mat R = as<arma::mat>(R_);
+  arma::mat epsilon = as<arma::mat>(epsilon_);
+  double mu0 = as<double>(mu0_);
+  arma::mat b = as<arma::mat>(b_);
+  arma::mat Q = as<arma::mat>(Q_);
+  double theta  = as<double>(theta_);
+  double tstart  = as<double>(tstart_);
+  arma::mat ystart = as<arma::mat>(ystart_);
+  double tend  = as<double>(tend_);
+  //End of data loading
+  double id = 0;
+  double t1;
+  double t2;
+  double dt=as<double>(dt_);
+  arma::mat y1;
+  arma::mat y2;
+  bool new_person = false;
+  double S; 
+  
+  std::vector< std::vector<double> > data;
+  
+  for(int i=0; i < N; i++) { // Across all individuals
+    t1 = tstart;
+    t2 = t1 + dt;
+    y1 = ystart;
     
-    std::vector< std::vector<double> > data;
-        
-    for(int i=0; i < N; i++) { // Across all individuals
-      t1 = tstart;
-      t2 = t1 + dt;
-      y1 = ystart;
+    new_person = false;
+    id = id + 1;
+    
+    while(new_person == false) {
+      S = exp(-1*dt*mu(t1, mu0, b, Q, theta, y1));
       
-      new_person = false;
-      id = id + 1;
+      double xi = 0; // case (0 - alive, 1 - dead) indicator
       
-      while(new_person == false) {
-        S = exp(-1*dt*mu(t1, mu0, b, Q, theta, y1));
+      if(S > Rcpp::runif(1, 0.0, 1.0)[0]) {
+        xi = 0; // case (0 - alive, 1 - dead) indicator
+        arma::mat eps(k,1);
         
-        double xi = 0; // case (0 - alive, 1 - dead) indicator
+        for(int ii=0; ii < k; ii++) {
+          eps(ii,0) = Rcpp::rnorm(1, 0.0, epsilon(ii,0.0))[0];
+        }
         
-        if(S > Rcpp::runif(1, 0.0, 1.0)[0]) {
-          xi = 0; // case (0 - alive, 1 - dead) indicator
-          arma::mat eps(k,1);
-          
-          for(int ii=0; ii < k; ii++) {
-            eps(ii,0) = Rcpp::rnorm(1, 0.0, epsilon(ii,0.0))[0];
-          }
-          
-          y2 = u + R * y1 + eps;
-          new_person = false;
-          
-        } 
-        else {
-          xi = 1;
-          y2 = arma::mat(k,1);
-          
-          for(int ii=0; ii<k; ii++) {
-            y2(ii,0) = NumericVector::get_na();
-          }
-          
-          t2 = t1 + Rcpp::runif(1, 0.0, dt)[0];
+        y2 = u + R * y1 + eps;
+        new_person = false;
+        
+      } 
+      else {
+        xi = 1;
+        y2 = arma::mat(k,1);
+        
+        for(int ii=0; ii<k; ii++) {
+          y2(ii,0) = NumericVector::get_na();
+        }
+        
+        t2 = t1 + Rcpp::runif(1, 0.0, dt)[0];
+        new_person = true;
+      }
+      
+      std::vector<double> row; row.resize(4+2*k);
+      row[0] = id; row[1] = xi; row[2] = t1; row[3] = t2;
+      
+      int j=0;
+      for(int ii=4; ii<(4 + 2*k-1); ii+=2) {
+        row[ii] = y1(j,0);
+        row[ii+1] = y2(j,0);
+        j += 1;
+      }
+      
+      data.push_back(row);
+      
+      if (new_person == false) {
+        t1 = t2;
+        t2 = t1 + dt;
+        
+        if(t2 > tend+dt) {
           new_person = true;
-        }
-          
-        std::vector<double> row; row.resize(4+2*k);
-        row[0] = id; row[1] = xi; row[2] = t1; row[3] = t2;
-        
-        int j=0;
-        for(int ii=4; ii<(4 + 2*k-1); ii+=2) {
-            row[ii] = y1(j,0);
-            row[ii+1] = y2(j,0);
-            j += 1;
+          break;
         }
         
-        data.push_back(row);
-          
-        if (new_person == false) {
-          t1 = t2;
-          t2 = t1 + dt;
-        
-          if(t2 > tend+dt) {
-            new_person = true;
-            break;
-          }
-        
-          y1 = y2;
-        }
-     }
+        y1 = y2;
+      }
+    }
   }
   
   arma::mat res(data.size(), 4+2*k);
@@ -119,5 +121,121 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
   }
   
   return(Rcpp::wrap(res));
+  
+}
 
+
+RcppExport SEXP simdata_gen(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, SEXP b_, SEXP Q_, SEXP theta_, SEXP tstart_, SEXP ystart_, SEXP tend_, SEXP k_, SEXP dt_, SEXP p0_) {
+  long N = as<long>(n); // Number of individuals
+  int k = as<long>(k_); // Number of dimensions
+  arma::mat u = as<arma::mat>(u_);
+  arma::mat R = as<arma::mat>(R_);
+  arma::mat epsilon = as<arma::mat>(epsilon_);
+  double mu0 = as<double>(mu0_);
+  arma::mat b = as<arma::mat>(b_);
+  arma::mat Q = as<arma::mat>(Q_);
+  double theta  = as<double>(theta_);
+  double tstart  = as<double>(tstart_);
+  arma::mat ystart = as<arma::mat>(ystart_);
+  double tend  = as<double>(tend_);
+  //End of data loading
+  double id = 0;
+  double t1;
+  double t2;
+  double dt=as<double>(dt_);
+  arma::mat y1;
+  arma::mat y2;
+  bool new_person = false;
+  double S; 
+  double p0 = as<double>(p0_);
+  
+  double mumu;
+  
+  std::vector< std::vector<double> > data;
+  
+  for(int i=0; i < N; i++) { // Across all individuals
+    t1 = tstart;
+    t2 = t1 + dt;
+    y1 = ystart;
+    
+    new_person = false;
+    id = id + 1;
+    
+    int G = 0;
+    if(Rcpp::runif(1, 0.0, dt)[0] <= p0) {
+      G = 1;
+    }
+    
+    
+    while(new_person == false) {
+      if(G==1) {
+        mumu = mu0*mu(t1, mu0, b, Q, theta, y1);
+      } else {
+        mumu = mu0;
+      }
+      
+      S = exp(-1*dt*mumu);
+      
+      double xi = 0; // case (0 - alive, 1 - dead) indicator
+      
+      if(S > Rcpp::runif(1, 0.0, 1.0)[0]) {
+        xi = 0; // case (0 - alive, 1 - dead) indicator
+        arma::mat eps(k,1);
+        
+        for(int ii=0; ii < k; ii++) {
+          eps(ii,0) = Rcpp::rnorm(1, 0.0, epsilon(ii,0.0))[0];
+        }
+        
+        y2 = u + R * y1 + eps;
+        new_person = false;
+        
+      } 
+      else {
+        xi = 1;
+        y2 = arma::mat(k,1);
+        
+        for(int ii=0; ii<k; ii++) {
+          y2(ii,0) = NumericVector::get_na();
+        }
+        
+        t2 = t1 + Rcpp::runif(1, 0.0, dt)[0];
+        new_person = true;
+      }
+      
+      std::vector<double> row; row.resize(4+2*k + 1);
+      row[0] = id; row[1] = xi; row[2] = t1; row[3] = t2;
+      row[4] = G;
+      
+      int j=0;
+      for(int ii=5; ii<(4 + 2*k-1); ii+=2) {
+        row[ii] = y1(j,0);
+        row[ii+1] = y2(j,0);
+        j += 1;
+      }
+      
+      data.push_back(row);
+      
+      if (new_person == false) {
+        t1 = t2;
+        t2 = t1 + dt;
+        
+        if(t2 > tend+dt) {
+          new_person = true;
+          break;
+        }
+        
+        y1 = y2;
+      }
+    }
+  }
+  
+  arma::mat res(data.size(), 4+2*k + 1);
+  for(int i=0; i<data.size(); i++) {
+    for(int j=0; j<4+2*k + 1; j++) {
+      res(i, j) = data[i][j];
+    }
+  }
+  
+  return(Rcpp::wrap(res));
+  
 }
