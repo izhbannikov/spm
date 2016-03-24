@@ -45,13 +45,13 @@ normally distributed initial covariates.
 library(stpm)
 # Setting up the model
 model.par <- list()
-model.par[["Ya2007"]]$a <- matrix(c(-0.05, 1e-3, 2e-3, -0.05), nrow=2, ncol=2, byrow=TRUE)
-model.par[["Ya2007"]]$f1 <- matrix(c(90, 35), nrow=1, ncol=2)
-model.par[["Ya2007"]]$Q <- matrix(c(1e-8, 1e-9, 1e-9, 1e-8), nrow=2, ncol=2, byrow=TRUE)
-model.par[["Ya2007"]]$f <- matrix(c(80, 27), nrow=1, ncol=2)
-model.par[["Ya2007"]]$b <- matrix(c(6, 2), nrow=2, ncol=2)
-model.par[["Ya2007"]]$mu0 <- 1e-6
-model.par[["Ya2007"]]$theta <- 0.09
+model.par$a <- matrix(c(-0.05, 1e-3, 2e-3, -0.05), nrow=2, ncol=2, byrow=TRUE)
+model.par$f1 <- matrix(c(90, 35), nrow=1, ncol=2)
+model.par$Q <- matrix(c(1e-8, 1e-9, 1e-9, 1e-8), nrow=2, ncol=2, byrow=TRUE)
+model.par$f <- matrix(c(80, 27), nrow=1, ncol=2)
+model.par$b <- matrix(c(6, 2), nrow=2, ncol=2)
+model.par$mu0 <- 1e-6
+model.par$theta <- 0.09
 # Projection
 # Discrete-time model
 data.proj.discrete <- spm_projection(model.par, N=5000, ystart=c(80, 27))

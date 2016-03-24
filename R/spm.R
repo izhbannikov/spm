@@ -10,6 +10,7 @@
 #'(1) a data table for continuous-time model and (2) a data table for discrete-time model.
 #'@param model A model type. Choices are: "discrete", "continuous" or "time-dependent".
 #'@param formulas A list of parameter formulas used in the "time-dependent" model.
+#'@param start A starting values of coefficients in the "time-dependent" model.
 #'@param tol A tolerance threshold for matrix inversion (NULL by default).
 #'@param stopifbound A flag (default=FALSE) if it is set then the optimization stops 
 #'when any of the parametrs achives lower or upper boundary.
@@ -47,7 +48,9 @@
 #'data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"), 
 #'					   y=system.file("data","vitstat.csv",package="stpm"), 
 #'					   covariates="BMI")
-#'p.td.model <- spm(data, model="time-dependent")
+#'p.td.model <- spm(data, model="time-dependent",
+#'                  f=list(at="aa*t+bb", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"),
+#'                  start=list(a=-0.001, bb=0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3))
 #'p.td.model
 #'}
 spm <- function(x, model="discrete", formulas = NULL, start=NULL, tol=NULL, 

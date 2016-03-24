@@ -4,7 +4,7 @@
 \alias{spm}
 \title{A central function that estimates Stochastic Process Model parameters a from given dataset.}
 \usage{
-spm(x, model = "discrete", formulas = NULL, tol = NULL,
+spm(x, model = "discrete", formulas = NULL, start = NULL, tol = NULL,
   stopifbound = FALSE, algorithm = "NLOPT_LN_NELDERMEAD", lb = NULL,
   ub = NULL, maxeval = 100, pinv.tol = 0.01, theta.range = seq(0.01,
   0.2, by = 0.001), verbose = FALSE)
@@ -16,6 +16,8 @@ spm(x, model = "discrete", formulas = NULL, tol = NULL,
 \item{model}{A model type. Choices are: "discrete", "continuous" or "time-dependent".}
 
 \item{formulas}{A list of parameter formulas used in the "time-dependent" model.}
+
+\item{start}{A starting values of coefficients in the "time-dependent" model.}
 
 \item{tol}{A tolerance threshold for matrix inversion (NULL by default).}
 
@@ -69,7 +71,9 @@ p.cont.model
 data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"), 
 				   y=system.file("data","vitstat.csv",package="stpm"), 
 				   covariates="BMI")
-p.td.model <- spm(data, model="time-dependent")
+p.td.model <- spm(data, model="time-dependent",
+                 f=list(at="aa*t+bb", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"),
+                 start=list(a=-0.001, bb=0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3))
 p.td.model
 }
 }
