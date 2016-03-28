@@ -100,7 +100,7 @@ spm_discrete <- function(dat, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verb
     colnames(newdat2) <- cnames
   
     reg_formula <- paste(cnames[1],"~", paste(cnames[2:length(cnames)],collapse='+'))
-  
+    
     res <- lm(as.formula(reg_formula),data=as.data.frame(newdat2))
     coef <- res$coefficients # intercept, y1
     parameters_lsq <- rbind(parameters_lsq, c(coef, sd(res$residuals), logLik(res)[1]))

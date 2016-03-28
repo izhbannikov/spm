@@ -487,8 +487,7 @@ RcppExport SEXP complik_gen(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh
     double pi = 3.141592654;
     
     if(dd(i,0) == 0) { 
-      arma::mat exp = -1*dim*0.5*dim*log(2.00*pi*det(gamma2)) -1*dim*0.5*(m2-y2).t()*pinv(gamma2,ptol)*(m2-y2);
-      //arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*pinv(gamma2,ptol)*(m2-y2);
+      arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*pinv(gamma2,ptol)*(m2-y2);
       //arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*inv(gamma2)*(m2-y2); // inv() fails very ofter
       L += s + exp(0,0);
     } else {
