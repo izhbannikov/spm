@@ -32,6 +32,8 @@ simdata_gen(N = 100, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
 \item{tend}{A number, defines final time (105 by default).}
 
 \item{dt}{A time step (1 by default).}
+
+\item{p0}{A proportion of carriers and non-carriers in a population (default p=0.25).}
 }
 \value{
 A table with simulated data.
@@ -41,7 +43,7 @@ Multi-dimension simulation function
 }
 \examples{
 library(stpm)
-data <- simdata_discr(N=100, ystart=80)
+data <- simdata_gen(N=100, ystart=80)
 head(data)
 
 }

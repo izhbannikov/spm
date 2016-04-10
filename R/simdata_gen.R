@@ -14,10 +14,11 @@
 #' @param tstart A number that defines starting time (30 by default).
 #' @param tend A number, defines final time (105 by default).
 #' @param dt A time step (1 by default).
+#' @param p0 A proportion of carriers and non-carriers in a population (default p=0.25).
 #' @return A table with simulated data.
 #' @examples
 #' library(stpm)
-#' data <- simdata_discr(N=100, ystart=80)
+#' data <- simdata_gen(N=100, ystart=80)
 #' head(data)
 #'
 simdata_gen <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart=80, tstart=30, tend=105, dt=1, p0=0.25) {

@@ -1,6 +1,3 @@
-#' Sets lower boundaries.
-#' @param k number of dimensions.
-#' @param params a vector of parameter values.
 setlb <- function(k, params) {
   # This function sets lower and upper boundaries for optim.
   # - k - number of dimensions
@@ -34,9 +31,6 @@ setlb <- function(k, params) {
   lower_bound
 }
 
-#'Sets upper boundaries.
-#' @param k number of dimensions.
-#' @param params a vector of parameter values.
 setub <- function(k, params) {
   # This function sets lower and upper boundaries for optim.
   # - k - number of dimensions
@@ -187,7 +181,6 @@ spm_gen <- function(dat,
   
   parameters <- c(t(a), f1, t(Q), f, b, mu0, theta)
   # Current results:
-  #results <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
   results_tmp <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
   iteration <- 0
   
@@ -323,7 +316,7 @@ spm_gen <- function(dat,
   }
   final_results$limit <- limit
   #assign("results", final_results, envir=baseenv())
-  class(final_results) <- "spm.continuous"
+  class(final_results) <- "gen.spm"
   invisible(final_results)
 }
 
