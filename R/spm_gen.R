@@ -66,7 +66,10 @@ setub <- function(k, params) {
 
 
 
-#'Continuous multi-dimensional optimization
+#'Continuous multi-dimensional optimization for Genetic SPM (multidimensional GenSPM)
+#'@references Arbeev, K.G. et al (2009). Genetic model for longitudinal studies of aging, health, and longevity
+# and its potential application to incomplete data. Journal of Theoretical
+# Biology 258(1), 103{111 (2009).<doi:10.1016/j.jtbi.2009.01.023>
 #'@references Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
 #'and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.
 #'@param dat A data table.

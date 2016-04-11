@@ -2,7 +2,7 @@
 % Please edit documentation in R/simdata_gen.R
 \name{simdata_gen}
 \alias{simdata_gen}
-\title{Multi-dimension simulation function}
+\title{Multi-dimension simulation function for Genetic SPM (multidimensional GenSPM)}
 \usage{
 simdata_gen(N = 100, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
   mu0 = 1e-05, theta = 0.08, ystart = 80, tstart = 30, tend = 105,
@@ -39,7 +39,7 @@ simdata_gen(N = 100, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
 A table with simulated data.
 }
 \description{
-Multi-dimension simulation function
+Multi-dimension simulation function for Genetic SPM (multidimensional GenSPM)
 }
 \examples{
 library(stpm)
@@ -48,6 +48,8 @@ head(data)
 
 }
 \references{
+Arbeev, K.G. et al (2009). Genetic model for longitudinal studies of aging, health, and longevity
+
 Akushevich I., Kulminski A. and Manton K. (2005), Life tables with covariates: Dynamic model 
 for Nonlinear Analysis of Longitudinal Data. Mathematical Population Studies, 12(2), pp.: 51-80.
 <DOI:10.1080/08898480590932296>.

@@ -32,7 +32,7 @@ p.td.model
 }
 }
 \author{
-: I. Y. Zhbannikov, I. V. Akushevich, K. G. Arbeev, A. I. Yashin.
+I. Y. Zhbannikov, I. V. Akushevich, K. G. Arbeev, A. I. Yashin.
 }
 \references{
 Yashin, A. et al (2007), Stochastic model for analysis of longitudinal data on aging 

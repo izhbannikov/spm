@@ -1,4 +1,7 @@
-#' Multi-dimension simulation function
+#'Multi-dimension simulation function for Genetic SPM (multidimensional GenSPM)
+#'@references Arbeev, K.G. et al (2009). Genetic model for longitudinal studies of aging, health, and longevity
+# and its potential application to incomplete data. Journal of Theoretical
+# Biology 258(1), 103{111 (2009).<doi:10.1016/j.jtbi.2009.01.023>
 #'@references Akushevich I., Kulminski A. and Manton K. (2005), Life tables with covariates: Dynamic model 
 #'for Nonlinear Analysis of Longitudinal Data. Mathematical Population Studies, 12(2), pp.: 51-80.
 #'<DOI:10.1080/08898480590932296>.

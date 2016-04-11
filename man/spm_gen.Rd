@@ -2,7 +2,7 @@
 % Please edit documentation in R/spm_gen.R
 \name{spm_gen}
 \alias{spm_gen}
-\title{Continuous multi-dimensional optimization}
+\title{Continuous multi-dimensional optimization for Genetic SPM (multidimensional GenSPM)}
 \usage{
 spm_gen(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
   mu0 = 2e-05, theta = 0.08, p = 0.25, stopifbound = FALSE,
@@ -52,7 +52,7 @@ additional variable \code{limit} which indicates if any parameter
 achieved lower or upper boundary conditions (FALSE by default).
 }
 \description{
-Continuous multi-dimensional optimization
+Continuous multi-dimensional optimization for Genetic SPM (multidimensional GenSPM)
 }
 \details{
 \code{spm_continuous} runs much slower that discrete but more precise and can handle time intervals with different lengths.
@@ -69,6 +69,8 @@ pars
 
 }
 \references{
+Arbeev, K.G. et al (2009). Genetic model for longitudinal studies of aging, health, and longevity
+
 Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
 and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.
 }
