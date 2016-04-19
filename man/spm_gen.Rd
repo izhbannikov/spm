@@ -4,27 +4,40 @@
 \alias{spm_gen}
 \title{Continuous multi-dimensional optimization for Genetic SPM (multidimensional GenSPM)}
 \usage{
-spm_gen(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
-  mu0 = 2e-05, theta = 0.08, p = 0.25, stopifbound = FALSE,
-  algorithm = "NLOPT_LN_COBYLA", lb = NULL, ub = NULL, maxeval = 500,
-  verbose = FALSE, pinv.tol = 0.01)
+spm_gen(dat, aH = -0.05, aL = -0.01, f1H = 60, f1L = 80, QH = 2e-08,
+  QL = 2.5e-08, fH = 60, fL = 80, bH = 4, bL = 5, mu0H = 8e-06,
+  mu0L = 1e-05, thetaH = 0.08, thetaL = 0.1, p = 0.25,
+  stopifbound = FALSE, algorithm = "NLOPT_LN_COBYLA", lb = NULL,
+  ub = NULL, maxeval = 500, verbose = FALSE, pinv.tol = 0.01)
 }
 \arguments{
 \item{dat}{A data table.}
 
-\item{a}{A starting value of the rate of adaptive response to any deviation of Y from f1(t).}
+\item{aH}{A k by k matrix, which characterize the rate of the adaptive response when Z = 1.}
 
-\item{f1}{A starting value of the average age trajectories of the variables which process is forced to follow.}
+\item{aL}{A k by k matrix, which characterize the rate of the adaptive response when Z = 0.}
 
-\item{Q}{Starting values of the quadratic hazard term.}
+\item{f1H}{A particular state, which if a deviation from the normal (or optimal) when Z = 1.
+This is a vector with length of k.}
 
-\item{f}{A starting value of the "optimal" value of variable which corresponds to the minimum of hazard rate at a respective time.}
+\item{f1L}{A particular state, which if a deviation from the normal (or optimal) when Z = 0. 
+This is a vector with length of k.}
 
-\item{b}{A starting value of a diffusion coefficient representing a strength of the random disturbance from Wiener Process.}
+\item{QH}{A matrix k by k, which is a non-negative-definite symmetric matrix when Z = 1.}
 
-\item{mu0}{A starting value of the baseline hazard.}
+\item{QL}{A matrix k by k, which is a non-negative-definite symmetric matrix when Z = 0.}
 
-\item{theta}{A starting value of the parameter theta (axe displacement of Gompertz function).}
+\item{fH}{A vector-function (with length k) of the normal (or optimal) state when Z = 1.}
+
+\item{fL}{A vector-function (with length k) of the normal (or optimal) state when Z = 0.}
+
+\item{bH}{A diffusion coefficient, k by k matrix when Z = 1.}
+
+\item{bL}{A diffusion coefficient, k by k matrix when Z = 0.}
+
+\item{thetaH}{A displacement coefficient of the Gompertz function when Z = 1.}
+
+\item{thetaL}{A displacement coefficient of the Gompertz function when Z = 0.}
 
 \item{p}{A proportion of carriers and non-carriers in a population (default p=0.25).}
 
@@ -41,13 +54,17 @@ the algorithms. Default: NLOPT_LN_COBYLA}
 \item{maxeval}{Maximum number of iterations of the algorithm for \code{nloptr} optimization. 
 The program stops when the number of function evaluations exceeds maxeval. Default: 500.}
 
-\item{verbose}{An indicator of verbosing output.}
+\item{verbose}{An indicator of verbosing output (FALSE by default).}
 
 \item{pinv.tol}{A tolerance value for pseudo-inverse of matrix gamma (see Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
 and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.)}
+
+\item{mu0}{mortality at start period of time when Z = 1.}
+
+\item{mu0}{mortality at start period of time when Z = 0.}
 }
 \value{
-A set of estimated parameters a, f1, Q, f, b, mu0, theta and
+A set of estimated parameters aH, aL, f1H, f1H, QH, QL, fH, fL, bH, bL, mu0H, mu0L, thetaH, thetaL, p and
 additional variable \code{limit} which indicates if any parameter 
 achieved lower or upper boundary conditions (FALSE by default).
 }

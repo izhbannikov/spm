@@ -6,27 +6,53 @@ setlb <- function(k, params) {
   # Lower boundaries:
   lower_bound <- c()
   # Setting boundaries for coefficients:
-  # aH
+  # aH, aL
   start=1; end=k^2
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) }))) 
-  # f1H
+  start=end+1; end=start+k^2-1
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) }))) 
+  
+  # f1H, f1L
   start=end+1; end=start+k-1
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) }))) 
-  # QH
+  start=end+1; end=start+k-1
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) }))) 
+  
+  # QH, QL
   start=end+1; end=start+k^2-1
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ ifelse(params[n] > 0, 0, params[n]+0.1*params[n]) })))
-  # fH
+  start=end+1; end=start+k^2-1
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ ifelse(params[n] > 0, 0, params[n]+0.1*params[n]) })))
+  
+  # fH, fL
   start=end+1; end=start+k-1
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) })) )
-  # bH
+  start=end+1; end=start+k-1
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) })) )
+  
+  # bH, bL
   start=end+1; end=start+k-1
   lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) })) )
-  # mu0
+  start=end+1; end=start+k-1
+  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) })) )
+  
+  # mu0h, mu0L
   start=end+1; end=start
   lower_bound <- c( lower_bound, params[start:end] - 0.1*params[start:end])
-  # theta
   start=end+1; end=start
   lower_bound <- c( lower_bound, params[start:end] - 0.1*params[start:end])
+  
+  # thetah, thetal
+  start=end+1; end=start
+  lower_bound <- c( lower_bound, params[start:end] - 0.1*params[start:end])
+  start=end+1; end=start
+  lower_bound <- c( lower_bound, params[start:end] - 0.1*params[start:end])
+  
+  # p
+  start=end+1; end=start
+  lower_bound <- c( lower_bound, ifelse((params[start:end] - 0.1*params[start:end]) <= 0,
+                                 0,
+                                 params[start:end] - 0.1*params[start:end]))
   
   lower_bound
 }
@@ -39,27 +65,55 @@ setub <- function(k, params) {
   #Upper boundaries:
   upper_bound <- c()
   # Setting boundaries for coefficients:
-  # aH
+  # aH, aL
   start=1; end=k^2
   upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.1*params[n], 0*params[n]) })))
-  # f1H
+  start=end+1; end=start+k^2-1
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.1*params[n], 0*params[n]) })))
+  
+  # f1H, f1L
   start=end+1; end=start+k-1
   upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.1*params[n], params[n]- 0.1*params[n]) })))
-  # QH
+  start=end+1; end=start+k-1
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.1*params[n], params[n]- 0.1*params[n]) })))
+  
+  # QH, QL
   start=end+1; end=start+k^2-1
   upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {ifelse(params[n] > 0, params[n] + 0.1*params[n], params[n]-0.1*params[n] )})))
-  # fH
+  start=end+1; end=start+k^2-1
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {ifelse(params[n] > 0, params[n] + 0.1*params[n], params[n]-0.1*params[n] )})))
+  
+  # fH, fL
   start=end+1; end=start+k-1
   upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.1*params[n], params[n]-0.1*params[n]) })))
-  # bH
   start=end+1; end=start+k-1
   upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.1*params[n], params[n]-0.1*params[n]) })))
-  # mu0
+  
+  # bH, bL
+  start=end+1; end=start+k-1
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.1*params[n], params[n]-0.1*params[n]) })))
+  start=end+1; end=start+k-1
+  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.1*params[n], params[n]-0.1*params[n]) })))
+  
+  # mu0h, mu0L
   start=end+1; end=start
   upper_bound <- c( upper_bound, params[start:end] + 0.1*params[start:end])
-  # theta
   start=end+1; end=start
   upper_bound <- c( upper_bound, params[start:end] + 0.1*params[start:end])
+  
+  # thetah, thetal
+  start=end+1; end=start
+  upper_bound <- c( upper_bound, params[start:end] + 0.1*params[start:end])
+  start=end+1; end=start
+  upper_bound <- c( upper_bound, params[start:end] + 0.1*params[start:end])
+  
+  # p
+  start=end+1; end=start
+  upper_bound <- c( upper_bound, 
+                    ifelse((params[start:end] + 0.1*params[start:end]) >= 1, 
+                           1, 
+                           (params[start:end] + 0.1*params[start:end])))
+  
   
   upper_bound
 }
@@ -73,15 +127,23 @@ setub <- function(k, params) {
 #'@references Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
 #'and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.
 #'@param dat A data table.
-#'@param a A starting value of the rate of adaptive response to any deviation of Y from f1(t).
-#'@param f1 A starting value of the average age trajectories of the variables which process is forced to follow. 
-#'@param Q Starting values of the quadratic hazard term.
-#'@param f A starting value of the "optimal" value of variable which corresponds to the minimum of hazard rate at a respective time.
-#'@param b A starting value of a diffusion coefficient representing a strength of the random disturbance from Wiener Process.
-#'@param mu0 A starting value of the baseline hazard.
-#'@param theta A starting value of the parameter theta (axe displacement of Gompertz function).
+#'@param aH A k by k matrix, which characterize the rate of the adaptive response when Z = 1.
+#'@param aL A k by k matrix, which characterize the rate of the adaptive response when Z = 0.
+#'@param f1H A particular state, which if a deviation from the normal (or optimal) when Z = 1.
+#'This is a vector with length of k.
+#'@param f1L A particular state, which if a deviation from the normal (or optimal) when Z = 0. 
+#'This is a vector with length of k.
+#'@param QH A matrix k by k, which is a non-negative-definite symmetric matrix when Z = 1.
+#'@param QL A matrix k by k, which is a non-negative-definite symmetric matrix when Z = 0.
+#'@param fH A vector-function (with length k) of the normal (or optimal) state when Z = 1.
+#'@param fL A vector-function (with length k) of the normal (or optimal) state when Z = 0.
+#'@param bH A diffusion coefficient, k by k matrix when Z = 1.
+#'@param bL A diffusion coefficient, k by k matrix when Z = 0.
+#'@param mu0 mortality at start period of time when Z = 1.
+#'@param mu0 mortality at start period of time when Z = 0.
+#'@param thetaH A displacement coefficient of the Gompertz function when Z = 1.
+#'@param thetaL A displacement coefficient of the Gompertz function when Z = 0.
 #'@param p A proportion of carriers and non-carriers in a population (default p=0.25).
-#'@param verbose An indicator of verbosing output.
 #'@param stopifbound Estimation stops if at least one parameter achieves lower or upper boundaries.
 #'@param algorithm An optimization algorithm used, can be one of those provided by \code{nloptr}. 
 #'#'Check the NLopt website for a description of
@@ -90,9 +152,10 @@ setub <- function(k, params) {
 #'@param ub Upper bound of parameters under estimation.
 #'@param maxeval Maximum number of iterations of the algorithm for \code{nloptr} optimization. 
 #'The program stops when the number of function evaluations exceeds maxeval. Default: 500.
+#'@param verbose An indicator of verbosing output (FALSE by default).
 #'@param pinv.tol A tolerance value for pseudo-inverse of matrix gamma (see Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
 #'and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.)
-#'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta and
+#'@return A set of estimated parameters aH, aL, f1H, f1H, QH, QL, fH, fL, bH, bL, mu0H, mu0L, thetaH, thetaL, p and
 #'additional variable \code{limit} which indicates if any parameter 
 #'achieved lower or upper boundary conditions (FALSE by default).
 #'@details \code{spm_continuous} runs much slower that discrete but more precise and can handle time intervals with different lengths.
@@ -107,20 +170,20 @@ setub <- function(k, params) {
 #'pars
 #'
 spm_gen <- function(dat, 
-                           a=-0.05, 
-                           f1=80, 
-                           Q=2e-8,
-                           f=80,
-                           b=5,
-                           mu0=2e-5,
-                           theta=0.08,
-                           p=0.25,
-                           stopifbound=FALSE, 
-                           algorithm="NLOPT_LN_COBYLA",
-                           lb=NULL, ub=NULL,
-                           maxeval=500,
-                           verbose=FALSE,
-                           pinv.tol=0.01) {
+                    aH=-0.05, aL=-0.01, 
+                    f1H=60, f1L=80, 
+                    QH=2e-8, QL=2.5e-8, 
+                    fH=60, fL=80, 
+                    bH=4, bL=5, 
+                    mu0H=0.8e-5, mu0L=1e-5, 
+                    thetaH=0.08, thetaL=0.1,
+                    p=0.25,
+                    stopifbound=FALSE, 
+                    algorithm="NLOPT_LN_COBYLA",
+                    lb=NULL, ub=NULL,
+                    maxeval=500,
+                    verbose=FALSE,
+                    pinv.tol=0.01) {
   
   ###=======For DEBUG========###
   #dat = dat
@@ -169,22 +232,31 @@ spm_gen <- function(dat,
   
   dat <- as.matrix(dat[, 2:dim(dat)[2]])
   
-  k <- dim(as.matrix(a))[1]
+  k <- dim(as.matrix(aH))[1]
   final_res <- list()
   
-  if(mu0 < 0) {mu0 <- 0}
+  if(mu0H < 0) {mu0H <- 0}
+  if(mu0L < 0) {mu0L <- 0}
   
-  #dat <- simdata_gen(N=20000)
+  #######################################################################################################
   dd <- cbind(dat[,1], dat[,5])
   colnames(dd) <- c("id", "G")
   ddd <- data.frame(dd)
   d<-aggregate(G ~ id, data=ddd, FUN=mean)
   N.c <- length(which(d$G == 1)) # Carriers
   N.nc <- length(which(d$G == 0)) # Non-carriers
+  #######################################################################################################
   
-  parameters <- c(t(a), f1, t(Q), f, b, mu0, theta)
+  parameters <- c(t(aH), t(aL), f1H, f1L, t(QH), t(QL), fH, fL, bH, bL, mu0H, mu0L, thetaH, thetaL, p)
   # Current results:
-  results_tmp <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
+  results_tmp <- list(aH=NULL, aL=NULL, 
+                      f1H=NULL, f1L=NULL,
+                      QH=NULL, QL=NULL,
+                      fH=NULL, fL=NULL,
+                      bH=NULL, bL=NULL,
+                      mu0H=NULL, mu0L=NULL,
+                      thetaH=NULL, thetaL=NULL,
+                      p=NULL)
   iteration <- 0
   
   bounds <- list()
@@ -236,27 +308,68 @@ spm_gen <- function(dat,
     
     stopflag <- F
     # Reading parameters:
+    
+    # ah, al
     start=1; end=k^2
-    a <- matrix(par[start:end],ncol=k, , nrow=k, byrow=TRUE)
-    results_tmp$a <<- a
+    ah <- matrix(par[start:end],ncol=k, , nrow=k, byrow=TRUE)
+    results_tmp$aH <<- ah
     start=end+1; end=start+k-1
-    f1 <- matrix(par[start:end],ncol=1, nrow=k, byrow=FALSE)
-    results_tmp$f1 <<- f1
+    al <- matrix(par[start:end],ncol=k, , nrow=k, byrow=TRUE)
+    results_tmp$aL <<- al
+    
+    # f1h, f1l
+    start=end+1; end=start+k-1
+    f1h <- matrix(par[start:end],ncol=1, nrow=k, byrow=FALSE)
+    results_tmp$f1H <<- f1h
+    start=end+1; end=start+k-1
+    f1l <- matrix(par[start:end],ncol=1, nrow=k, byrow=FALSE)
+    results_tmp$f1L <<- f1l
+    
+    # Qh, Ql
     start=end+1; end=start+k^2-1
-    Q <- matrix(par[start:end],ncol=k, nrow=k, byrow=TRUE)
-    results_tmp$Q <<- Q
+    Qh <- matrix(par[start:end],ncol=k, nrow=k, byrow=TRUE)
+    results_tmp$QH <<- Qh
+    start=end+1; end=start+k^2-1
+    Ql <- matrix(par[start:end],ncol=k, nrow=k, byrow=TRUE)
+    results_tmp$QL <<- Ql
+    
+    # fh, fl
     start=end+1; end=start+k-1
-    f <- matrix(par[start:end],ncol=1, nrow=k, byrow=FALSE)
-    results_tmp$f <<- f
+    fh <- matrix(par[start:end],ncol=1, nrow=k, byrow=FALSE)
+    results_tmp$fH <<- fh
     start=end+1; end=start+k-1
-    b <- matrix(par[start:end],nrow=k, ncol=1, byrow=FALSE)
-    results_tmp$b <<- b
+    fl <- matrix(par[start:end],ncol=1, nrow=k, byrow=FALSE)
+    results_tmp$fL <<- fl
+    
+    # bh, bl
+    start=end+1; end=start+k-1
+    bh <- matrix(par[start:end],nrow=k, ncol=1, byrow=FALSE)
+    results_tmp$bH <<- bh
+    start=end+1; end=start+k-1
+    bl <- matrix(par[start:end],nrow=k, ncol=1, byrow=FALSE)
+    results_tmp$bL <<- bl
+    
+    # mu0h, mu0l
     start=end+1; end=start
-    mu0 <- par[start:end]
-    results_tmp$mu0 <<- mu0
+    mu0h <- par[start:end]
+    results_tmp$mu0H <<- mu0h
     start=end+1; end=start
-    theta <- par[start:end]
-    results_tmp$theta <<- theta
+    mu0l <- par[start:end]
+    results_tmp$mu0L <<- mu0l
+    
+    # thetah, thetal
+    start=end+1; end=start
+    thetah <- par[start:end]
+    results_tmp$thetaH <<- thetah
+    start=end+1; end=start
+    thetal <- par[start:end]
+    results_tmp$thetaL <<- thetal
+    
+    # p
+    start=end+1; end=start
+    p <- par[start:end]
+    results_tmp$p <<- p
+    
     # End reading parameters
     
     if(stopifbound) {
@@ -272,7 +385,18 @@ spm_gen <- function(dat,
     
     if(stopflag == FALSE) {
       dims <- dim(dat)
-      res <- .Call("complik_gen", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k, pinv.tol)
+      res <- .Call("complik_gen", dat, dims[1], dims[2], 
+                   ah, al,
+                   f1h, f1l,
+                   Qh, Ql,
+                   bh, bl, 
+                   fh, fl, 
+                   mu0h, mu0l, 
+                   thetah, thetal, 
+                   p, 
+                   N.c, N.nc, 
+                   k, pinv.tol)
+      
       assign("results", results_tmp, envir=baseenv())
       iteration <<- iteration + 1
       if(verbose) {
@@ -283,7 +407,7 @@ spm_gen <- function(dat,
       
     }
     
-    return(as.numeric(-1*res*(p^N.c*(1-p)^N.nc)))
+    return(as.numeric(-1*res))
   }
   
   # Optimization:

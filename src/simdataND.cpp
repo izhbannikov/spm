@@ -125,7 +125,7 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
 }
 
 
-RcppExport SEXP simdata_gen(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, SEXP b_, SEXP Q_, SEXP theta_, SEXP tstart_, SEXP ystart_, SEXP tend_, SEXP k_, SEXP dt_, SEXP p0_) {
+RcppExport SEXP simdata_gen_discr(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, SEXP b_, SEXP Q_, SEXP theta_, SEXP tstart_, SEXP ystart_, SEXP tend_, SEXP k_, SEXP dt_, SEXP p0_) {
   long N = as<long>(n); // Number of individuals
   int k = as<long>(k_); // Number of dimensions
   arma::mat u = as<arma::mat>(u_);
@@ -162,7 +162,7 @@ RcppExport SEXP simdata_gen(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, 
     id = id + 1;
     
     int G = 0;
-    if(Rcpp::runif(1, 0.0, dt)[0] <= p0) {
+    if(Rcpp::runif(1, 0.0, 1)[0] <= p0) {
       G = 1;
     }
     
