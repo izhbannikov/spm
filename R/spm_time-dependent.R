@@ -25,7 +25,8 @@ optimize <- function(data, starting_params,  formulas, verbose,
                      lb, ub, 
                      algorithm,
                      stopifbound,
-                     maxeval=maxeval) {
+                     maxeval,
+                     ftol_rel) {
   
   final_res <- list()
   
@@ -367,7 +368,8 @@ optimize <- function(data, starting_params,  formulas, verbose,
   }
   tryCatch({ans <- nloptr(x0 = unlist(stpar), 
                   eval_f = maxlik_t, opts = list("algorithm"=algorithm, 
-                                               "xtol_rel"=1.0e-8, maxeval=maxeval),
+                                                 "ftol_rel"=ftol_rel, maxeval=maxeval),
+                                               #"xtol_rel"=xtol_rel, maxeval=maxeval),
                   lb = lower_bound, ub = upper_bound)
             i <- 1
             for(p in names(stpar)) {
@@ -376,6 +378,10 @@ optimize <- function(data, starting_params,  formulas, verbose,
               if(verbose)
                 cat(paste(p, get(p)), " ")
             }
+            results[["status"]] <- ans$status
+            results[["LogLik"]] <- L.prev
+            results[["objective"]] <- ans$objective
+            results[["message"]] <- ans$message
            },  
            error=function(e) {if(verbose  == TRUE) {print(e)}}, 
            finally=NA)
@@ -414,7 +420,7 @@ spm_time_dep <- function(x,
                          stopifbound=FALSE, 
                          algorithm="NLOPT_LN_NELDERMEAD",
                          lb=NULL, ub=NULL,
-                         verbose=FALSE, maxeval=100) {
+                         verbose=FALSE, maxeval=100, ftol_rel=1e-6) {
   formulas <- f
   data <- as.matrix(x)
   data <- data[, 2:dim(data)[2]]
@@ -423,6 +429,6 @@ spm_time_dep <- function(x,
     formulas.work[[item]] <- formulas[[item]]
   }
   # Optimization:
-  res = optimize(data, start, formulas.work, verbose, lb, ub, algorithm, stopifbound, maxeval)
+  res = optimize(data, start, formulas.work, verbose, lb, ub, algorithm, stopifbound, maxeval, ftol_rel)
   invisible(res)
 }
