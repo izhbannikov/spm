@@ -205,6 +205,7 @@ simdata_cont <- function(N=100,
 #' @param tstart A number that defines starting time (30 by default).
 #' @param tend A number, defines final time (105 by default).
 #' @param sd0 a standard deviation for modelling the next covariate value.
+#' @param nobs A number of observations per individual.
 #' @return A table with simulated data.
 #' @examples
 #' library(stpm)
@@ -215,14 +216,16 @@ simdata_cont2 <- function(N=10,
                           a=-0.05, 
                           f1=80, 
                           Q=2e-8, 
-                          f=80, b=5, 
+                          f=80, 
+                          b=5, 
                           mu0=1e-5, 
                           theta=0.08, 
                           ystart=80, 
                           tstart=30, 
                           tend=105, 
                           dt=1, 
-                          sd0=1) {
+                          sd0=1,
+                          nobs=NULL) {
   
   k <- length(ystart)
   
@@ -249,7 +252,7 @@ simdata_cont2 <- function(N=10,
   bH<-matrix(b,nrow=k,ncol=1,byrow=FALSE)
   ystart<-matrix(ystart,nrow=k,ncol=1,byrow=FALSE)
   
-  simulated = .Call("simCont", N, aH, f1H, QH, fH, bH, mu0, theta, tstart, ystart, tend, k, dt, sd0);
+  simulated = .Call("simCont", N, aH, f1H, QH, fH, bH, mu0, theta, tstart, ystart, tend, k, dt, sd0, nobs);
   
   data_names <- c()
   for(n in 1:k) {

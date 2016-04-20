@@ -192,189 +192,203 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
 }
 
 // Simulation routine
-RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SEXP mu0h, SEXP thetah, SEXP tstart_, SEXP ystart_, SEXP tend_, SEXP k_, SEXP dt_, SEXP sd_) {
-    
-    long N = as<long>(n); // Number of individuals
-    
-    arma::mat aH = as<arma::mat>(ah);
-    arma::mat f1H = as<arma::mat>(f1h);
-    arma::mat QH = as<arma::mat>(qh);
-    arma::mat bH = as<arma::mat>(bh);
-    arma::mat fH = as<arma::mat>(fh);
-    double mu0H = as<double>(mu0h); 
-    double thetaH  = as<double>(thetah);
-    int dim = as<int>(k_);
-    Rcpp::NumericVector sd = Rcpp::NumericVector(sd_);
-    
-    // Supporting variables
-    arma::mat *out, *k1ar, *yfin, *ytmp, *k2ar, *k3ar, *k4ar;
-    out = new arma::mat[2];
-    k1ar = new arma::mat[2];
-    yfin = new arma::mat[2];
-    ytmp = new arma::mat[2];
-    k2ar = new arma::mat[2];
-    k3ar = new arma::mat[2];
-    k4ar = new arma::mat[2];
-    
-    arma::mat y1(dim,1);
-    arma::mat y2(dim,1);
-    arma::mat gamma1(dim,dim);
-    
-    double  nsteps = 2;
-    
-    double tstart  = as<double>(tstart_);
-    arma::mat ystart = as<arma::mat>(ystart_);
-    
-    double tend  = as<double>(tend_);
-    //End of data loading
-    double t1;
-    double t2;
-    double dt=as<double>(dt_);
-    bool new_person = false;
-    
-    std::vector< std::vector<double> > data;
-    double S;
+RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SEXP mu0h, SEXP thetah, SEXP tstart_, SEXP ystart_, SEXP tend_, SEXP k_, SEXP dt_, SEXP sd_, SEXP nobs_) {
   
-    for(int i=0; i<N; i++) {
-    	// Starting point
-    	//t1 = Rcpp::runif(1, tstart, tend)[0];
-    	t1 = R::runif(tstart, tstart+10);
-      	
-      	//t2 = t1 + R::runif(0.0,dt); 
-      	t2 = t1 + dt + R::runif(0.0,1); 
-      	
-      	new_person = false;
-    	
-    	for(int ii=0; ii < dim; ii++) {
-    		y1(ii,0) = R::rnorm(ystart(ii,0), sd[ii]);
-    	}
-    	
-    	new_person = false;
-    	
-    	while(new_person == false) {
-        	nsteps = 10;
-        	double tdiff = t2-t1;
-        	
-        	double h = tdiff/nsteps;
-        	
-        	gamma1.zeros(); // set gamma1 to zero matrix
-        	double s = h/3.00*(-1.00)*mu(t1, y1, gamma1, fH, f1H, mu0H, thetaH, QH);
-        	double t = t1;
-        	out[0] = y1;
-        	out[1] = gamma1;
-        	double ifactor;
-        	
-        	for(int j = 0; j < nsteps; j++) {
-        		//Runge-Kutta method:
-		        func1(k1ar, t, out, fH, f1H, aH, bH, QH, thetaH);
-		        yfin[0] = out[0] + h/6.00*k1ar[0];
-         		yfin[1] = out[1] + h/6.00*k1ar[1];
-         		ytmp[0] = out[0] + h/2.00*k1ar[0];
-         		ytmp[1] = out[1] + h/2.00*k1ar[1];
-         		
-         		func1(k2ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
-         		yfin[0] = yfin[0] + h/3.00*k2ar[0];
-         		yfin[1] = yfin[1] + h/3.00*k2ar[1];
-         		ytmp[0] = out[0] + h/2.00*k2ar[0];
-         		ytmp[1] = out[1] + h/2.00*k2ar[1];
-         
-         		func1(k3ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
-         		yfin[0] = yfin[0] + h/3.00*k3ar[0];
-         		yfin[1] = yfin[1] + h/3.00*k3ar[1];
-         		ytmp[0] = out[0] + h*k3ar[0];
-         		ytmp[1] = out[1] + h*k3ar[1];
-         
-         		func1(k4ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
-         		out[0] = yfin[0] + h/6.00*k4ar[0];
-         		out[1] = yfin[1] + h/6.00*k4ar[1];
-         
-         		t = t + h;
-      
-        		//Integration:
-        		if (j == nsteps-1) {
-          			ifactor = 1.00;
-        		} else {
-          		if (((j % 2) == 0) && (j != 0)) {
-            		ifactor = 2.00;
-          		} else {
-            		ifactor = 4.00;
-          		}
-          		
-          	}
-        
-        
-        	  s = s + ifactor*h/3.00*(-1.00)*mu(t,out[0],out[1], fH, f1H, mu0H, thetaH, QH);
-        		
-        	}
-        
-      		arma::mat m2 = out[0];
-      		arma::mat gamma2 = out[1];
-      		
-      		S = exp(s);
-      		
-      		double xi = 0; // case (0 - alive, 1 - dead) indicator
-      		
-      		if(S > R::runif(0.0, 1.0)) {
-      			new_person = false;
-          		
-      			xi = 0; // case (0 - alive, 1 - dead) indicator
-      			
-      			// New y2:
-        		for(int ii = 0; ii < dim; ii++) {
-      				y2(ii,0) = R::rnorm(m2(ii,0), sqrt(gamma2(ii,ii)));
-      			}
-      		} 
-        	else {
-          		xi = 1;
-          		y2 = arma::mat(dim,1);
-          
-          		for(int ii=0; ii<dim; ii++) {
-            		y2(ii,0) = NumericVector::get_na();
-          		}
-          
-          		new_person = true;
-        	}
-        	
-        	std::vector<double> row; row.resize(4+2*dim);
-        	row[0] = i; row[1] = xi; row[2] = t1; row[3] = t2;
-        	
-        	int jj=0;
-        	for(int ii=4; ii<(4 + 2*dim-1); ii+=2) {
-            	row[ii] = y1(jj,0);
-            	row[ii+1] = y2(jj,0);
-            	jj += 1;
-        	}
-        	data.push_back(row);
-        	
-        	if(new_person == false) {
-        		y1 = y2;
-        		t1 = t2;
-        		//t2 = t1 + R::runif(0.0,dt);
-        		t2 = t1 + dt + R::runif(0.0,1); 
-    			if(t2 > tend) {
-        			new_person = true;
-        			break;
-        		}
-      		}
-        }
+  long N = as<long>(n); // Number of individuals
+  
+  arma::mat aH = as<arma::mat>(ah);
+  arma::mat f1H = as<arma::mat>(f1h);
+  arma::mat QH = as<arma::mat>(qh);
+  arma::mat bH = as<arma::mat>(bh);
+  arma::mat fH = as<arma::mat>(fh);
+  double mu0H = as<double>(mu0h); 
+  double thetaH  = as<double>(thetah);
+  int dim = as<int>(k_);
+  Rcpp::NumericVector sd = Rcpp::NumericVector(sd_);
+  int nobs = 0;
+  if(!Rf_isNull(nobs_)) {
+    nobs = as<int>(nobs_);
+  }
+  
+  
+  // Supporting variables
+  arma::mat *out, *k1ar, *yfin, *ytmp, *k2ar, *k3ar, *k4ar;
+  out = new arma::mat[2];
+  k1ar = new arma::mat[2];
+  yfin = new arma::mat[2];
+  ytmp = new arma::mat[2];
+  k2ar = new arma::mat[2];
+  k3ar = new arma::mat[2];
+  k4ar = new arma::mat[2];
+  
+  arma::mat y1(dim,1);
+  arma::mat y2(dim,1);
+  arma::mat gamma1(dim,dim);
+  
+  double  nsteps = 2;
+  
+  double tstart  = as<double>(tstart_);
+  arma::mat ystart = as<arma::mat>(ystart_);
+  
+  double tend  = as<double>(tend_);
+  //End of data loading
+  double t1;
+  double t2;
+  double dt=as<double>(dt_);
+  bool new_person = false;
+  //std::cout << N << " " << aH << " " << f1H << " " << QH << " " << fH << " " << mu0H << " " << thetaH << " " << ystart << " " << tstart << std::endl;
+  std::vector< std::vector<double> > data;
+  double S;
+  int n_observ;
+  
+  for(int i=0; i<N; i++) {
+    // Starting point
+    //t1 = Rcpp::runif(1, tstart, tend)[0];
+    //t1 = R::runif(tstart, tstart+10);
+    t1 = Rcpp::runif(1, tstart, tstart+10)[0];
+    
+    //t2 = t1 + R::runif(0.0,dt); 
+    //t2 = t1 + dt + R::runif(0.0,1); 
+    t2 = t1 + dt + Rcpp::runif(1, 0.0, 1)[0];
+    
+    for(int ii=0; ii < dim; ii++) {
+      //y1(ii,0) = R::rnorm(ystart(ii,0), sd[ii]);
+      y1(ii,0) = Rcpp::rnorm(1, ystart(ii,0), sd[ii])[0];
     }
     
-    delete[] out;
-    delete[] k1ar;
-    delete[] yfin;
-    delete[] ytmp;
-    delete[] k2ar;
-    delete[] k3ar;
-    delete[] k4ar;
-    
-    arma::mat res(data.size(), 4+2*dim);
-  	for(int i=0; i<data.size(); i++) {
-    	for(int j=0; j<4+2*dim; j++) {
-      		res(i, j) = data[i][j];
-    	}
-  	}
+    new_person = false;
+    n_observ = 0;
+    while(new_person == false) {
+      nsteps = 10;
+      double tdiff = t2-t1;
+      
+      double h = tdiff/nsteps;
+      
+      gamma1.zeros(); // set gamma1 to zero matrix
+      double s = h/3.00*(-1.00)*mu(t1, y1, gamma1, fH, f1H, mu0H, thetaH, QH);
+      double t = t1;
+      out[0] = y1;
+      out[1] = gamma1;
+      double ifactor;
+      
+      for(int j = 0; j < nsteps; j++) {
+        //Runge-Kutta method:
+        func1(k1ar, t, out, fH, f1H, aH, bH, QH, thetaH);
+        yfin[0] = out[0] + h/6.00*k1ar[0];
+        yfin[1] = out[1] + h/6.00*k1ar[1];
+        ytmp[0] = out[0] + h/2.00*k1ar[0];
+        ytmp[1] = out[1] + h/2.00*k1ar[1];
+        
+        func1(k2ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
+        yfin[0] = yfin[0] + h/3.00*k2ar[0];
+        yfin[1] = yfin[1] + h/3.00*k2ar[1];
+        ytmp[0] = out[0] + h/2.00*k2ar[0];
+        ytmp[1] = out[1] + h/2.00*k2ar[1];
+        
+        func1(k3ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
+        yfin[0] = yfin[0] + h/3.00*k3ar[0];
+        yfin[1] = yfin[1] + h/3.00*k3ar[1];
+        ytmp[0] = out[0] + h*k3ar[0];
+        ytmp[1] = out[1] + h*k3ar[1];
+        
+        func1(k4ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
+        out[0] = yfin[0] + h/6.00*k4ar[0];
+        out[1] = yfin[1] + h/6.00*k4ar[1];
+        
+        t = t + h;
+        
+        //Integration:
+        if (j == nsteps-1) {
+          ifactor = 1.00;
+        } else {
+          if (((j % 2) == 0) && (j != 0)) {
+            ifactor = 2.00;
+          } else {
+            ifactor = 4.00;
+          }
+          
+        }
+        
+        
+        s = s + ifactor*h/3.00*(-1.00)*mu(t,out[0],out[1], fH, f1H, mu0H, thetaH, QH);
+        
+      }
+      
+      arma::mat m2 = out[0];
+      arma::mat gamma2 = out[1];
+      
+      S = exp(s);
+      
+      double xi = 0; // case (0 - alive, 1 - dead) indicator
+      
+      if(S > R::runif(0.0, 1.0)) {
+        new_person = false;
+        
+        xi = 0; // case (0 - alive, 1 - dead) indicator
+        
+        // New y2:
+        for(int ii = 0; ii < dim; ii++) {
+          //y2(ii,0) = R::rnorm(m2(ii,0), sqrt(gamma2(ii,ii))); 
+          y2(ii,0) = Rcpp::rnorm(1, m2(ii,0), sqrt(gamma2(ii,ii)))[0];
+        }
+        
+      } 
+      else {
+        xi = 1;
+        y2 = arma::mat(dim,1);
+        
+        for(int ii=0; ii<dim; ii++) {
+          y2(ii,0) = NumericVector::get_na();
+        }
+        
+        new_person = true;
+      }
+      
+      std::vector<double> row; row.resize(4+2*dim);
+      row[0] = i; row[1] = xi; row[2] = t1; row[3] = t2;
+      
+      int jj=0;
+      for(int ii=4; ii<(4 + 2*dim-1); ii+=2) {
+        row[ii] = y1(jj,0);
+        row[ii+1] = y2(jj,0);
+        jj += 1;
+      }
+      data.push_back(row);
+      n_observ += 1;
+      if(n_observ == nobs) {
+        new_person = true;
+      }
+      
+      if(new_person == false) {
+        y1 = y2;
+        t1 = t2;
+        //t2 = t1 + R::runif(0.0,dt);
+        //t2 = t1 + dt + R::runif(0.0,1); 
+        t2 = t1 + dt + Rcpp::runif(1, 0.0, 1)[0];
+        if(t2 > tend) {
+          new_person = true;
+          break;
+        }
+      }
+    }
+  }
   
-  	return(Rcpp::wrap(res));
+  delete[] out;
+  delete[] k1ar;
+  delete[] yfin;
+  delete[] ytmp;
+  delete[] k2ar;
+  delete[] k3ar;
+  delete[] k4ar;
+  
+  arma::mat res(data.size(), 4+2*dim);
+  for(int i=0; i<data.size(); i++) {
+    for(int j=0; j<4+2*dim; j++) {
+      res(i, j) = data[i][j];
+    }
+  }
+  
+  return(Rcpp::wrap(res));
 }
 
 // Likelihood for GenSPM (see Arbeev et al., "Genetic model for longitudinal studies of aging, health 

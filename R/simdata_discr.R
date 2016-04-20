@@ -14,13 +14,26 @@
 #' @param tstart A number that defines starting time (30 by default).
 #' @param tend A number, defines final time (105 by default).
 #' @param dt A time step (1 by default).
+#' @param nobs A number, defines a number of observations for each individual, NULL by default.
 #' @return A table with simulated data.
 #' @examples
 #' library(stpm)
 #' data <- simdata_discr(N=100, ystart=80)
 #' head(data)
 #'
-simdata_discr <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart=80, tstart=30, tend=105, dt=1) {
+simdata_discr <- function(N=100, 
+                          a=-0.05, 
+                          f1=80, 
+                          Q=2e-8, 
+                          f=80, 
+                          b=5, 
+                          mu0=1e-5, 
+                          theta=0.08, 
+                          ystart=80, 
+                          tstart=30, 
+                          tend=105, 
+                          dt=1,
+                          nobs=NULL) {
   
   k <- length(ystart)
   
@@ -47,7 +60,7 @@ simdata_discr <- function(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, th
   Q_ <- matrix(Q, nrow=k, ncol=k)
   theta_ <- theta
   ystart = matrix(ystart, nrow=k, ncol=1)
-  simulated = .Call("simdata_ND", N, u_, R_, Sigma_, mu0_, b_, Q_, theta_, tstart, ystart, tend, k, dt);
+  simulated = .Call("simdata_ND", N, u_, R_, Sigma_, mu0_, b_, Q_, theta_, tstart, ystart, tend, k, dt, nobs);
   
   data_names <- c()
   for(n in 1:k) {

@@ -25,7 +25,7 @@ double mu(double t, double mu0, arma::mat b, arma::mat Q, double theta, arma::ma
 
 
 
-RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, SEXP b_, SEXP Q_, SEXP theta_, SEXP tstart_, SEXP ystart_, SEXP tend_, SEXP k_, SEXP dt_) {
+RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, SEXP b_, SEXP Q_, SEXP theta_, SEXP tstart_, SEXP ystart_, SEXP tend_, SEXP k_, SEXP dt_, SEXP nobs_) {
   long N = as<long>(n); // Number of individuals
   int k = as<long>(k_); // Number of dimensions
   arma::mat u = as<arma::mat>(u_);
@@ -38,6 +38,10 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
   double tstart  = as<double>(tstart_);
   arma::mat ystart = as<arma::mat>(ystart_);
   double tend  = as<double>(tend_);
+  int nobs = 0;
+  if(!Rf_isNull(nobs_)) {
+    nobs = as<int>(nobs_);
+  }
   //End of data loading
   double id = 0;
   double t1;
@@ -49,6 +53,7 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
   double S; 
   
   std::vector< std::vector<double> > data;
+  int n_observ;
   
   for(int i=0; i < N; i++) { // Across all individuals
     t1 = tstart;
@@ -57,8 +62,9 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
     
     new_person = false;
     id = id + 1;
-    
+    n_observ = 0;
     while(new_person == false) {
+      
       S = exp(-1*dt*mu(t1, mu0, b, Q, theta, y1));
       
       double xi = 0; // case (0 - alive, 1 - dead) indicator
@@ -98,6 +104,11 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
       }
       
       data.push_back(row);
+      
+      n_observ += 1;
+      if(n_observ == nobs) {
+          new_person = true;
+      }
       
       if (new_person == false) {
         t1 = t2;
