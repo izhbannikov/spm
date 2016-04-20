@@ -14,8 +14,8 @@
 #' dat <- simdata_time_dep(N=100)
 #' head(dat)
 #'
-simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-5", ft="80", bt="2.5", mu0t="1e-1"),
-                         step=1, tstart=30, tend=105, ystart=80, sd0=2) {
+simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80", bt="5", mu0t="1e-3"),
+                         step=1, tstart=30, tend=105, ystart=80, sd0=2, nobs=0) {
   formulas <- f  
   at <- NULL
   f1t <- NULL
@@ -57,15 +57,27 @@ simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-5", ft="80
   
   data <- matrix(nrow=1,ncol=6, NA)
   record <- 1
-  id <- 1
+  id <- 0
+  
   for(i in 1:N) {
-    t2 <- runif(1,tstart, tend) # Starting time
+    
+    if(length(tstart) == 1) {
+      t2 <- runif(1,tstart, tend) # Starting time
+    } else if(length(tstart) == 2){
+      t2 <- runif(1,tstart[1], tstart[2]) # Starting time
+    } else {
+      stop(paste("Incorrect tstart:", tstart))
+    }
+    
     # Starting point
     new_person <- FALSE
-    y2 <- rnorm(1,mean=ystart, sd=sd0)  
+    y2 <- rnorm(1,mean=ystart, sd=sd0) 
+    
+    n_observ <- 0
+    
     while(new_person == FALSE){
       t1 <- t2
-      t2 <- t1 + runif(1,0,1) + step
+      t2 <- t1 + runif(1,-step/10,step/10) + step
       y1 <- y2
         
       S <- exp(-1*mu(y1,t1)*(t2-t1))
@@ -74,7 +86,6 @@ simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-5", ft="80
       if (S > runif(1,0,1)) {
         xi <- 0
         y2 <- rnorm(1,mean=m(y1, t1, t2), sd=sqrt(sigma_sq(t1,t2)))
-        #y2 <- rnorm(1,mean=m(y1, t1, t2), sd=sigma_sq(t1,t2))
         new_person <- FALSE
         cov <- c(y1, y2)
         data <- rbind(data, c(id, xi, t1, t2, cov))
@@ -85,15 +96,20 @@ simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-5", ft="80
         new_person <- TRUE
         cov <- c(y1, y2)
         data <- rbind(data, c(id, xi, t1, t2, cov))
-        id <- id + 1
-        
+      }
+      
+      n_observ <- n_observ + 1
+      if(n_observ == nobs) {
+        new_person <- TRUE;
       }
         
       if(t2 > tend & new_person == FALSE) {
         new_person <- TRUE
-        id <- id + 1
+        
       }
     }
+    
+    id <- id + 1
       
   }
     
