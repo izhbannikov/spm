@@ -109,6 +109,10 @@ spm_discrete <- function(dat, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verb
     index_i <- index_i + 1
   }
   
+  # DEBUG
+  #print(reg_formula)
+  #print(coef)
+  
   #Output parameters:
   parameters_glm <- unname(parameters_glm);
   theta <- parameters_glm[1]

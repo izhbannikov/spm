@@ -225,7 +225,8 @@ simdata_cont2 <- function(N=10,
                           tend=105, 
                           dt=1, 
                           sd0=1,
-                          nobs=NULL) {
+                          nobs=NULL, 
+                          gomp=FALSE) {
   
   k <- length(ystart)
   
@@ -252,7 +253,7 @@ simdata_cont2 <- function(N=10,
   bH<-matrix(b,nrow=k,ncol=1,byrow=FALSE)
   ystart<-matrix(ystart,nrow=k,ncol=1,byrow=FALSE)
   
-  simulated = .Call("simCont", N, aH, f1H, QH, fH, bH, mu0, theta, tstart, ystart, tend, k, dt, sd0, nobs);
+  simulated = .Call("simCont", N, aH, f1H, QH, fH, bH, mu0, theta, tstart, ystart, tend, k, dt, sd0, nobs, gomp);
   
   data_names <- c()
   for(n in 1:k) {

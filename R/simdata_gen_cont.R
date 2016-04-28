@@ -46,7 +46,9 @@ simdata_gen_cont <- function(N=10,
                           tstart=30, 
                           tend=105, 
                           dt=1, 
-                          sd0=1) {
+                          sd0=1,
+                          mode="genetic", 
+                          gomp=FALSE) {
   
   k <- length(ystart)
   
@@ -74,6 +76,15 @@ simdata_gen_cont <- function(N=10,
   
   ystart<-matrix(ystart,nrow=k,ncol=1,byrow=FALSE)
   
+  genmode <- 1
+  if(mode == "genetic") {
+    genmode <- 1
+  } else if(mode == "nongenetic") {
+    genmode <- 0
+  } else {
+    stop("Mode can be set to 'genetic' or 'nongenetic'.")
+  }
+  
   simulated = .Call("simGenCont", 
                     N, 
                     aH, aL, 
@@ -84,13 +95,18 @@ simdata_gen_cont <- function(N=10,
                     mu0H, mu0L,
                     thetaH, thetaL,
                     p0,
-                    tstart, ystart, tend, k, dt, sd0);
+                    tstart, ystart, tend, k, dt, sd0, genmode, gomp);
   
   data_names <- c()
   for(n in 1:k) {
     data_names <- c(data_names, paste("y",n, sep=''), paste("y",n, ".next", sep=''))
   }
-  colnames(simulated) <- c("id", "xi", "t1", "t2", "G", data_names)
+  
+  if(genmode == 1) {
+    colnames(simulated) <- c("id", "xi", "t1", "t2", "G", data_names)
+  } else {
+    colnames(simulated) <- c("id", "xi", "t1", "t2", data_names)
+  }
   
   invisible(simulated)
 }

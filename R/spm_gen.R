@@ -162,14 +162,13 @@ setub <- function(k, params) {
 #'@examples
 #'library(stpm)
 #'#Reading the data:
-#'data <- simdata_gen(N=2)
+#'data <- simdata_gen_cont(N=5000)
 #'head(data)
 #'#Parameters estimation:
-#'pars <- spm_gen(dat=data,a=-0.05, f1=80, 
-#'						 Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08)
+#'pars <- spm_gen(dat=data)
 #'pars
 #'
-spm_gen <- function(dat, 
+spm_gen <- function(gendat, nongendat=NULL,
                     aH=-0.05, aL=-0.01, 
                     f1H=60, f1L=80, 
                     QH=2e-8, QL=2.5e-8, 
@@ -183,7 +182,9 @@ spm_gen <- function(dat,
                     lb=NULL, ub=NULL,
                     maxeval=500,
                     verbose=FALSE,
-                    pinv.tol=0.01) {
+                    pinv.tol=0.01,
+                    mode="genetic",
+                    gomp=FALSE) {
   
   ###=======For DEBUG========###
   #dat = dat
@@ -230,7 +231,23 @@ spm_gen <- function(dat,
     stop(cat("Provided algorithm", algorithm, "not in the list of available optimization methods."))
   }
   
-  dat <- as.matrix(dat[, 2:dim(dat)[2]])
+  mode_avail <- c("genetic", "nongenetic", "combined")
+  if(!(mode %in% mode_avail)){
+    stop(cat("Provided mode ", mode, " not found in a set of available modes: ", mode_avail))
+  }
+  
+  
+  dat <- as.matrix(gendat[, 2:dim(gendat)[2]])
+  
+  if( !is.null(nongendat) & (mode == "nongenetic" | mode == "combined") ) {
+    cat("Provided mode: ", mode, "\n")
+    nongendat <- as.matrix(nongendat[, 2:dim(nongendat)[2]])
+  } else if( is.null(nongendat) & (mode == "genetic") ){
+    cat("Provided mode: ", mode, "\n")
+  } else {
+    stop(cat("Provided mode:", mode, " but non-genetic data is NULL"))
+  }
+  
   
   k <- dim(as.matrix(aH))[1]
   final_res <- list()
@@ -383,9 +400,11 @@ spm_gen <- function(dat,
       }
     }
     
+    res <- 0
     if(stopflag == FALSE) {
-      dims <- dim(dat)
-      res <- .Call("complik_gen", dat, dims[1], dims[2], 
+      
+      if(mode == "genetic" | mode == "combined") {
+        res1 <- .Call("complik_gen", dat, dim(dat)[1], dim(dat)[2], 
                    ah, al,
                    f1h, f1l,
                    Qh, Ql,
@@ -395,7 +414,38 @@ spm_gen <- function(dat,
                    thetah, thetal, 
                    p, 
                    N.c, N.nc, 
-                   k, pinv.tol)
+                   k, pinv.tol,
+                   gomp)
+        if(mode == "combined") {
+          res2 <- .Call("complikGenNonGenetic", nongendat, dim(nongendat)[1], dim(nongendat)[2], 
+                        ah, al,
+                        f1h, f1l,
+                        Qh, Ql,
+                        bh, bl, 
+                        fh, fl, 
+                        mu0h, mu0l, 
+                        thetah, thetal, 
+                        p,
+                        k, pinv.tol, gomp)
+          
+          res <- res1 + res2
+          print(res1)
+          print(res2)
+        } else {
+          res <- res1
+        }
+      } else if(mode == "nongenetic") {
+        res <- .Call("complikGenNonGenetic", nongendat, dim(nongendat)[1], dim(nongendat)[2],
+                     ah, al,
+                     f1h, f1l,
+                     Qh, Ql,
+                     bh, bl, 
+                     fh, fl, 
+                     mu0h, mu0l, 
+                     thetah, thetal, 
+                     p,
+                     k, pinv.tol, gomp)
+      }
       
       assign("results", results_tmp, envir=baseenv())
       iteration <<- iteration + 1
@@ -427,7 +477,7 @@ spm_gen <- function(dat,
   #         finally=NA)
   
   nloptr(x0 = parameters, 
-         eval_f = maxlik, opts = list("algorithm"=algorithm, "xtol_rel"=1.0e-4, "maxeval"=maxeval),
+         eval_f = maxlik, opts = list("algorithm"=algorithm, "ftol_rel"=1.0e-8, "maxeval"=maxeval),
          lb = bounds$lower_bound, ub = bounds$upper_bound)
   
   final_results <- get("results",envir=baseenv())
@@ -444,6 +494,7 @@ spm_gen <- function(dat,
   final_results$limit <- limit
   #assign("results", final_results, envir=baseenv())
   class(final_results) <- "gen.spm"
+  
   invisible(final_results)
 }
 
