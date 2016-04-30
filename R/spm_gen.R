@@ -430,8 +430,6 @@ spm_gen <- function(gendat, nongendat=NULL,
                         k, pinv.tol, gomp)
           
           res <- res1 + res2
-          print(res1)
-          print(res2)
         } else {
           res <- res1
         }
