@@ -17,30 +17,36 @@ using namespace std;
 
 /*============FUNCTION DEFINITIONS*/
 
-double mu(double t, arma::mat y1, arma::mat gamma1, arma::mat fH, arma::mat f1H, double mu0H, double thetaH, arma::mat QH);
-void func1(arma::mat *res, double t, arma::mat *y, arma::mat fH, arma::mat f1H, arma::mat aH, arma::mat bH, arma::mat QH, double theta, double gomp);
-arma::mat Q(double t, arma::mat QH, double theta, bool gomp=false);
+bool gomp = false;
+
+long double mu(double t, arma::mat y1, arma::mat gamma1, arma::mat fH, arma::mat f1H, double mu0H, double thetaH, arma::mat QH);
+void func1(arma::mat *res, double t, arma::mat *y, arma::mat fH, arma::mat f1H, arma::mat aH, arma::mat bH, arma::mat QH, double theta);
+arma::mat Q(double t, arma::mat QH, double theta);
 
 
-double mu(double t, arma::mat y1, arma::mat gamma1, arma::mat fH, arma::mat f1H, double mu0H, double thetaH, arma::mat QH) {
+long double mu(double t, arma::mat y1, arma::mat gamma1, arma::mat fH, arma::mat f1H, double mu0H, double thetaH, arma::mat QH) {
   arma::mat hfH;
   arma::mat hf1H;
-  double mu0Ht;
+  long double mu0Ht;
   arma::mat mu;
   
   hfH = fH - y1;
   hf1H = f1H - y1;
-  mu0Ht = mu0H*exp(thetaH*t);
+  if(gomp) {
+    mu0Ht = mu0H*exp(thetaH*t);
+  } else {
+    mu0Ht = mu0H;
+  }
   arma::mat QH_gamma1 = QH*gamma1;
   mu = mu0Ht + (hfH.t()*QH)*hfH + arma::sum((QH_gamma1).diag());
   
-  return mu(0,0);
+  return (long double)mu(0,0);
 }
 
 
 //Calculating m (y[1]) & gamma(y[2]):
 void func1(arma::mat *res, double t, arma::mat *y, arma::mat fH, arma::mat f1H, arma::mat aH, 
-          arma::mat bH, arma::mat QH, double theta, bool gomp) {
+          arma::mat bH, arma::mat QH, double theta) {
   
   arma::mat hfH, hf1H, dy1, dy2;
   //hfH = fH.t() - y[0]; 
@@ -48,13 +54,13 @@ void func1(arma::mat *res, double t, arma::mat *y, arma::mat fH, arma::mat f1H, 
   hfH = fH - y[0]; 
   hf1H = f1H - y[0];
   
-  res[0] = -1.00 * (aH*hf1H) + 2.00 * ((y[1]*Q(t, QH, theta, gomp))*hfH);
-  res[1] = aH*y[1] + y[1]*aH.t() + bH*bH.t() - 2.00 * ((y[1]*Q(t, QH, theta, gomp))*y[1]);
+  res[0] = -1.00 * (aH*hf1H) + 2.00 * ((y[1]*Q(t, QH, theta))*hfH);
+  res[1] = aH*y[1] + y[1]*aH.t() + bH*bH.t() - 2.00 * ((y[1]*Q(t, QH, theta))*y[1]);
   
 }
 
 
-arma::mat Q(double t, arma::mat QH, double theta, bool gomp) {
+arma::mat Q(double t, arma::mat QH, double theta) {
   arma::mat Q;
   if(gomp) {
     Q = QH*exp(theta*t);
@@ -78,7 +84,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
     double mu0H = as<double>(mu0h); 
     double thetaH  = as<double>(thetah);
     int dim = as<int>(k);
-    bool gomp = as<bool>(gomp_);
+    gomp = as<bool>(gomp_);
     
     //Actual data set
     arma::mat dd = as<arma::mat>(dat);  
@@ -131,25 +137,25 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
       
       for(int j = 0; j < nsteps; j++) {
          //Runge-Kutta method:
-         func1(k1ar, t, out, fH, f1H, aH, bH, QH, thetaH, gomp);
+         func1(k1ar, t, out, fH, f1H, aH, bH, QH, thetaH);
          yfin[0] = out[0] + h/6.00*k1ar[0];
          yfin[1] = out[1] + h/6.00*k1ar[1];
          ytmp[0] = out[0] + h/2.00*k1ar[0];
          ytmp[1] = out[1] + h/2.00*k1ar[1];
          
-         func1(k2ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH, gomp);
+         func1(k2ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
          yfin[0] = yfin[0] + h/3.00*k2ar[0];
          yfin[1] = yfin[1] + h/3.00*k2ar[1];
          ytmp[0] = out[0] + h/2.00*k2ar[0];
          ytmp[1] = out[1] + h/2.00*k2ar[1];
          
-         func1(k3ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH, gomp);
+         func1(k3ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
          yfin[0] = yfin[0] + h/3.00*k3ar[0];
          yfin[1] = yfin[1] + h/3.00*k3ar[1];
          ytmp[0] = out[0] + h*k3ar[0];
          ytmp[1] = out[1] + h*k3ar[1];
          
-         func1(k4ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH, gomp);
+         func1(k4ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
          out[0] = yfin[0] + h/6.00*k4ar[0];
          out[1] = yfin[1] + h/6.00*k4ar[1];
          
@@ -175,14 +181,15 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
       double pi = 3.141592654;
       
       if(dd(i,0) == 0) { 
-        arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*pinv(gamma2,ptol)*(m2-y2);
+        //arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*pinv(gamma2,ptol)*(m2-y2);
+        arma::mat exp = log(pow(2.00*pi, -0.5*dim)*pow(det(gamma2), -0.5)) - 0.50*(m2-y2).t()*pinv(gamma2,ptol)*(m2-y2);
         //arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*inv(gamma2)*(m2-y2); // inv() fails very ofter
         L += s + exp(0,0);
       } else {
-        double logprobi = log(1.00 - exp(-1.00*mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH)));
+        //double logprobi = log(1.00 - exp(-1.00*mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH)));
+        double logprobi = log(mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH));
         L += s + logprobi;
       }
-      //std::cout << L << std::endl;
     }
     
     delete[] out;
@@ -209,7 +216,7 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
   double mu0H = as<double>(mu0h); 
   double thetaH  = as<double>(thetah);
   int dim = as<int>(k_);
-  bool gomp = as<bool>(gomp_);
+  gomp = as<bool>(gomp_);
   
   Rcpp::NumericVector sd = Rcpp::NumericVector(sd_);
   int nobs = 0;
@@ -280,25 +287,25 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
       
       for(int j = 0; j < nsteps; j++) {
         //Runge-Kutta method:
-        func1(k1ar, t, out, fH, f1H, aH, bH, QH, thetaH, gomp);
+        func1(k1ar, t, out, fH, f1H, aH, bH, QH, thetaH);
         yfin[0] = out[0] + h/6.00*k1ar[0];
         yfin[1] = out[1] + h/6.00*k1ar[1];
         ytmp[0] = out[0] + h/2.00*k1ar[0];
         ytmp[1] = out[1] + h/2.00*k1ar[1];
         
-        func1(k2ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH, gomp);
+        func1(k2ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
         yfin[0] = yfin[0] + h/3.00*k2ar[0];
         yfin[1] = yfin[1] + h/3.00*k2ar[1];
         ytmp[0] = out[0] + h/2.00*k2ar[0];
         ytmp[1] = out[1] + h/2.00*k2ar[1];
         
-        func1(k3ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH, gomp);
+        func1(k3ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
         yfin[0] = yfin[0] + h/3.00*k3ar[0];
         yfin[1] = yfin[1] + h/3.00*k3ar[1];
         ytmp[0] = out[0] + h*k3ar[0];
         ytmp[1] = out[1] + h*k3ar[1];
         
-        func1(k4ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH, gomp);
+        func1(k4ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
         out[0] = yfin[0] + h/6.00*k4ar[0];
         out[1] = yfin[1] + h/6.00*k4ar[1];
         
@@ -336,8 +343,8 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
         
         // New y2:
         for(int ii = 0; ii < dim; ii++) {
-          //y2(ii,0) = R::rnorm(m2(ii,0), sqrt(gamma2(ii,ii))); 
-          y2(ii,0) = Rcpp::rnorm(1, m2(ii,0), sqrt(gamma2(ii,ii)))[0];
+          y2(ii,0) = R::rnorm(m2(ii,0), sqrt(gamma2(ii,ii))); 
+          //y2(ii,0) = Rcpp::rnorm(1, m2(ii,0), sqrt(gamma2(ii,ii)))[0];
         }
         
       } 
@@ -433,7 +440,7 @@ RcppExport SEXP complik_gen(SEXP dat, SEXP n, SEXP m,
   int dim = as<int>(k);
   int nc = as<int>(nc_);
   int nnc = as<int>(nnc_);
-  bool gomp = as<bool>(gomp_);
+  gomp = as<bool>(gomp_);
   
   //Actual data set
   arma::mat dd = as<arma::mat>(dat);  
@@ -497,9 +504,9 @@ RcppExport SEXP complik_gen(SEXP dat, SEXP n, SEXP m,
     for(int j = 0; j < nsteps; j++) {
       //Runge-Kutta method:
       if(G == 1) {
-        func1(k1ar, t, out, fH, f1H, aH, bH, QH, thetaH, gomp);
+        func1(k1ar, t, out, fH, f1H, aH, bH, QH, thetaH);
       } else {
-        func1(k1ar, t, out, fL, f1L, aL, bL, QL, thetaL, gomp);
+        func1(k1ar, t, out, fL, f1L, aL, bL, QL, thetaL);
       }
       yfin[0] = out[0] + h/6.00*k1ar[0];
       yfin[1] = out[1] + h/6.00*k1ar[1];
@@ -507,9 +514,9 @@ RcppExport SEXP complik_gen(SEXP dat, SEXP n, SEXP m,
       ytmp[1] = out[1] + h/2.00*k1ar[1];
       
       if(G == 1) {
-        func1(k2ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH, gomp);
+        func1(k2ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
       } else {
-        func1(k2ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL, gomp);
+        func1(k2ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL);
       }
       yfin[0] = yfin[0] + h/3.00*k2ar[0];
       yfin[1] = yfin[1] + h/3.00*k2ar[1];
@@ -517,9 +524,9 @@ RcppExport SEXP complik_gen(SEXP dat, SEXP n, SEXP m,
       ytmp[1] = out[1] + h/2.00*k2ar[1];
       
       if(G == 1) {
-        func1(k3ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH, gomp);
+        func1(k3ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
       } else {
-        func1(k3ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL, gomp);
+        func1(k3ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL);
       }
       yfin[0] = yfin[0] + h/3.00*k3ar[0];
       yfin[1] = yfin[1] + h/3.00*k3ar[1];
@@ -527,9 +534,9 @@ RcppExport SEXP complik_gen(SEXP dat, SEXP n, SEXP m,
       ytmp[1] = out[1] + h*k3ar[1];
       
       if(G == 1) {
-        func1(k4ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH, gomp);
+        func1(k4ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
       } else {
-        func1(k4ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL, gomp);
+        func1(k4ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL);
       }
       out[0] = yfin[0] + h/6.00*k4ar[0];
       out[1] = yfin[1] + h/6.00*k4ar[1];
@@ -567,11 +574,11 @@ RcppExport SEXP complik_gen(SEXP dat, SEXP n, SEXP m,
     } else {
       double logprobi; 
       if(G == 1) {
-        logprobi = log(1.00 - exp(-1.00*mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH)));
-        //logprobi = log(mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH));
+        //logprobi = log(1.00 - exp(-1.00*mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH)));
+        logprobi = log(mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH));
       } else {
-        logprobi = log(1.00 - exp(-1.00*mu(t2, m2, gamma2, fL, f1L, mu0L, thetaL, QL)));
-        //logprobi = log(mu(t2, m2, gamma2, fL, f1L, mu0L, thetaL, QL));
+        //logprobi = log(1.00 - exp(-1.00*mu(t2, m2, gamma2, fL, f1L, mu0L, thetaL, QL)));
+        logprobi = log(mu(t2, m2, gamma2, fL, f1L, mu0L, thetaL, QL));
       }
       L += s + logprobi;
     }
@@ -616,7 +623,7 @@ RcppExport SEXP simGenCont(SEXP n,
   arma::mat fH = as<arma::mat>(fh); 
   arma::mat fL = as<arma::mat>(fl); 
   
-  double mu0H = as<double>(mu0h); 
+  long double mu0H = as<double>(mu0h); 
   double mu0L = as<double>(mu0l); 
   double thetaH  = as<double>(thetah); 
   double thetaL  = as<double>(thetal);
@@ -624,7 +631,7 @@ RcppExport SEXP simGenCont(SEXP n,
   Rcpp::NumericVector sd = Rcpp::NumericVector(sd_);
   double p0 = as<double>(p0_);
   int genmode = as<int>(_genmode);
-  bool gomp = as<bool>(gomp_);
+  gomp = as<bool>(gomp_);
   
   // Supporting variables
   arma::mat *out, *k1ar, *yfin, *ytmp, *k2ar, *k3ar, *k4ar;
@@ -642,14 +649,15 @@ RcppExport SEXP simGenCont(SEXP n,
   
   double  nsteps = 2;
   
-  double tstart  = as<double>(tstart_);
+  //double tstart  = as<double>(tstart_);
+  Rcpp::NumericVector tstart = Rcpp::NumericVector(tstart_);
   arma::mat ystart = as<arma::mat>(ystart_);
   
   double tend  = as<double>(tend_);
   //End of data loading
   double t1;
   double t2;
-  double dt=as<double>(dt_);
+  long double dt=as<long double>(dt_);
   bool new_person = false;
   
   std::vector< std::vector<double> > data;
@@ -659,11 +667,18 @@ RcppExport SEXP simGenCont(SEXP n,
     // Starting point
     //t1 = Rcpp::runif(1, tstart, tend)[0];
     //t1 = R::runif(tstart, tstart+10);
-    t1 = Rcpp::runif(1, tstart, tstart+10)[0];
+    //t1 = Rcpp::runif(1, tstart, tstart+10)[0];
+    
+    if(tstart.size() == 1) {
+      t1 = Rcpp::runif(1, tstart[0], tend)[0]; //Starting time
+    } else if(tstart.size() == 2) {
+      t1 = Rcpp::runif(1,tstart[0], tstart[1])[0]; //Starting time
+    }
     
     //t2 = t1 + R::runif(0.0,dt); 
     //t2 = t1 + dt + R::runif(0.0,1); 
-    t2 = t1 + dt + Rcpp::runif(1, 0.0,1)[0]; 
+    //t2 = t1 + dt + Rcpp::runif(1, 0.0,1)[0]; 
+    t2 = t1 + Rcpp::runif(1,-1.0*dt/10,dt/10)[0] + dt;
     
     new_person = false;
     
@@ -702,9 +717,9 @@ RcppExport SEXP simGenCont(SEXP n,
       for(int j = 0; j < nsteps; j++) {
         //Runge-Kutta method:
         if(G == 1) {
-          func1(k1ar, t, out, fH, f1H, aH, bH, QH, thetaH, gomp);
+          func1(k1ar, t, out, fH, f1H, aH, bH, QH, thetaH);
         } else {
-          func1(k1ar, t, out, fL, f1L, aL, bL, QL, thetaL, gomp);
+          func1(k1ar, t, out, fL, f1L, aL, bL, QL, thetaL);
         }
         
         yfin[0] = out[0] + h/6.00*k1ar[0];
@@ -713,9 +728,9 @@ RcppExport SEXP simGenCont(SEXP n,
         ytmp[1] = out[1] + h/2.00*k1ar[1];
         
         if(G == 1) {
-          func1(k2ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH, gomp);
+          func1(k2ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
         } else {
-          func1(k2ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL, gomp);
+          func1(k2ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL);
         }
         
         yfin[0] = yfin[0] + h/3.00*k2ar[0];
@@ -724,9 +739,9 @@ RcppExport SEXP simGenCont(SEXP n,
         ytmp[1] = out[1] + h/2.00*k2ar[1];
         
         if(G == 1) {
-          func1(k3ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH, gomp);
+          func1(k3ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
         } else {
-          func1(k3ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL, gomp);
+          func1(k3ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL);
         }
         
         yfin[0] = yfin[0] + h/3.00*k3ar[0];
@@ -735,9 +750,9 @@ RcppExport SEXP simGenCont(SEXP n,
         ytmp[1] = out[1] + h*k3ar[1];
         
         if(G == 1) {
-          func1(k4ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH, gomp);
+          func1(k4ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
         } else {
-          func1(k4ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL, gomp);
+          func1(k4ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL);
         }
         
         out[0] = yfin[0] + h/6.00*k4ar[0];
@@ -776,8 +791,8 @@ RcppExport SEXP simGenCont(SEXP n,
         xi = 0; // case (0 - alive, 1 - dead) indicator
         // New y2:
         for(int ii = 0; ii < dim; ii++) {
-          //y2(ii,0) = R::rnorm(m2(ii,0), sqrt(gamma2(ii,ii)));
-          y2(ii,0) = Rcpp::rnorm(1, m2(ii,0), sqrt(gamma2(ii,ii)))[0];
+          y2(ii,0) = R::rnorm(m2(ii,0), sqrt(gamma2(ii,ii)));
+          //y2(ii,0) = Rcpp::rnorm(1, m2(ii,0), sqrt(gamma2(ii,ii)))[0];
         }
       } 
       else {
@@ -819,7 +834,8 @@ RcppExport SEXP simGenCont(SEXP n,
         t1 = t2;
         //t2 = t1 + R::runif(0.0,dt);
         //t2 = t1 + dt + R::runif(0.0,1); 
-        t2 = t1 + dt + Rcpp::runif(1, 0.0,1)[0]; 
+        //t2 = t1 + dt + Rcpp::runif(1, 0.0,1)[0]; 
+        t2 = t1 + Rcpp::runif(1,-1.0*dt/10,dt/10)[0] + dt;
         if(t2 > tend) {
           new_person = true;
           break;
@@ -884,18 +900,18 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
   arma::mat bL = as<arma::mat>(bl);
   arma::mat fH = as<arma::mat>(fh); 
   arma::mat fL = as<arma::mat>(fl); 
-  bool gomp = as<bool>(gomp_);
-  double mu0H = as<double>(mu0h); 
-  double mu0L = as<double>(mu0l); 
-  double thetaH  = as<double>(thetah); 
-  double thetaL  = as<double>(thetal);
+  gomp = as<bool>(gomp_);
+  long double mu0H = as<long double>(mu0h); 
+  long double mu0L = as<long double>(mu0l); 
+  long double thetaH  = as<long double>(thetah); 
+  long double thetaL  = as<long double>(thetal);
   int dim = as<int>(k);
   
   //Actual data set
   arma::mat dd = as<arma::mat>(dat);  
-  double ptol = as<double>(pinv_tol);
-  double L, L1, L0; // Likelihoods for carriers (1) and non-carriers (0)
-  double p = as<double>(p_);
+  long double ptol = as<long double>(pinv_tol);
+  long double L, L1, L0; // Likelihoods for carriers (1) and non-carriers (0)
+  long double p = as<long double>(p_);
   //===============================End of data loading========================================//
   
   // Carriers
@@ -923,13 +939,13 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
   arma::mat y2(dim,1);
   arma::mat gamma1(dim,dim);
   
-  L = 0;
-  double  nsteps = 2;
+  L = 0.0;
+  long double  nsteps = 2;
   
   for(int i=0; i<N; i++) {
     //Solving differential equations on intervals:
-    double t1 = dd(i,1); 
-    double t2 = dd(i,2);
+    long double t1 = dd(i,1); 
+    long double t2 = dd(i,2);
     
     int jj=0;
     for(int ii=3; ii<M; ii+=2) { // ii=0: id, ii=1: t1, ii=2: t2, ii=3: y1, ii=4: y2 (y.next)
@@ -938,23 +954,23 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
       jj += 1;
     }
     
-    double tdiff = t2-t1;
+    long double tdiff = t2-t1;
     if(tdiff > 2) {
       nsteps = 2*tdiff;
     }
     
-    double h = tdiff/nsteps;
+    long double h = tdiff/nsteps;
     
     //Integration:
     gamma1.zeros(); // set gamma1 to zero matrix
-    double s1, s0; // For carriers (1) and non-carriers (0)
+    long double s1, s0; // For carriers (1) and non-carriers (0)
     
     // Carriers
     s1 = h/3.00*(-1.00)*mu(t1, y1, gamma1, fH, f1H, mu0H, thetaH, QH);
     gamma1.zeros();
     s0 = h/3.00*(-1.00)*mu(t1, y1, gamma1, fL, f1L, mu0L, thetaL, QL);
     
-    double t = t1;
+    long double t = t1;
     
     // Carriers
     out1[0] = y1;
@@ -963,14 +979,15 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
     out0[0] = y1;
     out0[1] = gamma1;
     
-    double ifactor;
-    
+    long double ifactor;
+    long double L1Y, L1Q, L0Y, L0Q;
+    L1Y = L1Q = L0Y = L0Q = 1.0;
     for(int j = 0; j < nsteps; j++) {
       //Runge-Kutta method:
       // Carriers
-      func1(k1ar1, t, out1, fH, f1H, aH, bH, QH, thetaH, gomp);
+      func1(k1ar1, t, out1, fH, f1H, aH, bH, QH, thetaH);
       // Non-carriers
-      func1(k1ar0, t, out0, fL, f1L, aL, bL, QL, thetaL, gomp);
+      func1(k1ar0, t, out0, fL, f1L, aL, bL, QL, thetaL);
       // Carriers
       yfin1[0] = out1[0] + h/6.00*k1ar1[0];
       yfin1[1] = out1[1] + h/6.00*k1ar1[1];
@@ -983,9 +1000,9 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
       ytmp0[1] = out0[1] + h/2.00*k1ar0[1];
       
       // Carriers
-      func1(k2ar1, t, ytmp1, fH, f1H, aH, bH, QH, thetaH, gomp);
+      func1(k2ar1, t, ytmp1, fH, f1H, aH, bH, QH, thetaH);
       // Non-carriers
-      func1(k2ar0, t, ytmp0, fL, f1L, aL, bL, QL, thetaL, gomp);
+      func1(k2ar0, t, ytmp0, fL, f1L, aL, bL, QL, thetaL);
       // Carriers
       yfin1[0] = yfin1[0] + h/3.00*k2ar1[0];
       yfin1[1] = yfin1[1] + h/3.00*k2ar1[1];
@@ -998,9 +1015,9 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
       ytmp0[1] = out0[1] + h/2.00*k2ar0[1];
       
       // Carriers
-      func1(k3ar1, t, ytmp1, fH, f1H, aH, bH, QH, thetaH, gomp);
+      func1(k3ar1, t, ytmp1, fH, f1H, aH, bH, QH, thetaH);
       // Non-carriers
-      func1(k3ar0, t, ytmp0, fL, f1L, aL, bL, QL, thetaL, gomp);
+      func1(k3ar0, t, ytmp0, fL, f1L, aL, bL, QL, thetaL);
       // Carriers
       yfin1[0] = yfin1[0] + h/3.00*k3ar1[0];
       yfin1[1] = yfin1[1] + h/3.00*k3ar1[1];
@@ -1013,9 +1030,9 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
       ytmp0[1] = out0[1] + h*k3ar0[1];
       
       // Carriers
-      func1(k4ar1, t, ytmp1, fH, f1H, aH, bH, QH, thetaH, gomp);
+      func1(k4ar1, t, ytmp1, fH, f1H, aH, bH, QH, thetaH);
       // Non-carriers
-      func1(k4ar0, t, ytmp0, fL, f1L, aL, bL, QL, thetaL, gomp);
+      func1(k4ar0, t, ytmp0, fL, f1L, aL, bL, QL, thetaL);
       // Carriers
       out1[0] = yfin1[0] + h/6.00*k4ar1[0];
       out1[1] = yfin1[1] + h/6.00*k4ar1[1];
@@ -1053,7 +1070,7 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
     arma::mat m20 = out0[0];
     arma::mat gamma20 = out0[1];
     
-    double pi = 3.141592654;
+    long double pi = 3.141592654;
     
     bool firstRow = false;
     bool lastRow = false;
@@ -1074,20 +1091,16 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
     arma::mat exp1;
     arma::mat exp0;
     
+    
     if(firstRow) {
-      L1 = 1; L0 = 1;
+      L1 = 1.0; L0 = 1.0;
       if(dd(i,0) == 0) {
         exp1 = exp(-0.5*(m21-y2).t()*pinv(gamma21,ptol)*(m21-y2));
         exp0 = exp(-0.5*(m20-y2).t()*pinv(gamma20,ptol)*(m20-y2));
         
-        L1 = L1*pow(2.00*pi,-0.5*dim)*pow(det(gamma21),-0.5)*exp1(0,0)*exp(s1);
-        L0 = L0*pow(2.00*pi,-0.5*dim)*pow(det(gamma20),-0.5)*exp0(0,0)*exp(s0);
-        
-        //L1 = L1*pow(det(gamma21),-0.5)*exp1(0,0)*exp(s1);
-        //L0 = L0*pow(det(gamma20),-0.5)*exp0(0,0)*exp(s0);
+        L1 = L1*pow(2.00*pi,-0.5*dim)*1/sqrt(det(gamma21))*exp1(0,0)*exp(s1);
+        L0 = L0*pow(2.00*pi,-0.5*dim)*1/sqrt(det(gamma20))*exp0(0,0)*exp(s0);
       } else {
-        //L1 = L1*(1-exp(-1.00*mu(t2, m21, gamma21, fH, f1H, mu0H, thetaH, QH)))*exp(s1);
-        //L0 = L0*(1-exp(-1.00*mu(t2, m20, gamma20, fL, f1L, mu0L, thetaL, QL)))*exp(s0);
         L1 = L1*mu(t2, m21, gamma21, fH, f1H, mu0H, thetaH, QH)*exp(s1);
         L0 = L0*mu(t2, m20, gamma20, fL, f1L, mu0L, thetaL, QL)*exp(s0);
       }
@@ -1096,22 +1109,20 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
         exp1 = exp(-0.5*(m21-y2).t()*pinv(gamma21,ptol)*(m21-y2));
         exp0 = exp(-0.5*(m20-y2).t()*pinv(gamma20,ptol)*(m20-y2));
         
-        L1 = L1*pow(2.00*pi,-0.5*dim)*pow(det(gamma21),-0.5)*exp1(0,0)*exp(s1);
-        L0 = L0*pow(2.00*pi,-0.5*dim)*pow(det(gamma20),-0.5)*exp0(0,0)*exp(s0);
-        
-        //L1 = L1*pow(det(gamma21),-0.5)*exp1(0,0)*exp(s1);
-        //L0 = L0*pow(det(gamma20),-0.5)*exp0(0,0)*exp(s0);
+        L1 = L1*pow(2.00*pi,-0.5*dim)*1/sqrt(det(gamma21))*exp1(0,0)*exp(s1);
+        L0 = L0*pow(2.00*pi,-0.5*dim)*1/sqrt(det(gamma20))*exp0(0,0)*exp(s0);
       } else {
-        //L1 = L1*(1-exp(-1.00*mu(t2, m21, gamma21, fH, f1H, mu0H, thetaH, QH)))*exp(s1);
-        //L0 = L0*(1-exp(-1.00*mu(t2, m20, gamma20, fL, f1L, mu0L, thetaL, QL)))*exp(s0);
         L1 = L1*mu(t2, m21, gamma21, fH, f1H, mu0H, thetaH, QH)*exp(s1);
         L0 = L0*mu(t2, m20, gamma20, fL, f1L, mu0L, thetaL, QL)*exp(s0);
       }
     }
     
     if(lastRow) {
+      
       L += log(p*L1 + (1-p)*L0);
     }
+     
+     
   }
   
   // Cleaning up

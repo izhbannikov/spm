@@ -85,6 +85,10 @@ simdata_gen_cont <- function(N=10,
     stop("Mode can be set to 'genetic' or 'nongenetic'.")
   }
   
+  if(length(tstart) > 2) {
+    stop(paste("Incorrect tstart:", tstart))
+  }
+  
   simulated = .Call("simGenCont", 
                     N, 
                     aH, aL, 

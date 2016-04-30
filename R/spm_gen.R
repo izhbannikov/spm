@@ -184,7 +184,8 @@ spm_gen <- function(gendat, nongendat=NULL,
                     verbose=FALSE,
                     pinv.tol=0.01,
                     mode="genetic",
-                    gomp=FALSE) {
+                    gomp=FALSE,
+                    ftol_rel=1.0e-6) {
   
   ###=======For DEBUG========###
   #dat = dat
@@ -477,7 +478,7 @@ spm_gen <- function(gendat, nongendat=NULL,
   #         finally=NA)
   
   nloptr(x0 = parameters, 
-         eval_f = maxlik, opts = list("algorithm"=algorithm, "ftol_rel"=1.0e-8, "maxeval"=maxeval),
+         eval_f = maxlik, opts = list("algorithm"=algorithm, "ftol_rel"=ftol_rel, "maxeval"=maxeval),
          lb = bounds$lower_bound, ub = bounds$upper_bound)
   
   final_results <- get("results",envir=baseenv())
