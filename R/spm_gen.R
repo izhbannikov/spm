@@ -329,10 +329,10 @@ spm_gen <- function(gendat, nongendat=NULL,
     
     # ah, al
     start=1; end=k^2
-    ah <- matrix(par[start:end],ncol=k, , nrow=k, byrow=TRUE)
+    ah <- matrix(par[start:end],ncol=k, nrow=k, byrow=TRUE)
     results_tmp$aH <<- ah
-    start=end+1; end=start+k-1
-    al <- matrix(par[start:end],ncol=k, , nrow=k, byrow=TRUE)
+    start=end+1; end=start+k^2-1
+    al <- matrix(par[start:end],ncol=k, nrow=k, byrow=TRUE)
     results_tmp$aL <<- al
     
     # f1h, f1l
