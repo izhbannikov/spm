@@ -18,7 +18,7 @@
 #'pars <- spm_discrete(data)
 #'pars
 #'
-spm_discrete <- function(dat, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verbose=FALSE) {
+spm_discrete <- function(dat, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, gomp=FALSE, verbose=FALSE) {
   
   k <- (dim(dat)[2] - 4)/2
   
@@ -148,12 +148,20 @@ spm_discrete <- function(dat, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verb
   pars1 <- list(theta=theta, mu0=mu0, b=b, Q=Q, u=u, R=R, Sigma=Sigma)
   
   # Making a new parameter set:
-  QH <- Q
+  if(gomp) {
+    QH <- Q/exp(theta)
+  } else {
+    QH <- Q
+  }
   aH <- R - diag(k)
   bH <- as.matrix(Sigma, nrow=1)
   f1H <- (-1)*u %*% solve(aH, tol=tol)
   fH <- -0.5 * b %*% solve(QH, tol=tol)
-  mu0H <- mu0 - fH %*% QH %*% t(fH)
+  if(gomp) {
+    mu0H <- (mu0 - fH %*% QH %*% t(fH))/exp(theta)
+  } else {
+    mu0H <- mu0 - fH %*% QH %*% t(fH)
+  }
   thetaH <- theta
   pars2 <- list(a=aH, f1=f1H, Q=QH, f=fH, b=bH, mu0=mu0H, theta=thetaH)
   

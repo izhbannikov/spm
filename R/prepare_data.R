@@ -32,7 +32,7 @@ fill_last <- function(x) {
 #'@examples \dontrun{ 
 #'library(stpm) 
 #'data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"), 
-#'					   y=system.file("data","vitstat.csv",package="stpm"))
+#'  				   y=system.file("data","vitstat.csv",package="stpm"))
 #'head(data[[1]])
 #'head(data[[2]])
 #'}
@@ -51,7 +51,7 @@ prepare_data <- function(x, y,
   } else if(file_ext(x) == "sas7bdat") {
     longdat <- read.sas7bdat(x)
   } else {
-  	stop(paste(x, ":", "unknown file format, it must be csv or sas7bdat."))
+    stop(paste(x, ":", "unknown file format, it must be csv or sas7bdat."))
   }
   
   if(file_ext(y) == "csv") {
@@ -59,7 +59,7 @@ prepare_data <- function(x, y,
   } else if(file_ext(y) == "sas7bdat") {
     vitstat <- read.sas7bdat(y)
   } else {
-  	stop(paste(y, ":", "unknown file format, it must be csv or sas7bdat."))
+    stop(paste(y, ":", "unknown file format, it must be csv or sas7bdat."))
   }
   
   # Parsing input parameters in order to check for errors:
@@ -210,7 +210,7 @@ prepare_data_cont <- function(longdat,
   }
   
   colnames(ans_final) <- c("id", "case", "t1", "t2", unlist(lapply(1:length(col.covar.ind), function(n) {c(names(longdat)[col.covar.ind[n]], 
-                                                                                                  paste(names(longdat)[col.covar.ind[n]],".next",sep=""))} )) )
+                                                                                                           paste(names(longdat)[col.covar.ind[n]],".next",sep=""))} )) )
   ans_final
   
 }
@@ -305,14 +305,32 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.i
   dat <- cbind(dat, ans_final[,4]) #tt3 (t2)
   
   
-  j <- 0
-  i <- 0
+  #j <- 0
+  #i <- 0
+  #for(i in 0:(length(col.covar.ind)-1)) {
+  #  dat <- cbind(dat, ans_final[,(5+i)]) 
+  #  dat[2:dim(dat)[1],(5+j)] <- dat[1:(dim(dat)[1]-1),(5+j)]
+  #  dat <- cbind(dat, ans_final[,(5+i)]) 
+  #  averages[1,(i+1)] = dat[1,(5+j)]
+  #  j <- j + 2
+  #}
+  
+  
   for(i in 0:(length(col.covar.ind)-1)) {
     dat <- cbind(dat, ans_final[,(5+i)]) 
-    dat[2:dim(dat)[1],(5+j)] <- dat[1:(dim(dat)[1]-1),(5+j)]
-    dat <- cbind(dat, ans_final[,(5+i)]) 
-    averages[1,(i+1)] = dat[1,(5+j)]
-    j <- j + 2
+    dat <- cbind(dat, ans_final[,(5+i)])
+  }
+  
+  k <- 0
+  for(i in 0:(length(col.covar.ind)-1)) {
+    for(j in 1:(dim(dat)[1]-1)) {
+      if(dat[j,1] != dat[(j+1), 1]) {
+        dat[j, (5+k+1)] <- NA
+      } else {
+        dat[j, (5+k+1)] <- dat[(j+1), (5+k)]
+      }
+    }
+    k <- k+2
   }
   
   # Database should be in appropriate format:
@@ -330,12 +348,11 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.i
   }
   
   colnames(dat) <- c("id", "case", "t1", "t2", unlist(lapply(1:length(col.covar.ind), function(n) {c(names(longdat)[col.covar.ind[n]], 
-                                                                                                  paste(names(longdat)[col.covar.ind[n]],".next",sep="")
-                                                                                                  )} 
-                                                             )
-                                                      ) 
-                     )
+                                                                                                     paste(names(longdat)[col.covar.ind[n]],".next",sep="")
+  )} 
+  )
+  ) 
+  )
   rownames(dat) <- 1:dim(dat)[1]
   dat
 }
-
