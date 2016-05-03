@@ -569,8 +569,9 @@ RcppExport SEXP complik_gen(SEXP dat, SEXP n, SEXP m,
     if(dd(i,0) == 0) { 
       long double det_gamma = det(gamma2);
       if(det_gamma < 0) {
-        std::cout << det_gamma << std::endl;
+        std::cout << "Warning: determinant of gamma is less than zero: " << det_gamma << std::endl;
         det_gamma = 1e-16;
+        std::cout << "It was set to " << det_gamma << std::endl;
       }
       //arma::mat exp = -0.50*dim*log(2.00*pi*pow(det(gamma2), -0.5)) - 0.50*(m2-y2).t()*pinv(gamma2,ptol)*(m2-y2);
       arma::mat exp = log(pow(2.00*pi, -0.5*dim)*pow(det_gamma, -0.5)) - 0.50*(m2-y2).t()*pinv(gamma2,ptol)*(m2-y2);
