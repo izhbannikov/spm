@@ -127,34 +127,41 @@ setub <- function(k, params) {
 #'@references Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
 #'and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.
 #'@param dat A data table.
-#'@param aH A k by k matrix, which characterize the rate of the adaptive response when Z = 1.
-#'@param aL A k by k matrix, which characterize the rate of the adaptive response when Z = 0.
-#'@param f1H A particular state, which if a deviation from the normal (or optimal) when Z = 1.
-#'This is a vector with length of k.
-#'@param f1L A particular state, which if a deviation from the normal (or optimal) when Z = 0. 
-#'This is a vector with length of k.
-#'@param QH A matrix k by k, which is a non-negative-definite symmetric matrix when Z = 1.
-#'@param QL A matrix k by k, which is a non-negative-definite symmetric matrix when Z = 0.
-#'@param fH A vector-function (with length k) of the normal (or optimal) state when Z = 1.
-#'@param fL A vector-function (with length k) of the normal (or optimal) state when Z = 0.
-#'@param bH A diffusion coefficient, k by k matrix when Z = 1.
-#'@param bL A diffusion coefficient, k by k matrix when Z = 0.
-#'@param mu0 mortality at start period of time when Z = 1.
-#'@param mu0 mortality at start period of time when Z = 0.
-#'@param thetaH A displacement coefficient of the Gompertz function when Z = 1.
-#'@param thetaL A displacement coefficient of the Gompertz function when Z = 0.
-#'@param p A proportion of carriers and non-carriers in a population (default p=0.25).
-#'@param stopifbound Estimation stops if at least one parameter achieves lower or upper boundaries.
+#'@param aH A k by k matrix. Characterizes the rate of the adaptive response for Z = 1.
+#'@param aL A k by k matrix. Characterize the rate of the adaptive response for Z = 0.
+#'@param f1H A deviation from the norm (or optimal) state for Z = 1.
+#'This is a vector of length k.
+#'@param f1L A deviation from the norm (or optimal) for Z = 0. 
+#'This is a vector of length k.
+#'@param QH A matrix k by k, which is a non-negative-definite symmetric matrix for Z = 1.
+#'@param QL A matrix k by k, which is a non-negative-definite symmetric matrix for Z = 0.
+#'@param fH A vector with length of k. Represents the normal (or optimal) state for Z = 1.
+#'@param fL A vector with length of k. Represents the normal (or optimal) state for Z = 0.
+#'@param bH A diffusion coefficient, k by k matrix for Z = 1.
+#'@param bL A diffusion coefficient, k by k matrix for Z = 0.
+#'@param mu0 A baseline mortality for Z = 1.
+#'@param mu0 A baseline mortality for Z = 0.
+#'@param thetaH A displacement coefficient for Z = 1.
+#'@param thetaL A displacement coefficient for Z = 0.
+#'@param p A proportion of carriers in a population (default p=0.25).
+#'@param stopifbound If TRUE then estimation stops if at least one parameter achieves lower or upper boundaries.
 #'@param algorithm An optimization algorithm used, can be one of those provided by \code{nloptr}. 
 #'#'Check the NLopt website for a description of
-#'the algorithms. Default: NLOPT_LN_COBYLA
-#'@param lb Lower bound of parameters under estimation.
-#'@param ub Upper bound of parameters under estimation.
+#'the algorithms. Default: NLOPT_LN_NELDERMEAD
+#'@param lb Lower bound of parameter values.
+#'@param ub Upper bound of parameter values.
 #'@param maxeval Maximum number of iterations of the algorithm for \code{nloptr} optimization. 
 #'The program stops when the number of function evaluations exceeds maxeval. Default: 500.
 #'@param verbose An indicator of verbosing output (FALSE by default).
 #'@param pinv.tol A tolerance value for pseudo-inverse of matrix gamma (see Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
 #'and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.)
+#'@param mode Can be one of the following: "genetic" (default), "nongenetic" or "combined". 
+#'mode = "genetic" represents analysing only data of genetic group (which contains a value of genetic marker);
+#'mode = "nongenetic" represents analysing only data of non-genetic group (not genotyped group).
+#'mode = "combined" denoted joint analysis of both genetic and non-genetic groups.
+#'@param gomp A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
+#' mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).
+#'@param ftol_rel Relative tolerance threshold for likelihood function (defalult: 1e-6), see http://ab-initio.mit.edu/wiki/index.php/NLopt_Reference
 #'@return A set of estimated parameters aH, aL, f1H, f1H, QH, QL, fH, fL, bH, bL, mu0H, mu0L, thetaH, thetaL, p and
 #'additional variable \code{limit} which indicates if any parameter 
 #'achieved lower or upper boundary conditions (FALSE by default).

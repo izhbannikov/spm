@@ -21,12 +21,17 @@
 #' @param mu0 mortality at start period of time when Z = 0.
 #' @param thetaH A displacement coefficient of the Gompertz function when Z = 1.
 #' @param thetaL A displacement coefficient of the Gompertz function when Z = 0.
-#' @param p0 A proportion of carriers and non-carriers in a population (default p0=0.25).
+#' @param p0 A proportion of carriers in a sumulated population (default p0=0.25).
 #' @param ystart A vector with length equal to number of dimensions used, defines starting values of covariates.
 #' @param dt A discrete step size between two observations. A random uniform value is then added to this step size.
 #' @param tstart A number that defines starting time (30 by default).
 #' @param tend A number, defines final time (105 by default).
-#' @param sd0 a standard deviation for modelling the next covariate value.
+#' @param sd0 A standard deviation for modelling the next physiological variable (covariate) value.
+#' @param mode Can have the following values: "genetic" (default), "nongenetic".
+#' This represents a type of group to simulate: genetic (genotyped) group, non-genetic (not genotyped) group.
+#' @param gomp A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
+#' mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).
+#' @param nobs A number of observations (lines) for individual observations.
 #' @return A table with simulated data.
 #' @examples
 #' library(stpm)
@@ -48,7 +53,8 @@ simdata_gen_cont <- function(N=10,
                           dt=1, 
                           sd0=1,
                           mode="genetic", 
-                          gomp=FALSE) {
+                          gomp=FALSE, 
+                          nobs = NULL) {
   
   k <- length(ystart)
   
@@ -99,7 +105,8 @@ simdata_gen_cont <- function(N=10,
                     mu0H, mu0L,
                     thetaH, thetaL,
                     p0,
-                    tstart, ystart, tend, k, dt, sd0, genmode, gomp);
+                    tstart, ystart, tend, 
+                    k, dt, sd0, genmode, gomp, nobs);
   
   data_names <- c()
   for(n in 1:k) {

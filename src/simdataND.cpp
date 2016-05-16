@@ -74,8 +74,7 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
         arma::mat eps(k,1);
         
         for(int ii=0; ii < k; ii++) {
-          //eps(ii,0) = Rcpp::rnorm(1, 0.0, epsilon(ii,0.0))[0];
-          eps(ii,0) = Rcpp::rnorm(1, 0.0, sqrt(epsilon(ii,0.0)))[0];
+          eps(ii,0) = Rcpp::rnorm(1, 0.0, epsilon(ii,0.0))[0];
         }
         
         y2 = u + R * y1 + eps;

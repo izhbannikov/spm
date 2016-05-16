@@ -615,7 +615,9 @@ RcppExport SEXP simGenCont(SEXP n,
                            SEXP mu0h, SEXP mu0l,
                            SEXP thetah, SEXP thetal,
                            SEXP p0_,
-                           SEXP tstart_, SEXP ystart_, SEXP tend_, SEXP k_, SEXP dt_, SEXP sd_, SEXP _genmode, SEXP gomp_) {
+                           SEXP tstart_, SEXP ystart_, SEXP tend_, 
+                           SEXP k_, SEXP dt_, SEXP sd_, 
+                           SEXP _genmode, SEXP gomp_, SEXP nobs_) {
   
   long N = as<long>(n); // Number of individuals
   
@@ -639,6 +641,7 @@ RcppExport SEXP simGenCont(SEXP n,
   double p0 = as<double>(p0_);
   int genmode = as<int>(_genmode);
   gomp = as<bool>(gomp_);
+  int nobs = as<int>(nobs_);
   
   // Supporting variables
   arma::mat *out, *k1ar, *yfin, *ytmp, *k2ar, *k3ar, *k4ar;
@@ -669,6 +672,7 @@ RcppExport SEXP simGenCont(SEXP n,
   
   std::vector< std::vector<double> > data;
   double S;
+  int n_observ;
   
   for(int i=0; i<N; i++) {
     // Starting point
@@ -701,6 +705,9 @@ RcppExport SEXP simGenCont(SEXP n,
       G = 1;
     }
     //G = Rcpp::rbinom(1,1,p0)[0];
+    
+    
+    n_observ = 0;
     
     while(new_person == false) {
       nsteps = 10;
@@ -835,6 +842,11 @@ RcppExport SEXP simGenCont(SEXP n,
       }
       
       data.push_back(row);
+      
+      n_observ += 1;
+      if(n_observ == nobs) {
+        new_person = true;
+      }
       
       if(new_person == false) {
         y1 = y2;

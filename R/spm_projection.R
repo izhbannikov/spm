@@ -18,6 +18,9 @@
 #'@param dt A time interval between observations, dt=1 by default.
 #'@param sd0 A standard deviation value for simulation of the next value of variable.
 #'sd0=4 by default.
+#'@param nobs A number of observations (lines) for i-th individual.
+#'@param gomp A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
+#' mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).
 #'@return An object of 'spm.projection' class with two elements. 
 #'(1) A simulated data set.
 #'(2) A summary statistics which includes (i) age-specific means of state variables and
@@ -48,7 +51,7 @@ spm_projection <- function(x,
                            f = NULL,
                            tstart=30, tend=105, 
                            dt=1, 
-                           sd0=4) {
+                           sd0=4, nobs=NULL, gomp=FALSE) {
   
   avail.models <- c("discrete", "continuous", "time-dependent")
   if(!(model %in% avail.models)) {
@@ -74,7 +77,7 @@ spm_projection <- function(x,
                                     tstart=tstart, 
                                     tend=tend, 
                                     ystart=ystart, 
-                                    sd0=sd0)
+                                    sd0=sd0, nobs=nobs)
     #Compute summary statistics:
     # Statistics
     stat <- list()
@@ -135,7 +138,7 @@ spm_projection <- function(x,
     }
     
     # Data simulation for discrete and continuous models
-    res.cont <- simdata_cont2(N=N, 
+    res.cont <- simdata_cont(N=N, 
                              a=x$a, 
                              f1=x$f1, 
                              Q=x$Q, 
@@ -146,7 +149,7 @@ spm_projection <- function(x,
                              dt=dt, 
                              ystart=ystart,
                              tstart=tstart, tend=tend, 
-                             sd0=sd0)
+                             sd0=sd0, nobs=nobs, gomp=gomp)
     
     
     # Statistics
