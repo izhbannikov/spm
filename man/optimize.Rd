@@ -5,7 +5,7 @@
 \title{A sub-finction that corresponds to the spm_time_dep(...)}
 \usage{
 optimize(data, starting_params, formulas, verbose, lb, ub, algorithm,
-  stopifbound, maxeval = maxeval)
+  stopifbound, maxeval, ftol_rel)
 }
 \arguments{
 \item{data}{a data matrix.}

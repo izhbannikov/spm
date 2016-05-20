@@ -2,44 +2,54 @@
 % Please edit documentation in R/simdata_cont.R
 \name{simdata_cont}
 \alias{simdata_cont}
-\title{Multi-dimensional simulation function for continuous trait.}
+\title{Multi-dimensional simulation function for continuous-time SPM.}
 \usage{
-simdata_cont(N = 100, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
-  mu0 = 2e-05, theta = 0.08, dt = 1, tstart = 30, tend = 105,
-  ystart = 80, sd0 = 2)
+simdata_cont(N = 10, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
+  mu0 = 1e-05, theta = 0.08, ystart = 80, tstart = 30, tend = 105,
+  dt = 1, sd0 = 1, nobs = NULL, gomp = FALSE)
 }
 \arguments{
 \item{N}{Number of individuals.}
 
-\item{a}{A k by k matrix, which characterize the rate of the adaptive response.}
+\item{a}{A k by k matrix, represents the adaptive capacity of the organism}
 
-\item{f1}{A particular state, which if a deviation from the normal (or optimal). This is a vector with length of k.}
+\item{f1}{A trajectory that corresponds to the long-term average value of the stochastic process Y(t), 
+which describes a trajectory of individual covariate (physiological variable) influenced by different 
+factors represented by a random Wiener process W(t).
+This is a vector with length of k.}
 
-\item{Q}{A matrix k by k, which is a non-negative-definite symmetric matrix.}
+\item{Q}{A matrix k by k, which is a non-negative-definite symmetric matrix, 
+represents a sensitivity of risk function to deviation from the norm.}
 
-\item{f}{A vector-function (with length k) of the normal (or optimal) state.}
+\item{f}{A vector with length of k, represents the normal (or optimal) state of physiological variable.}
 
-\item{b}{A diffusion coefficient, k by k matrix.}
+\item{b}{A diffusion coefficient, k by k matrix, 
+characterizes a strength of the random disturbances from Wiener process W(t).}
 
-\item{mu0}{mortality at start period of time.}
+\item{mu0}{A baseline mortality.}
 
-\item{theta}{A displacement coefficient of the Gompertz function.}
+\item{theta}{A displacement coefficient.}
 
-\item{dt}{A discrete step size between two observations. A random uniform value is then added to this step size.}
+\item{ystart}{A vector with length equal of k, defines starting values of covariates.}
 
 \item{tstart}{A number that defines starting time (30 by default).}
 
 \item{tend}{A number, defines final time (105 by default).}
 
-\item{ystart}{A vector with length equal to number of dimensions used, defines starting values of covariates.}
+\item{dt}{A discrete step size between two observations. A random uniform value is then added to this step size.}
 
 \item{sd0}{a standard deviation for modelling the next covariate value.}
+
+\item{nobs}{A number of observations (lines) for individual observations.}
+
+\item{gomp}{A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
+mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).}
 }
 \value{
 A table with simulated data.
 }
 \description{
-Multi-dimensional simulation function for continuous trait.
+Multi-dimensional simulation function for continuous-time SPM.
 }
 \examples{
 library(stpm)

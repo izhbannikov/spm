@@ -9,7 +9,7 @@
 #'@references Yashin, A. et al (2007), Health decline, aging and mortality: how are they related? 
 #'Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
 #'@param x A list of parameters from output of the \code{spm(...)} function.
-#'@param N A number of individual to simulate, N=100 by default.
+#'@param N A number of individuals to simulate, N=100 by default.
 #'@param ystart A vector of starting values of covariates (variables), ystart=80 by default.
 #'@param model A model type. Choices are: "discrete", "continuous" or "time-dependent".
 #'@param f A list of formulas for the time-dependent model (NULL by default).
@@ -17,10 +17,12 @@
 #'@param tend End time (age), default=105.
 #'@param dt A time interval between observations, dt=1 by default.
 #'@param sd0 A standard deviation value for simulation of the next value of variable.
-#'sd0=4 by default.
+#'sd0=1 by default.
 #'@param nobs A number of observations (lines) for i-th individual.
-#'@param gomp A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
-#' mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).
+#'@param gomp A flag (FALSE by default). 
+#'When it is set, then time-dependent exponential form of mu0 and Q are used:
+#' mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t). 
+#' Only for continous-time SPM.
 #'@return An object of 'spm.projection' class with two elements. 
 #'(1) A simulated data set.
 #'(2) A summary statistics which includes (i) age-specific means of state variables and
@@ -43,19 +45,28 @@
 #'# Continuous-time model
 #'data.proj.continuous <- spm_projection(model.par, N=5000, ystart=c(80, 27), model="continuous")
 #'plot(data.proj.continuous$stat$srv.prob)
+#'# Time-dependent model
+#'model.par <- list(at="-0.05", f1t="80", Qt="2e-5", ft="80", bt="5", mu0t="1e-3*exp(0.08*t)")
+#'data.proj.time_dependent <- spm_projection(model.par, N=500, ystart=80, model="time-dependent")
+#'plot(data.proj.time_dependent$stat$srv.prob)
 #'}
 spm_projection <- function(x, 
                            N=100, 
                            ystart=80, 
                            model="discrete", 
-                           f = NULL,
                            tstart=30, tend=105, 
                            dt=1, 
-                           sd0=4, nobs=NULL, gomp=FALSE) {
+                           sd0=1, 
+                           nobs=NULL, 
+                           gomp=FALSE) {
   
   avail.models <- c("discrete", "continuous", "time-dependent")
   if(!(model %in% avail.models)) {
     stop(paste("Provided model", model, "not found in the list of available models."))
+  }
+  
+  if(length(tstart) > 2) {
+    stop(paste("Incorrect tstart:", tstart))
   }
   
   res <- list()
@@ -65,14 +76,14 @@ spm_projection <- function(x,
     
     formulas.work <- list(at="-0.05", f1t="80", Qt="2e-8", ft="80", bt="5", mu0t="2e-5")
     
-    if (!is.null(f)) {
-      for(item in f) {
-        formulas.work[[item]] <- f[[item]]
+    if (!is.null(x)) {
+      for(item in x) {
+        formulas.work[[item]] <- x[[item]]
       }
     }
     
     #Simulate (project) data:
-    res.time_dep <- simdata_time_dep(N=N,f=f,
+    res.time_dep <- simdata_time_dep(N=N,f=formulas.work,
                                     step=dt, 
                                     tstart=tstart, 
                                     tend=tend, 

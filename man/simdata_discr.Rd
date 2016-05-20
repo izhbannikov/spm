@@ -6,7 +6,7 @@
 \usage{
 simdata_discr(N = 100, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
   mu0 = 1e-05, theta = 0.08, ystart = 80, tstart = 30, tend = 105,
-  dt = 1)
+  dt = 1, nobs = NULL)
 }
 \arguments{
 \item{N}{Number of individuals}
@@ -25,13 +25,18 @@ simdata_discr(N = 100, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
 
 \item{theta}{A displacement coefficient of the Gompertz function.}
 
-\item{ystart}{A vector with length equal to number of dimensions used, defines starting values of covariates.}
+\item{ystart}{A vector with length equal to number of dimensions used, defines starting values of covariates.
+Default ystart = 80.}
 
-\item{tstart}{A number that defines starting time (30 by default).}
+\item{tstart}{Starting time (age). 
+Can be a number (30 by default) or a vector of two numbers: c(a, b) - in this case, starting value of time 
+is simulated via uniform(a,b) distribution.}
 
 \item{tend}{A number, defines final time (105 by default).}
 
 \item{dt}{A time step (1 by default).}
+
+\item{nobs}{A number, defines a number of observations (lines) for an individual, NULL by default.}
 }
 \value{
 A table with simulated data.

@@ -35,7 +35,8 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
   arma::mat b = as<arma::mat>(b_);
   arma::mat Q = as<arma::mat>(Q_);
   double theta  = as<double>(theta_);
-  double tstart  = as<double>(tstart_);
+  //double tstart  = as<double>(tstart_);
+  Rcpp::NumericVector tstart = Rcpp::NumericVector(tstart_);
   arma::mat ystart = as<arma::mat>(ystart_);
   double tend  = as<double>(tend_);
   int nobs = 0;
@@ -56,7 +57,15 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
   int n_observ;
   
   for(int i=0; i < N; i++) { // Across all individuals
-    t1 = tstart;
+    if(tstart.size() == 1) {
+      t1 = tstart[0];
+    } else if(tstart.size() == 2){
+      t1 = Rcpp::runif(1, tstart[0], tstart[1])[0];
+    } else {
+      std::cout << "Warning: length of tstart > 2. Only first element will be used as tstart.\n";
+      t1 = tstart[0];
+    }
+    
     t2 = t1 + dt;
     y1 = ystart;
     

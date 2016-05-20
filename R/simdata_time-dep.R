@@ -2,10 +2,12 @@
 #' @param N Number of individuals.
 #' @param f a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)")
 #' @param step An interval between two observations, a random uniformally-distributed value is then added to this step.
-#' @param tstart A number that defines starting time (30 by default).
+#' @param tstart Starting time (age).
+#' Can be a number (30 by default) or a vector of two numbers: c(a, b) - in this case, starting value of time 
+#' is simulated via uniform(a,b) distribution.
 #' @param tend A number, defines final time (105 by default).
 #' @param ystart A starting value of covariates.
-#' @param sd0 A standard deviation for modelling the next covariate value.
+#' @param sd0 A standard deviation for modelling the next covariate value, sd0 = 2 by default. 
 #' @return A table with simulated data.
 #'@references Yashin, A. et al (2007), Health decline, aging and mortality: how are they related? 
 #'Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
@@ -15,7 +17,7 @@
 #' head(dat)
 #'
 simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80", bt="5", mu0t="1e-3"),
-                         step=1, tstart=30, tend=105, ystart=80, sd0=2, nobs=0) {
+                         step=1, tstart=30, tend=105, ystart=80, sd0=1, nobs=NULL) {
   formulas <- f  
   at <- NULL
   f1t <- NULL
@@ -36,20 +38,17 @@ simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80
   sigma_sq <- function(t1, t2) {
     # t2 = t_{j}, t1 = t_{j-1}
     ans <- bt(t1)*(t2-t1)
-    #ans <- 2.5*(t2-t1)
     ans
   }
   
   m <- function(y, t1, t2) {
     # y = y_{j-1}, t1 = t_{j-1}, t2 = t_{j}
     ans <- y + at(t1)*(y - f1t(t1))*(t2 - t1)
-    #ans <- y + (-0.05)*(y - 80)*(t2 - t1)
     ans
   }
   
   mu <- function(y, t) {
     ans <- mu0t(t) + (y - ft(t))^2*Qt(t)
-    #ans <- 1e-1 + (y - 80)^2*2e-5
   }
   
   
@@ -62,7 +61,7 @@ simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80
   for(i in 1:N) {
     
     if(length(tstart) == 1) {
-      t2 <- runif(1,tstart, tend) # Starting time
+      t2 <- tstart # Starting time
     } else if(length(tstart) == 2){
       t2 <- runif(1,tstart[1], tstart[2]) # Starting time
     } else {
@@ -81,7 +80,7 @@ simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80
       y1 <- y2
         
       S <- exp(-1*mu(y1,t1)*(t2-t1))
-      #S <- exp(-1*mu(y1, t1))
+      
       xi <- 0
       if (S > runif(1,0,1)) {
         xi <- 0
@@ -99,8 +98,10 @@ simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80
       }
       
       n_observ <- n_observ + 1
-      if(n_observ == nobs) {
-        new_person <- TRUE;
+      if(!is.null(nobs)) {
+        if(n_observ == nobs) {
+          new_person <- TRUE;
+        }
       }
         
       if(t2 > tend & new_person == FALSE) {
@@ -110,7 +111,6 @@ simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80
     }
     
     id <- id + 1
-      
   }
     
   # One last step:

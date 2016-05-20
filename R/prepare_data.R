@@ -233,6 +233,21 @@ prepare_data_cont <- function(longdat,
 #'@param verbose turns on/off verbosing output.
 prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose) {
   
+  #longdat <- read.sas7bdat("C:/Projects/spm/data/covar_aric_gru.sas7bdat")
+  #vitstat <- read.sas7bdat("C:/Projects/spm/data/mortality_aric_all_gru.sas7bdat")
+  #interval <- 1
+  #col.id="SubjID"
+  #col.age="Age"
+  #col.age.event="LSmort"
+  #col.status="IsDead"
+  #covariates="BMI"
+  #col.status.ind <- grep(paste("\\b", col.status, "\\b", sep=""), colnames(vitstat))
+  #col.id.ind <- grep(paste("\\b", col.id, "\\b", sep=""), colnames(vitstat)) 
+  #col.age.ind <- grep(paste("\\b", col.age, "\\b", sep=""), colnames(longdat))
+  #col.age.event.ind <- grep(paste("\\b", col.age.event, "\\b", sep=""), colnames(vitstat))
+  #col.covar.ind <-  grep(paste("\\b", "BMI", "\\b", sep=""), colnames(longdat))
+  #verbose <- TRUE
+  #longdat <- longdat[which(!is.na(longdat[ , col.age.ind])),]
   # Interpolation
   dt <- interval
   tt <- matrix(nrow=0, ncol=4)
@@ -275,7 +290,14 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.i
           # Fill NAs by linear approximation with approx():
           nn <- length(splitted[[iii]][, ind])
           splitted[[iii]][, ind] <- approx(splitted[[iii]][, ind],n=nn)$y
-          par1.approx[,j] <-  approx(splitted[[iii]][, ind], n=nrows)$y
+          
+          aprx <- c()
+          for(k in 1:(length(splitted[[iii]][, col.age.ind])-1)) {
+            nr <- ceiling((splitted[[iii]][, col.age.ind][k+1] - splitted[[iii]][, col.age.ind][k])/dt) + 1
+            aprx <- c(aprx[1:length(aprx)-1], approx(splitted[[iii]][, ind][k:(k+1)], n=nr)$y)
+          }
+          par1.approx[,j] <- aprx
+          #par1.approx[,j] <-  approx(splitted[[iii]][, ind], n=nrows)$y
         }
         
         j <- j + 1
@@ -340,13 +362,16 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.i
   }
   
   # Database should be in appropriate format:
-  pid=dat[1,1]
+  pid <- dat[1,1]
   for(i in 1:(dim(dat)[1]-1)) {
     if(dat[i,1] != pid) {
       for(ii in seq(0,(ndim-1),2)) {
         dat[(i+1),(5+ii)] = dat[i,(6+ii)]
       }
       pid = dat[i,1]
+      #if(dat[i-1,2] == 0) {
+      #  dat[i-1,4] <- dat[i-1,3] + interval
+      #}
     }
     if(dat[i,2] > 1) {
       dat[i,2] <- 1

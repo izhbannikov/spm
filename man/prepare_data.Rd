@@ -9,28 +9,34 @@ prepare_data(x, y, col.id = NULL, col.status = NULL, col.age = NULL,
   verbose = FALSE)
 }
 \arguments{
-\item{x}{A path to the table with follow-up oservations (longitudinal study). Formats: csv, sas7bdat}
+\item{x}{A path to the file with table of follow-up oservations (longitudinal table). 
+Formats: csv, sas7bdat}
 
-\item{y}{A path to the table with vital statistics (mortality). File formats: csv, sas7bdat}
+\item{y}{A path to the file with table of vital statistics (mortality) table. 
+File formats: csv, sas7bdat}
 
 \item{col.id}{A name of column containing subject ID. 
-This ID should be the same in both longdat and vitstat tables.
-If not provided, the first column in the x and y will be used by default.}
+This ID should be the same in both x (longitudinal) and y (vital statistics) tables.
+None: if col.id not provided, the first column of the x and 
+first column of the y will be used by default.}
 
-\item{col.status}{A name of the column containing status variable (0/1 which indicate alive/dead). 
-If not provided - then the column #2 from the vital statistics dataset will be used.}
+\item{col.status}{A name of the column containing status variable 
+(0/1, which is an indicator of death/censoring). 
+Note: if not provided - then the column #2 from the y (vital statistics) dataset will be used.}
 
 \item{col.age}{A name of age column (also called 't1'). 
+This column represents a time (age) of measurement.
 If not provided then the 3rd column from the longitudinal dataset (x) will be used.}
 
 \item{col.age.event}{A name of 'event' column.
 The event column indicates a time when the even occured (e.g. system failure).
-If not provided then the 3rd column from the vital statistics dataset will be used.}
+Note: if not provided then the 3rd column from the y (vital statistics) dataset will be used.}
 
-\item{covariates}{A list of covariates. 
+\item{covariates}{A list of covariates (physiological variables). 
 If covariates not provided, then all columns from longitudinal table having index > 3 will be used as covariates.}
 
-\item{interval}{A number of breaks between observations for discrete model. Default = 1 unit of time.}
+\item{interval}{A number of breaks between observations for data for discrete model. 
+Default = 1 unit of time.}
 
 \item{verbose}{A verbosing output indicator. Default=FALSE.}
 }
@@ -45,7 +51,7 @@ Data pre-processing for analysis with stochastic process model methodology.
 \dontrun{ 
 library(stpm) 
 data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"), 
-				   y=system.file("data","vitstat.csv",package="stpm"))
+ 				   y=system.file("data","vitstat.csv",package="stpm"))
 head(data[[1]])
 head(data[[2]])
 }

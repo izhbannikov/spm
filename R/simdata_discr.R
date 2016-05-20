@@ -11,10 +11,13 @@
 #' @param mu0 mortality at start period of time.
 #' @param theta A displacement coefficient of the Gompertz function.
 #' @param ystart A vector with length equal to number of dimensions used, defines starting values of covariates.
-#' @param tstart A number that defines starting time (30 by default).
+#' Default ystart = 80.
+#' @param tstart Starting time (age). 
+#' Can be a number (30 by default) or a vector of two numbers: c(a, b) - in this case, starting value of time 
+#' is simulated via uniform(a,b) distribution.
 #' @param tend A number, defines final time (105 by default).
 #' @param dt A time step (1 by default).
-#' @param nobs A number, defines a number of observations for each individual, NULL by default.
+#' @param nobs A number, defines a number of observations (lines) for an individual, NULL by default.
 #' @return A table with simulated data.
 #' @examples
 #' library(stpm)
@@ -49,6 +52,10 @@ simdata_discr <- function(N=100,
     stop("\'b'\ must be a 1 x k matrix")
   } else if((dim(as.data.frame(ystart))[1] != k) ) {
     stop("\'y'\ must be a 1 x k vector")
+  }
+  
+  if(length(tstart) > 2) {
+    stop(paste("Incorrect tstart:", tstart))
   }
   
   # Re-calculating parameters:

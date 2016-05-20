@@ -7,7 +7,8 @@
 simdata_gen_cont(N = 10, aH = -0.05, aL = -0.01, f1H = 60, f1L = 80,
   QH = 2e-08, QL = 2.5e-08, fH = 60, fL = 80, bH = 4, bL = 5,
   mu0H = 8e-06, mu0L = 1e-05, thetaH = 0.08, thetaL = 0.1, p0 = 0.25,
-  ystart = 80, tstart = 30, tend = 105, dt = 1, sd0 = 1)
+  ystart = 80, tstart = 30, tend = 105, dt = 1, sd0 = 1,
+  mode = "genetic", gomp = FALSE, nobs = NULL)
 }
 \arguments{
 \item{N}{Number of individuals.}
@@ -38,7 +39,7 @@ This is a vector with length of k.}
 
 \item{thetaL}{A displacement coefficient of the Gompertz function when Z = 0.}
 
-\item{p0}{A proportion of carriers and non-carriers in a population (default p0=0.25).}
+\item{p0}{A proportion of carriers in a sumulated population (default p0=0.25).}
 
 \item{ystart}{A vector with length equal to number of dimensions used, defines starting values of covariates.}
 
@@ -48,7 +49,15 @@ This is a vector with length of k.}
 
 \item{dt}{A discrete step size between two observations. A random uniform value is then added to this step size.}
 
-\item{sd0}{a standard deviation for modelling the next covariate value.}
+\item{sd0}{A standard deviation for modelling the next physiological variable (covariate) value.}
+
+\item{mode}{Can have the following values: "genetic" (default), "nongenetic".
+This represents a type of group to simulate: genetic (genotyped) group, non-genetic (not genotyped) group.}
+
+\item{gomp}{A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
+mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).}
+
+\item{nobs}{A number of observations (lines) for individual observations.}
 
 \item{mu0}{mortality at start period of time when Z = 1.}
 

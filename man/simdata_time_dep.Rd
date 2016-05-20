@@ -4,9 +4,9 @@
 \alias{simdata_time_dep}
 \title{Simulation function for continuous trait with time-dependant coefficients.}
 \usage{
-simdata_time_dep(N = 10, f = list(at = "-0.05", f1t = "80", Qt = "2e-5", ft
-  = "80", bt = "2.5", mu0t = "1e-1"), step = 1, tstart = 30, tend = 105,
-  ystart = 80, sd0 = 2)
+simdata_time_dep(N = 10, f = list(at = "-0.05", f1t = "80", Qt = "2e-8", ft
+  = "80", bt = "5", mu0t = "1e-3"), step = 1, tstart = 30, tend = 105,
+  ystart = 80, sd0 = 1, nobs = NULL)
 }
 \arguments{
 \item{N}{Number of individuals.}
@@ -15,13 +15,15 @@ simdata_time_dep(N = 10, f = list(at = "-0.05", f1t = "80", Qt = "2e-5", ft
 
 \item{step}{An interval between two observations, a random uniformally-distributed value is then added to this step.}
 
-\item{tstart}{A number that defines starting time (30 by default).}
+\item{tstart}{Starting time (age).
+Can be a number (30 by default) or a vector of two numbers: c(a, b) - in this case, starting value of time 
+is simulated via uniform(a,b) distribution.}
 
 \item{tend}{A number, defines final time (105 by default).}
 
 \item{ystart}{A starting value of covariates.}
 
-\item{sd0}{A standard deviation for modelling the next covariate value.}
+\item{sd0}{A standard deviation for modelling the next covariate value, sd0 = 2 by default.}
 }
 \value{
 A table with simulated data.

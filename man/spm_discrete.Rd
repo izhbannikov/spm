@@ -10,7 +10,7 @@ spm_discrete(dat, theta_range = seq(0.02, 0.2, by = 0.001), tol = NULL,
 \arguments{
 \item{dat}{A data table.}
 
-\item{theta_range}{A range of theta parameter (axe displacement of Gompertz function), default: from 0.001 to 0.09 with step of 0.001.}
+\item{theta_range}{A range of \code{theta} parameter (axe displacement of Gompertz function), default: from 0.001 to 0.09 with step of 0.001.}
 
 \item{tol}{A tolerance threshold for matrix inversion (NULL by default).}
 
@@ -25,7 +25,7 @@ from b and mu0 from the second list.
 Discrete multi-dimensional optimization
 }
 \details{
-This function is way much faster that continuous \code{spm_continuous_MD(...)} (but less precise) and used mainly in 
+This function is way more faster that continuous \code{spm_continuous_MD(...)} (but less precise) and used mainly in 
 estimation a starting point for the \code{spm_continuous_MD(...)}.
 }
 \examples{

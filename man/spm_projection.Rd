@@ -6,19 +6,17 @@
 Projections are constructed for a cohort with fixed or 
 normally distributed initial covariates.}
 \usage{
-spm_projection(x, N = 100, ystart = 80, model = "discrete", f = NULL,
-  tstart = 30, tend = 105, dt = 1, sd0 = 4)
+spm_projection(x, N = 100, ystart = 80, model = "discrete", tstart = 30,
+  tend = 105, dt = 1, sd0 = 1, nobs = NULL, gomp = FALSE)
 }
 \arguments{
 \item{x}{A list of parameters from output of the \code{spm(...)} function.}
 
-\item{N}{A number of individual to simulate, N=100 by default.}
+\item{N}{A number of individuals to simulate, N=100 by default.}
 
 \item{ystart}{A vector of starting values of covariates (variables), ystart=80 by default.}
 
 \item{model}{A model type. Choices are: "discrete", "continuous" or "time-dependent".}
-
-\item{f}{A list of formulas for the time-dependent model (NULL by default).}
 
 \item{tstart}{Start time (age), default=30.}
 
@@ -27,7 +25,16 @@ spm_projection(x, N = 100, ystart = 80, model = "discrete", f = NULL,
 \item{dt}{A time interval between observations, dt=1 by default.}
 
 \item{sd0}{A standard deviation value for simulation of the next value of variable.
-sd0=4 by default.}
+sd0=1 by default.}
+
+\item{nobs}{A number of observations (lines) for i-th individual.}
+
+\item{gomp}{A flag (FALSE by default). 
+When it is set, then time-dependent exponential form of mu0 and Q are used:
+mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t). 
+Only for continous-time SPM.}
+
+\item{f}{A list of formulas for the time-dependent model (NULL by default).}
 }
 \value{
 An object of 'spm.projection' class with two elements. 
@@ -59,6 +66,10 @@ plot(data.proj.discrete$stat$srv.prob)
 # Continuous-time model
 data.proj.continuous <- spm_projection(model.par, N=5000, ystart=c(80, 27), model="continuous")
 plot(data.proj.continuous$stat$srv.prob)
+# Time-dependent model
+model.par <- list(at="-0.05", f1t="80", Qt="2e-8", ft="80", bt="5", mu0t="1e-3")
+data.proj.time-dependent <- spm_projection(model.par, N=5000, ystart=80, model="time-dependent")
+plot(data.proj.time-dependent$stat$srv.prob)
 }
 }
 \references{

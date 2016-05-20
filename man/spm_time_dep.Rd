@@ -7,7 +7,8 @@
 spm_time_dep(x, start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0
   = 0.001), f = list(at = "a", f1t = "f1", Qt = "Q", ft = "f", bt = "b", mu0t
   = "mu0"), stopifbound = FALSE, algorithm = "NLOPT_LN_NELDERMEAD",
-  lb = NULL, ub = NULL, verbose = FALSE, maxeval = 100)
+  lb = NULL, ub = NULL, verbose = FALSE, maxeval = 100,
+  ftol_rel = 1e-06)
 }
 \arguments{
 \item{x}{: input data table.}
