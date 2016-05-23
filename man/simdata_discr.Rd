@@ -46,7 +46,7 @@ Multi-dimension simulation function
 }
 \examples{
 library(stpm)
-data <- simdata_discr(N=100, ystart=80)
+data <- simdata_discr(N=100)
 head(data)
 
 }

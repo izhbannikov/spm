@@ -7,7 +7,7 @@
 spm_gen(gendat, nongendat = NULL, aH = -0.05, aL = -0.01, f1H = 60,
   f1L = 80, QH = 2e-08, QL = 2.5e-08, fH = 60, fL = 80, bH = 4,
   bL = 5, mu0H = 8e-06, mu0L = 1e-05, thetaH = 0.08, thetaL = 0.1,
-  p = 0.25, stopifbound = FALSE, algorithm = "NLOPT_LN_COBYLA",
+  p = 0.25, stopifbound = FALSE, algorithm = "NLOPT_LN_NELDERMEAD",
   lb = NULL, ub = NULL, maxeval = 500, verbose = FALSE,
   pinv.tol = 0.01, mode = "genetic", gomp = FALSE, ftol_rel = 1e-06)
 }
@@ -38,11 +38,15 @@ This is a vector of length k.}
 
 \item{bL}{A diffusion coefficient, k by k matrix for Z = 0.}
 
+\item{mu0H}{A baseline mortality for Z = 1.}
+
+\item{mu0L}{A baseline mortality for Z = 0.}
+
 \item{thetaH}{A displacement coefficient for Z = 1.}
 
 \item{thetaL}{A displacement coefficient for Z = 0.}
 
-\item{p}{A proportion of carriers in a population (default p=0.25).}
+\item{p}{A percentage of carriers in a population (default p=0.25).}
 
 \item{stopifbound}{If TRUE then estimation stops if at least one parameter achieves lower or upper boundaries.}
 
@@ -71,10 +75,6 @@ mode = "combined" denoted joint analysis of both genetic and non-genetic groups.
 mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).}
 
 \item{ftol_rel}{Relative tolerance threshold for likelihood function (defalult: 1e-6), see http://ab-initio.mit.edu/wiki/index.php/NLopt_Reference}
-
-\item{mu0}{A baseline mortality for Z = 1.}
-
-\item{mu0}{A baseline mortality for Z = 0.}
 }
 \value{
 A set of estimated parameters aH, aL, f1H, f1H, QH, QL, fH, fL, bH, bL, mu0H, mu0L, thetaH, thetaL, p and
@@ -90,7 +90,7 @@ Continuous multi-dimensional optimization for Genetic SPM (multidimensional GenS
 \examples{
 library(stpm)
 #Reading the data:
-data <- simdata_gen_cont(N=100)
+data <- simdata_gen(N=100)
 head(data)
 #Parameters estimation:
 pars <- spm_gen(gendat=data)

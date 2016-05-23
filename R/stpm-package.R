@@ -18,8 +18,8 @@
 #'@name stpm
 #'@aliases stpm stpm-package
 #'@keywords Stochastic process model, allostatic load, quadratic hazard
-#'@version 1.2.1
-#'@date 2016-04-10
+#'@version 1.3.1
+#'@date 2016-05-24
 #'longitudinal studies, time-to-event
 #'@examples \dontrun{ 
 #'library(stpm)

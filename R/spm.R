@@ -24,6 +24,8 @@
 #'@param theta.range A user-defined range of the parameter \code{theta} used in 
 #'discrete-time optimization and estimating of starting point for continuous-time optimization.
 #'@param verbose A verbosing output indicator (FALSE by default).
+#'@param gomp A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
+#' mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).
 #'@return For "discrete" and "continuous" model types: 
 #'(1) a list of model parameter estimates for the discrete model type described in 
 #'"Life tables with covariates: Dynamic Model for Nonlinear Analysis of Longitudinal Data", 
@@ -42,7 +44,9 @@
 #'p.discr.model
 #'p.cont.model <- spm(data, model="continuous")
 #'p.cont.model
-#'p.td.model <- spm(data, model="time-dependent",f=list(at="aa*t+bb", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"), start=list(a=-0.001, bb=0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3))
+#'p.td.model <- spm(data, 
+#'model="time-dependent",f=list(at="aa*t+bb", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"), 
+#'start=list(a=-0.001, bb=0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3))
 #'p.td.model
 #'}
 spm <- function(x, model="discrete", formulas = NULL, start=NULL, tol=NULL, 
@@ -50,7 +54,7 @@ spm <- function(x, model="discrete", formulas = NULL, start=NULL, tol=NULL,
                 lb=NULL, ub=NULL, maxeval=100,
                 pinv.tol = 0.01,
                 theta.range=seq(0.01, 0.2, by=0.001),
-                verbose=FALSE) {
+                verbose=FALSE, gomp=FALSE) {
   
   # List of available models:
   models <- c("discrete", "continuous", "time-dependent")
@@ -116,7 +120,7 @@ spm <- function(x, model="discrete", formulas = NULL, start=NULL, tol=NULL,
                     lb = lb, ub = ub,
                     maxeval = maxeval, 
                     pinv.tol = pinv.tol,
-                    verbose = verbose)
+                    verbose = verbose, gomp)
       
       Q.c <- res.t$Q
       R.c <- res.t$a + diag(k)

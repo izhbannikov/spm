@@ -10,7 +10,7 @@ prepare_data(x, y, col.id = NULL, col.status = NULL, col.age = NULL,
 }
 \arguments{
 \item{x}{A path to the file with table of follow-up oservations (longitudinal table). 
-Formats: csv, sas7bdat}
+File formats: csv, sas7bdat}
 
 \item{y}{A path to the file with table of vital statistics (mortality) table. 
 File formats: csv, sas7bdat}
@@ -36,7 +36,7 @@ Note: if not provided then the 3rd column from the y (vital statistics) dataset 
 If covariates not provided, then all columns from longitudinal table having index > 3 will be used as covariates.}
 
 \item{interval}{A number of breaks between observations for data for discrete model. 
-This interval must be numeric.
+This interval must be numeric (integer).
 Default = 1 unit of time.}
 
 \item{verbose}{A verbosing output indicator. Default=FALSE.}

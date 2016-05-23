@@ -62,7 +62,6 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
     } else if(tstart.size() == 2){
       t1 = Rcpp::runif(1, tstart[0], tstart[1])[0];
     } else {
-      std::cout << "Warning: length of tstart > 2. Only first element will be used as tstart.\n";
       t1 = tstart[0];
     }
     

@@ -7,7 +7,8 @@
 #' is simulated via uniform(a,b) distribution.
 #' @param tend A number, defines final time (105 by default).
 #' @param ystart A starting value of covariates.
-#' @param sd0 A standard deviation for modelling the next covariate value, sd0 = 2 by default. 
+#' @param sd0 A standard deviation for modelling the next covariate value, sd0 = 1 by default. 
+#' @param nobs A number of observations (lines) for individual observations.
 #' @return A table with simulated data.
 #'@references Yashin, A. et al (2007), Health decline, aging and mortality: how are they related? 
 #'Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.

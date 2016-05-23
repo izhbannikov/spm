@@ -18,11 +18,11 @@
 #'@param fL A vector with length of k. Represents the normal (or optimal) state for Z = 0.
 #'@param bH A diffusion coefficient, k by k matrix for Z = 1.
 #'@param bL A diffusion coefficient, k by k matrix for Z = 0.
-#'@param mu0 A baseline mortality for Z = 1.
-#'@param mu0 A baseline mortality for Z = 0.
+#'@param mu0H A baseline mortality for Z = 1.
+#'@param mu0L A baseline mortality for Z = 0.
 #'@param thetaH A displacement coefficient for Z = 1.
 #'@param thetaL A displacement coefficient for Z = 0.
-#'@param p A proportion of carriers in a population (default p=0.25).
+#'@param p A percentage of carriers in a population (default p=0.25).
 #'@param stopifbound If TRUE then estimation stops if at least one parameter achieves lower or upper boundaries.
 #'@param algorithm An optimization algorithm used, can be one of those provided by \code{nloptr}. 
 #'#'Check the NLopt website for a description of
@@ -48,7 +48,7 @@
 #'@examples
 #'library(stpm)
 #'#Reading the data:
-#'data <- simdata_gen_cont(N=100)
+#'data <- simdata_gen(N=100)
 #'head(data)
 #'#Parameters estimation:
 #'pars <- spm_gen(gendat=data)
@@ -64,7 +64,7 @@ spm_gen <- function(gendat, nongendat=NULL,
                     thetaH=0.08, thetaL=0.1,
                     p=0.25,
                     stopifbound=FALSE, 
-                    algorithm="NLOPT_LN_COBYLA",
+                    algorithm="NLOPT_LN_NELDERMEAD",
                     lb=NULL, ub=NULL,
                     maxeval=500,
                     verbose=FALSE,

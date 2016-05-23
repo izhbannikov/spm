@@ -17,8 +17,8 @@
 #' @param fL A vector-function (with length k) of the normal (or optimal) state when Z = 0.
 #' @param bH A diffusion coefficient, k by k matrix when Z = 1.
 #' @param bL A diffusion coefficient, k by k matrix when Z = 0.
-#' @param mu0 mortality at start period of time when Z = 1.
-#' @param mu0 mortality at start period of time when Z = 0.
+#' @param mu0H mortality at start period of time when Z = 1.
+#' @param mu0L mortality at start period of time when Z = 0.
 #' @param thetaH A displacement coefficient of the Gompertz function when Z = 1.
 #' @param thetaL A displacement coefficient of the Gompertz function when Z = 0.
 #' @param p0 A proportion of carriers in a sumulated population (default p0=0.25).
@@ -35,10 +35,10 @@
 #' @return A table with simulated data.
 #' @examples
 #' library(stpm)
-#' dat <- simdata_gen_cont(N=50)
+#' dat <- simdata_gen(N=50)
 #' head(dat)
 #'
-simdata_gen_cont <- function(N=10, 
+simdata_gen <- function(N=10, 
                           aH=-0.05, aL=-0.01, 
                           f1H=60, f1L=80, 
                           QH=2e-8, QL=2.5e-8, 
@@ -118,7 +118,7 @@ simdata_gen_cont <- function(N=10,
   }
   
   if(genmode == 1) {
-    colnames(simulated) <- c("id", "xi", "t1", "t2", "G", data_names)
+    colnames(simulated) <- c("id", "xi", "t1", "t2", "Z", data_names)
   } else {
     colnames(simulated) <- c("id", "xi", "t1", "t2", data_names)
   }

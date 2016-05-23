@@ -1,6 +1,6 @@
 
 ---
-title: "stpm: a set of utilities for estimating stochastic process parameters and modeling survival data with stochastic process model"
+title: "Stochastic Process Model for Analysis of Longitudinal and Time-to-Event Outcomes"
 author: "Ilya Y. Zhbannikov"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_document
@@ -34,7 +34,7 @@ install.packages("<path to the downloaded r-package stpm>", repos=NULL, type="bi
 
 ## Data description
 
-Data represents a typical longitudinal data in form of two datasets: longitudinal dataset (follow-up studies), in which one record represents a single observation, and vital (survival) statistics, where one record represents all information about the subject. Longitudinal dataset cat contain a subject ID (identification number), status (event(1)/no event(0)), time and measurements across the variables. The \texttt{spm} can handle an infinite number of variables but in practice, 5-7 variables is enough.
+Data represents a typical longitudinal data in form of two datasets: longitudinal dataset (follow-up studies), in which one record represents a single observation, and vital (survival) statistics, where one record represents all information about the subject. Longitudinal dataset cat contain a subject ID (identification number), status (event(1)/censored(0)), time and measurements across the variables. The ```stpm``` can handle an infinite number of variables but in practice, 5-7 variables is enough.
 
 ```{r,results='hide',warning=FALSE,echo=FALSE,message=FALSE}
 library(stpm)
@@ -44,111 +44,131 @@ longdat <- read.csv(system.file("data","longdat.csv",package="stpm"))
 vitstat <- read.csv(system.file("data","vitstat.csv",package="stpm"))
 ```
 
-Below there is an example of clinical data that can be used in \texttt{spm} and we will discuss the field later.
-Longitudinal studies:
+Below there is an example of clinical data that can be used in ```stpm``` and we will discuss the field later.
+
+Longitudinal table:
+
 ```{r,echo=FALSE}
 head(longdat)
 ```
-Vital statistics:
+Vital statistics table:
+
 ```{r,echo=FALSE}
 head(vitstat)
 ```
 
-#### Data fields description
+#### Description of data fields
 ##### Longitude studies
 * ID - subject unique identificatin number.
 * IndicatorDeath - 0/1, indicates death of a subject.
-* Age - current age of subjects.
-* AgeNext - next age of subject he will attend to the survey/exam.
+* Age - current age of subject at observation.
 * DBP, BMI - covariates, here "DBP" represents a diastolic blood pressure, "BMI" a body-mass index.
 
-##### Survival statistics
+##### Vital statistics
 * ID - subject's unique ID.
 * IsDead - death indicator, 0 - alive, 1 - dead.
 * LSmort - age at death of stopping observations.
 
-## Discrete- and Continuous-time models
+## Discrete- and continuous-time models
 
 There are two main SPM types in the package: discrete-time model [4] and continuous-time model [3]. Discrete model assumes equal intervals between follow-up observations. The example of discrete dataset is given below.
 
 ```{r}
 library(stpm)
-data <- simdata_discr(N=10, ystart=80)
+data <- simdata_discr(N=10) # simulate data for 10 individuals
 head(data)
 ```
-In this case there are equal intervals between t1 and t2 (Age and Age.next).
+In this case there are equal intervals between $t_1$ and $t_2$.
 
-The opposite is continuous case, in which intervals between observations are not equal. The example of continuous case dataset is shown below:
+In the continuous-time SPM, in which intervals between observations are not equal (arbitrary or random). The example of such dataset is shown below:
 
 ```{r}
 library(stpm)
-data <- simdata_cont2(N=5,ystart = 50)
+data <- simdata_cont(N=5) # simulate data for 5 individuals
 head(data)
 ```
 
 
 
-### Discrete model
-In discrete model, we use the following assumptions:
-$$ \bar{y}(t+1) = \bar{u} + \bar{R} \times \bar{y}(t) + \bar{\epsilon} $$ (1)
-$$ \mu(t) = \mu_0(t) + \bar{b}(t) \times \bar{y}(t) + \bar{Q} \times \bar{y}(t)^2 $$ (2)
+### Discrete-time model
 
-Where:
-$$ \mu_0(t) = \mu_0 e^{\theta t} $$
-$$ \bar{b}(t) = \bar{b} e^{\theta t} $$
-$$ \bar{Q}(t) = \bar{Q} e^{\theta t} $$
+The discrete model assumes fixed time intervals between consecutive observations. In this model, $\mathbf{Y}(t)$ (a $k \times 1$ matrix of the values of covariates, where $k$ is the number of considered covariates) and $\mu(t, \mathbf{Y}(t))$ (the hazard rate) have the following form:
 
-### Example
+$\mathbf{Y}(t+1) = \mathbf{u} + \mathbf{R} \mathbf{Y}(t) + \mathbf{\epsilon}$
+
+$\mu (t, \mathbf{Y}(t)) = [\mu_0 + \mathbf{b} \mathbf{Y}(t) + \mathbf{Y}(t)^* \mathbf{Q} \mathbf{Y}(t)] e^{\theta t}$
+
+Coefficients $\mathbf{u}$ (a $k \times 1$ matrix, where $k$ is a number of covariates), $\mathbf{R}$ (a $k \times k$ matrix), $\mu_0$, $\mathbf{b}$ (a $1 \times k$ matrix), $\mathbf{Q}$ (a $k \times k$ matrix) are assumed to be constant in the particular implementation of this model in the R-package ```stpm```. $\mathbf{\epsilon}$ are normally-distributed random residuals, $k \times 1$ matrix. A symbol '*' denotes transpose operation. $\theta$ is a parameter to be estimated along with other parameters ($\mathbf{u}$, $\mathbf{R}$, $\mathbf{\mu_0}$, $\mathbf{b}$, $\mathbf{Q}$).
+
+#### Example
 
 ```{r}
 library(stpm)
+#Data simulation (200 individuals)
 data <- simdata_discr(N=200)
-#Parameters estimation
+#Estimation of parameters
 pars <- spm_discrete(data)
 pars
 ```
 
-## Continuous model
+### Continuous-time model
 
-$$ \mu(u) = \mu_0(u) + (\bar{m}(u) - \bar{f}(u)^* \times \bar{Q}(u) \times (\bar{m}(u) - \bar{f}(u)) + Tr(\bar{Q}(u) \times \bar{\gamma}(u)) $$ (3)
+In the specification of the SPM described in 2007 paper by Yashin and collegaues [3] the stochastic differential equation describing the age dynamics of a covariate is:
 
-$$ dm(t)/dt = \bar{a}(t) \times (\bar{m}(t) - \bar{f_1}(t)) - 2 \bar{\gamma}(t) \times \bar{Q}(t) \times (\bar{m}(t) - \bar{f}(t)) $$ (4)
-$$ d\bar{\gamma}(t)/dt = \bar{a}(t) \times \bar{\gamma}(t) +  \bar{\gamma}(t) \times \bar{a}(t)^* + \bar{b}(t) \times \bar{b}(t)^* - 2 \bar{\gamma}{t} \times \bar{Q}(t) \times \bar{\gamma}(t) $$ (5)
+$d\mathbf{Y}(t)= \mathbf{a}(t)(\mathbf{Y}(t) -\mathbf{f}_1(t))dt + \mathbf{b}(t)d\mathbf{W}(t), \mathbf{Y}(t=t_0)$
 
-### Example
+In this equation, $\mathbf{Y}(t)$ (a $k \times 1$ matrix) is the value of a particular covariate at a time (age) $t$. $\mathbf{f}_1(t)$ (a $k \times 1$ matrix) corresponds to the long-term mean value of the stochastic process $\mathbf{Y}(t)$, which describes a trajectory of individual covariate influenced by different factors represented by a random Wiener process $\mathbf{W}(t)$. Coefficient $\mathbf{a}(t)$ (a $k \times k$ matrix) is a negative feedback coefficient, which characterizes the rate at which the process reverts to its mean. 
+In the area of research on aging, $\mathbf{f}_1(t)$ represents the mean allostatic trajectory and $\mathbf{a}(t)$ represents the adaptive capacity of the organism. Coefficient $\mathbf{b}(t)$ (a $k \times 1$ matrix) characterizes a strength of the random disturbances from Wiener process $\mathbf{W}(t)$.
+
+The following function $\mu(t, \mathbf{Y}(t))$ represents a hazard rate:
+
+$\mu(t, \mathbf{Y}(t)) = \mu_0(t) + (\mathbf{Y}(t) - \mathbf{f}(t))^* \mathbf{Q}(t) (\mathbf{Y}(t) - \mathbf{f}(t))$
+
+here $\mu_0(t)$ is the baseline hazard, which represents a risk when $\mathbf{Y}(t)$ follows its optimal trajectory; $\mathbf{f}(t)$ (a $k \times 1$ matrix) represents the optimal trajectory that minimizes the risk and $\mathbf{Q}(t)$ ($k \times k$ matrix) represents a sensitivity of risk function to deviation from the norm.
+
+#### Example
 
 ```{r}
 library(stpm)
-#Reading the data:
-data <- simdata_cont2(N=100)
+#Simulate some data for 100 individuals
+data <- simdata_cont(N=100)
 head(data)
-#Parameters estimation:
-pars <- spm_continuous(dat=data,a=-0.05, f1=80, 
-                       Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08)
+#Estimate parameters
+# a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08 are starting values for estimation procedure
+pars <- spm_continuous(dat=data,a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08)
 pars
 ```
 
-## Coefficient conversion between continuous- and discrete-time models
+### Coefficient conversion between continuous- and discrete-time models
 
-$$ Q = Q $$
-$$ \bar{a} = \bar{R} - diag(k) $$
-$$ \bar{b} = \bar{\epsilon} $$
-$$ \bar{f1} = -1 \times \bar{u} \times \bar{a^{-1}} $$
-$$ \bar{f} = -0.5 \times \bar{b} \times \bar{Q^{-1}} $$
-$$ mu_0 = mu_0 - \bar{f} \times \bar{Q} \times t(\bar{f}) $$
-$$ \theta = \theta $$
+The coefficient conversion between continuous- and discrete-time models is as follows ('c' and 'd' denote continuous- and discrete-time models respectively; note: these equations can be used if intervals between consecutive observations of discrete- and continuous-time models are equal; it also required that matrices $\mathbf{a}_c$ and $\mathbf{Q}_{c,d}$ must be full-rank matrices):
 
-Here $$k$$ is a number of variables (covariates), which is equal to model's dimension.
+$\mathbf{Q}_c = \mathbf{Q}_d$
 
-## Model with time-dependent coefficients
+$\mathbf{a}_c = \mathbf{R}_d - I(k)$
 
-In previous models, we assumed that coefficients is sort of time-dependant: we multiplied them on to $$e^{\theta t}$$. In general, this may not be the case [5]. We extend this to a general case, i.e. (we consider one-dimensional case):
+$\mathbf{b}_c = \mathbf{\Sigma}$
 
-$$ \bar{a(t)} = par_1 t + par_2 $$ - linear function. 
+${\mathbf{f}_1}_c = -\mathbf{a}_c^{-1} \times \mathbf{u}_d$
+
+$\mathbf{f}_c = -0.5 \mathbf{b}_d \times \mathbf{Q}^{-1}_d$
+
+${\mu_0}_c = {\mu _0}_d - \mathbf{f}_c \times \mathbf{Q_c} \times \mathbf{f}_c^*$
+
+$\theta_c = \theta_d$
+
+where $k$ is a number of covariates, which is equal to model's dimension and '*' denotes transpose operation; $\mathbf{\Sigma}$ is a $k \times 1$ matrix which contains ```s.d.```s of corresponding residuals  (residuals of a linear regression $\mathbf{Y}(t+1) = \mathbf{u} + \mathbf{R}\mathbf{Y}(t) + \mathbf{\epsilon}$; ```s.d.``` is a standard deviation), $I(k)$ is an identity $k \times k$ matrix.
+
+### Model with time-dependent coefficients
+
+In previous models, we assumed that coefficients is sort of time-dependant: we multiplied them on to $e^{\theta t}$. In general, this may not be the case [5]. We extend this to a general case, i.e. (we consider one-dimensional case):
+
+$\mathbf{a(t)} = \mathbf{par}_1 t + \mathbf{par}_2$ - linear function. 
 
 The corresponding equations will be equivalent to one-dimensional continuous case described above.
 
-### Example
+#### Example
+
 ```{r}
 library(stpm)
 #Data preparation:
@@ -161,13 +181,13 @@ opt.par <- spm_time_dep(data,
 opt.par
 ```
 
-## Simulation (trajectory projection)
+## Simulation (individual trajectory projection, also known as microsimulations)
 
 We added one- and multi- dimensional simulation to be able to generate test data for hyphotesis testing. Data,  which can be simulated can be discrete (equal intervals between observations) and continuous (with arbitrary intervals).
 
-## Discrete-time
+### Discrete-time simulation
 
-The corresponding function is ($$k$$ - a number of variables(covariates), equal to model's dimension):
+The corresponding function is (```k``` - a number of variables(covariates), equal to model's dimension):
 
 ```simdata_discr(N=100, a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5, theta=0.08, ystart=80, tstart=30, tend=105, dt=1)```
 
@@ -201,15 +221,15 @@ This function returns a table with simulated data, as shown in example below:
 
 ```{r}
 library(stpm)
-data <- simdata_discr(N=10, ystart=75)
+data <- simdata_discr(N=10)
 head(data)
 ```
 
-## Continuous-time
+### Continuous-time simulation
 
-The correstonding function is ($$k$$ - a number of variables(covariates), equal to model's dimension):
+The corresponding function is (```k``` - a number of variables(covariates), equal to model's dimension):
 
-```simdata_cont2(N=100, a=-0.05, f1=80, Q=2e-07, f=80, b=5, mu0=2e-05, theta=0.08, ystart=80, tstart=30, tend=105)```
+```simdata_cont(N=100, a=-0.05, f1=80, Q=2e-07, f=80, b=5, mu0=2e-05, theta=0.08, ystart=80, tstart=30, tend=105)```
 
 Here:
 
@@ -244,60 +264,58 @@ data <- simdata_cont(N=10)
 head(data)
 ```
 
+## SPM with genetic component: GenSPM
 
+Stochastic Process Model has many applications in analysis of longitudinal biodemographic data. Such data contain various physiological variables (known as covariates). Data can also potentially contain genetic information available for all or a part of participants. Taking advantage from both genetic and non-genetic information can provide future insights into a broad range of processes describing aging-related changes in the organism.
 
-## Simulation strategies
+### Method
 
-R-package ```spm``` currently offers continuous- and discrete time simulations. Below we describe the simulations in details. In general, the input to each corresponding function: ```simdata_cont_MD(...)``` for continuous-time and ```simdata_discr_MD(...)``` for discrete-time simulations.
+GenSPM (Genetic SPM), presented in 2009 by Arbeev at al [6] and further advanced in [7,8], further elaborates the basic stochastic process model conception by introducing a categorical variable, $Z$, which may be a specific value of a genetic marker or, in general, any categorical variable. Currently, $Z$ has two gradations: 0 or 1 in a genetic group of interest, assuming that $P(Z=1) = p$, $p \in [0, 1]$, were $p$ is the proportion of carriers and non-carriers of an allele in a population. Example of longitudinal data with genetic component $Z$ is provided below.
 
-### Continuous-time simulation strategies
-
-####Step 1
-We model observations from a subject (which can be any system in general) and at first, we think that the subject is alive and compute the starting observation time ```t1``` and the next time ```t2```:
-
-```t1 = runif(1, tstart, tend)```
-```t2 = t1 + 2*runif(1, 0, 1)```
-
-Here ```runif()``` a random number generator which returns uniformly distributed value. We assume that the ```t1``` as a random value, uniformly distributed from the start time (```tstart```) to end (```tend```). 
-
-####Step 2
-
-Computing y1 (an observed variable) from the previous observation:
-
-```
-if event = False:
-  y1 = rnorm(1, ystart, sd0)
-} else {
-  y1 = y2
-}
+```{r}
+library(stpm)
+data <- simdata_gen(N=10)
+head(data)
 ```
 
-Here ```rnorm(...)``` is a random number generator which returns normally distributed values. 
+In the specification of the SPM described in 2007 paper by Yashin and colleagues [3] the stochastic differential equation describing the age dynamics of a physiological variable (a dynamic component of the model) is:
 
-####Step 3
+$dY(t) = a(Z, t)(Y(t) - f1(Z, t))dt + b(Z, t)dW(t), Y(t = t_0)$
 
-In order to compute y2 , we need to compute a survival fuction ```S``` based on the equations 3, 4 and 5.
-We then compare the ```S``` to the random number, uniformly distributed. 
-If ```S``` is larger than that number, than we assume that the event is happened (death of subject or system failure). Otherwise we compute ```y2``` and proceed to the next iteration:
+Here in this equation, $Y(t)$ is a $k \times 1$ matrix, where $k$ is a number of covariates, which is a model dimension) describing the value of a physiological variable at a time (e.g. age) t. $f_1(Z,t)$ is a $k \times 1$ matrix that corresponds to the long-term average value of the stochastic process $Y(t)$, which describes a trajectory of individual variable influenced by different factors represented by a random Wiener process $W(t)$. The negative feedback coefficient $a(Z,t)$ ($k \times k$ matrix) characterizes the rate at which the stochastic process goes to its mean. In research on aging and well-being, $f_1(Z,t)$ represents the average allostatic trajectory and $a(t)$ in this case represents the adaptive capacity of the organism. Coefficient $b(Z,t)$ ($k \times 1$ matrix) characterizes a strength of the random disturbances from Wiener process $W(t)$. All of these parameters depend on $Z$ (a genetic marker having values 1 or 0).
+The following function $\mu(t,Y(t))$ represents a hazard rate:
 
+$\mu(t,Y(t)) = \mu_0(t) + (Y(t) - f(Z, t))^*Q(Z, t)(Y(t) - f(Z, t))$
+
+In this equation: $\mu_0(t)$ is the baseline hazard, which represents a risk when $Y(t)$ follows its optimal trajectory; f(t) ($k \times 1$ matrix) represents the optimal trajectory that minimizes the risk and $Q(Z, t)$ ($k \times k$ matrix) represents a sensitivity of risk function to deviation from the norm. In general, model coefficients $a(Z, t)$, $f1(Z, t)$, $Q(Z, t)$, $f(Z, t)$, $b(Z, t)$ and $\mu_0(t)$ are time(age)-dependent.
+Once we have data, we then can run analysis, i.e. estimate coefficients (they are assumed to be time-independent and data here is simulated):
+
+```{r}
+library(stpm)
+#Generating data:
+data <- simdata_gen(N=1000)
+head(data)
+#Parameters estimation:
+pars <- spm_gen(gendat=data)
+pars
 ```
-if S > runif(1, 0, 1) : 
-    y2 = rnorm(1, m, sqrt(gamma))
-    event = True
-    new_subject = True
-else if event = False:
-  y2 = rnorm(1, m, sqrt(gamma))
-  event = False
-  new_record = True
+
+Here \textbf{H} and \textbf{L} represents parameters when $Z$ = 1 (**H**) and 0 (**L**).
+
+###Joint analysis of two datasets: first dataset with genetic and second dataset with non-genetic component
+
+```{r}
+library(stpm)
+data.genetic <- simdata_gen(N=100, mode='genetic')
+head(data.genetic)
+data.nongenetic <- simdata_gen(N=500, mode='nongenetic')
+head(data.nongenetic)
+#Parameters estimation:
+pars <- spm_gen(gendat=data.genetic, nongendat = data.nongenetic, mode='combined')
+pars
 ```
 
-###Discrete-time simulation strategies
 
-In this case we use equal intervals ```dt``` between observations and survival function ```S``` is computed directly from $\mu$ (2):
-
-$S = e^{-1\mu(t_1)}$
-
-The rest of the discrete simulation routine is the same as in continuous-time simulation case.
 
 ## References
 
@@ -310,3 +328,9 @@ The rest of the discrete simulation routine is the same as in continuous-time si
 [4] Akushevich I., Kulminski A. and Manton K.: Life tables with covariates: Dynamic model for Nonlinear Analysis of Longitudinal Data. 2005. Mathematical Popu-lation Studies, 12(2), pp.: 51-80.
 
 [5] Yashin, A. et al.  Health decline, aging and mortality: how are they related? Biogerontology, 2007 8(3), 291-302.
+
+[6]	Arbeev, K.G., Akushevich, I., Kulminski, A.M., Arbeeva, L.S., Akushevich, L., Ukraintseva, S.V., Culminskaya, I.V., Yashin, A.I.: Genetic model for longitudinal studies of aging, health, and longevity and its potential application to incomplete data. Journal of Theoretical Biology 258(1), 103{111 (2009). doi:10.1016/j.jtbi.2009.01.023
+
+[7] Arbeev K.G, Akushevich I., Kulminski A.M., Ukraintseva S.V., Yashin A.I., Joint Analyses of Longitudinal and Time-to-Event Data in Research on Aging: Implications for Predicting Health and Survival, Front Public Health. 2014 Nov 6;2:228. doi: 10.3389/fpubh.2014.00228
+
+[8] Arbeev K., Arbeeva L., Akushevich I., Kulminski A., Ukraintseva S., Yashin A., Latent Class and Genetic Stochastic Process Models: Implications for Analyses of Longitudinal Data on Aging, Health, and Longevity, JSM-2015, Seattle, WA.

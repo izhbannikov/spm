@@ -24,7 +24,8 @@ prepare_data_discr(longdat, vitstat, interval, col.status.ind, col.id.ind,
 
 \item{col.covar.ind}{a set of column indexes which represent covariates.}
 
-\item{verbose}{turns on/off verbosing output.}
+\item{verbose}{turns on/off verbosing output.
+Filling the last cell}
 }
 \description{
 Prepares discrete-time dataset.

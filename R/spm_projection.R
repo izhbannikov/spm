@@ -12,8 +12,8 @@
 #'@param N A number of individuals to simulate, N=100 by default.
 #'@param ystart A vector of starting values of covariates (variables), ystart=80 by default.
 #'@param model A model type. Choices are: "discrete", "continuous" or "time-dependent".
-#'@param f A list of formulas for the time-dependent model (NULL by default).
-#'@param tstart Start time (age), default=30.
+#'@param tstart Start time (age), default=30. Can be an interval: c(a, b) - in this case,
+#'the starting time is sumulated via \code{runif(1, a, b)}.
 #'@param tend End time (age), default=105.
 #'@param dt A time interval between observations, dt=1 by default.
 #'@param sd0 A standard deviation value for simulation of the next value of variable.

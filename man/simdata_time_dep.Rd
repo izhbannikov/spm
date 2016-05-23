@@ -23,7 +23,9 @@ is simulated via uniform(a,b) distribution.}
 
 \item{ystart}{A starting value of covariates.}
 
-\item{sd0}{A standard deviation for modelling the next covariate value, sd0 = 2 by default.}
+\item{sd0}{A standard deviation for modelling the next covariate value, sd0 = 1 by default.}
+
+\item{nobs}{A number of observations (lines) for individual observations.}
 }
 \value{
 A table with simulated data.

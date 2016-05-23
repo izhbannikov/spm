@@ -1,18 +1,6 @@
-
-
-#'Filling the last cell
-#'@param x a data vector.
-fill_last <- function(x) {
-  na_idx <- which(is.na(x))
-  unique_elements <- unique(x[-na_idx])
-  set_diff <- unique_elements[length(unique_elements)]
-  x[na_idx] <- set_diff
-  x
-}
-
 #'Data pre-processing for analysis with stochastic process model methodology.
 #'@param x A path to the file with table of follow-up oservations (longitudinal table). 
-#'Formats: csv, sas7bdat
+#'File formats: csv, sas7bdat
 #'@param y A path to the file with table of vital statistics (mortality) table. 
 #'File formats: csv, sas7bdat
 #'@param col.id A name of column containing subject ID. 
@@ -31,7 +19,7 @@ fill_last <- function(x) {
 #'@param covariates A list of covariates (physiological variables). 
 #'If covariates not provided, then all columns from longitudinal table having index > 3 will be used as covariates. 
 #'@param interval A number of breaks between observations for data for discrete model. 
-#'This interval must be numeric.
+#'This interval must be numeric (integer).
 #'Default = 1 unit of time.
 #'@param verbose A verbosing output indicator. Default=FALSE.
 #'@return A list of two elements: first element contains a preprocessed data for continuous model, with arbitrary intervals between observations  and 
@@ -255,6 +243,16 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.i
   #verbose <- TRUE
   #longdat <- longdat[which(!is.na(longdat[ , col.age.ind])),]
   #---END DEBUG---#
+  
+  #'Filling the last cell
+  fill_last <- function(x) {
+    na_idx <- which(is.na(x))
+    unique_elements <- unique(x[-na_idx])
+    set_diff <- unique_elements[length(unique_elements)]
+    x[na_idx] <- set_diff
+    x
+  }
+  
   
   # Interpolation
   dt <- interval

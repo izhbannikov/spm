@@ -20,6 +20,8 @@
 #'The program stops when the number of function evaluations exceeds maxeval. Default: 500.
 #'@param pinv.tol A tolerance value for pseudo-inverse of matrix gamma (see Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
 #'and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.)
+#'@param gomp A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
+#' mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).
 #'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta and
 #'additional variable \code{limit} which indicates if any parameter 
 #'achieved lower or upper boundary conditions (FALSE by default).
@@ -51,7 +53,7 @@ spm_continuous <- function(dat,
                            gomp=FALSE) {
   
   
-  #' Sets lower boundaries.
+  
   setlb <- function(k, params) {
     # This function sets lower and upper boundaries for optim.
     # - k - number of dimensions
@@ -86,7 +88,7 @@ spm_continuous <- function(dat,
   }
   
   
-  #'Sets upper boundaries.
+  
   setub <- function(k, params) {
     # This function sets lower and upper boundaries for optim.
     # - k - number of dimensions

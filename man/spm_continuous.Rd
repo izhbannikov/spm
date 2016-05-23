@@ -43,6 +43,9 @@ The program stops when the number of function evaluations exceeds maxeval. Defau
 
 \item{pinv.tol}{A tolerance value for pseudo-inverse of matrix gamma (see Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
 and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.)}
+
+\item{gomp}{A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
+mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).}
 }
 \value{
 A set of estimated parameters a, f1, Q, f, b, mu0, theta and
@@ -65,8 +68,6 @@ pars <- spm_continuous(dat=data,a=-0.05, f1=80,
 					           Q=2e-8, f=80, b=5, mu0=2e-5)
 pars
 
-Sets lower boundaries.
-Sets upper boundaries.
 }
 \references{
 Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 

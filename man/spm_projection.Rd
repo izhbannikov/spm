@@ -18,7 +18,8 @@ spm_projection(x, N = 100, ystart = 80, model = "discrete", tstart = 30,
 
 \item{model}{A model type. Choices are: "discrete", "continuous" or "time-dependent".}
 
-\item{tstart}{Start time (age), default=30.}
+\item{tstart}{Start time (age), default=30. Can be an interval: c(a, b) - in this case,
+the starting time is sumulated via \code{runif(1, a, b)}.}
 
 \item{tend}{End time (age), default=105.}
 
@@ -33,8 +34,6 @@ sd0=1 by default.}
 When it is set, then time-dependent exponential form of mu0 and Q are used:
 mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t). 
 Only for continous-time SPM.}
-
-\item{f}{A list of formulas for the time-dependent model (NULL by default).}
 }
 \value{
 An object of 'spm.projection' class with two elements. 

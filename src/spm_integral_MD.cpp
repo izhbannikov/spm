@@ -250,7 +250,7 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
   double t2;
   double dt=as<double>(dt_);
   bool new_person = false;
-  //std::cout << N << " " << aH << " " << f1H << " " << QH << " " << fH << " " << mu0H << " " << thetaH << " " << ystart << " " << tstart << std::endl;
+  
   std::vector< std::vector<double> > data;
   double S;
   int n_observ;
@@ -569,9 +569,7 @@ RcppExport SEXP complik_gen(SEXP dat, SEXP n, SEXP m,
     if(dd(i,0) == 0) { 
       long double det_gamma = det(gamma2);
       if(det_gamma < 0) {
-        std::cout << "Warning: determinant of gamma is less than zero: " << det_gamma << std::endl;
         det_gamma = 1e-16;
-        std::cout << "It was set to " << det_gamma << std::endl;
       }
       //arma::mat exp = -0.50*dim*log(2.00*pi*pow(det(gamma2), -0.5)) - 0.50*(m2-y2).t()*pinv(gamma2,ptol)*(m2-y2);
       arma::mat exp = log(pow(2.00*pi, -0.5*dim)*pow(det_gamma, -0.5)) - 0.50*(m2-y2).t()*pinv(gamma2,ptol)*(m2-y2);
@@ -1094,7 +1092,6 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
     bool firstRow = false;
     bool lastRow = false;
     
-    //std::cout << dd(i,0) << " " << dd(i,1) << " " << dd(i,2) << " " << dd(i,3) << " " << dd(i,4) << std::endl;
     if(i == 0) {
      firstRow = true; 
     } else if(dd(i,1) != dd(i-1,2)) {
@@ -1106,7 +1103,7 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
     }else if(i == N-1) {
       lastRow = true;
     }
-    //std::cout << firstRow << " " << lastRow << std::endl;
+    
     arma::mat exp1;
     arma::mat exp0;
     
