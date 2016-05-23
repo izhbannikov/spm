@@ -67,9 +67,9 @@ plot(data.proj.discrete$stat$srv.prob)
 data.proj.continuous <- spm_projection(model.par, N=5000, ystart=c(80, 27), model="continuous")
 plot(data.proj.continuous$stat$srv.prob)
 # Time-dependent model
-model.par <- list(at="-0.05", f1t="80", Qt="2e-8", ft="80", bt="5", mu0t="1e-3")
-data.proj.time-dependent <- spm_projection(model.par, N=5000, ystart=80, model="time-dependent")
-plot(data.proj.time-dependent$stat$srv.prob)
+model.par <- list(at="-0.05", f1t="80", Qt="2e-5", ft="80", bt="5", mu0t="1e-3*exp(0.08*t)")
+data.proj.time_dependent <- spm_projection(model.par, N=500, ystart=80, model="time-dependent")
+plot(data.proj.time_dependent$stat$srv.prob)
 }
 }
 \references{

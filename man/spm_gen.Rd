@@ -12,6 +12,10 @@ spm_gen(gendat, nongendat = NULL, aH = -0.05, aL = -0.01, f1H = 60,
   pinv.tol = 0.01, mode = "genetic", gomp = FALSE, ftol_rel = 1e-06)
 }
 \arguments{
+\item{gendat}{A data table with genetic component.}
+
+\item{nongendat}{A data table without genetic component.}
+
 \item{aH}{A k by k matrix. Characterizes the rate of the adaptive response for Z = 1.}
 
 \item{aL}{A k by k matrix. Characterize the rate of the adaptive response for Z = 0.}
@@ -68,8 +72,6 @@ mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).}
 
 \item{ftol_rel}{Relative tolerance threshold for likelihood function (defalult: 1e-6), see http://ab-initio.mit.edu/wiki/index.php/NLopt_Reference}
 
-\item{dat}{A data table.}
-
 \item{mu0}{A baseline mortality for Z = 1.}
 
 \item{mu0}{A baseline mortality for Z = 0.}
@@ -88,10 +90,10 @@ Continuous multi-dimensional optimization for Genetic SPM (multidimensional GenS
 \examples{
 library(stpm)
 #Reading the data:
-data <- simdata_gen_cont(N=5000)
+data <- simdata_gen_cont(N=100)
 head(data)
 #Parameters estimation:
-pars <- spm_gen(dat=data)
+pars <- spm_gen(gendat=data)
 pars
 
 }

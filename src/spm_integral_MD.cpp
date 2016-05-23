@@ -640,6 +640,7 @@ RcppExport SEXP simGenCont(SEXP n,
   Rcpp::NumericVector sd = Rcpp::NumericVector(sd_);
   double p0 = as<double>(p0_);
   int genmode = as<int>(_genmode);
+  
   gomp = as<bool>(gomp_);
   int nobs = as<int>(nobs_);
   
@@ -659,7 +660,6 @@ RcppExport SEXP simGenCont(SEXP n,
   
   double  nsteps = 2;
   
-  //double tstart  = as<double>(tstart_);
   Rcpp::NumericVector tstart = Rcpp::NumericVector(tstart_);
   arma::mat ystart = as<arma::mat>(ystart_);
   

@@ -31,6 +31,7 @@ fill_last <- function(x) {
 #'@param covariates A list of covariates (physiological variables). 
 #'If covariates not provided, then all columns from longitudinal table having index > 3 will be used as covariates. 
 #'@param interval A number of breaks between observations for data for discrete model. 
+#'This interval must be numeric.
 #'Default = 1 unit of time.
 #'@param verbose A verbosing output indicator. Default=FALSE.
 #'@return A list of two elements: first element contains a preprocessed data for continuous model, with arbitrary intervals between observations  and 
@@ -51,6 +52,11 @@ prepare_data <- function(x, y,
                          interval=1, 
                          verbose=FALSE) {
   
+  if(interval < 1) {
+    stop("Interval must be more or equal to 1.")
+  } else if(interval != round(interval)) {
+    stop("Interval must be integer.")
+  }
   
   if(file_ext(x) == "csv") {
     longdat <- read.csv(x)
@@ -232,9 +238,9 @@ prepare_data_cont <- function(longdat,
 #'@param col.covar.ind a set of column indexes which represent covariates.
 #'@param verbose turns on/off verbosing output.
 prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose) {
-  
-  #longdat <- read.sas7bdat("C:/Projects/spm/data/covar_aric_gru.sas7bdat")
-  #vitstat <- read.sas7bdat("C:/Projects/spm/data/mortality_aric_all_gru.sas7bdat")
+  #---DEBUG---#
+  #longdat <- read.sas7bdat("/Volumes/G/spm/data/covar_aric_gru.sas7bdat")
+  #vitstat <- read.sas7bdat("/Volumes/G/spm/data/mortality_aric_all_gru.sas7bdat")
   #interval <- 1
   #col.id="SubjID"
   #col.age="Age"
@@ -248,6 +254,8 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.i
   #col.covar.ind <-  grep(paste("\\b", "BMI", "\\b", sep=""), colnames(longdat))
   #verbose <- TRUE
   #longdat <- longdat[which(!is.na(longdat[ , col.age.ind])),]
+  #---END DEBUG---#
+  
   # Interpolation
   dt <- interval
   tt <- matrix(nrow=0, ncol=4)
@@ -256,21 +264,21 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.i
   # Split records by ID:
   splitted <- split(longdat, longdat[, col.id.ind])
   vitstat.splitted <- split(vitstat, vitstat[, col.id.ind])
-  #iii <- 1
   # For each particular person's record:
   for(iii in 1:length(splitted)) {
     if(!is.na(vitstat.splitted[[iii]][ , col.age.event.ind]) & !is.na(vitstat.splitted[[iii]][ , col.status.ind]) ) {
       if(verbose) {
-        print(iii)
+        print(paste(iii, "individual processed."))
       }
+      # Individual ID:
       id <- splitted[[iii]][ , col.id.ind][1]
-      nrows <- (tail(splitted[[iii]][ , col.age.ind], n=1) - splitted[[iii]][ , col.age.ind][1])/dt + 1
-      # Perform approximation:
+      nrows <- (tail(splitted[[iii]][ , col.age.ind], n=1) - floor(splitted[[iii]][ , col.age.ind][1]))/dt + 1
+      # Perform approximation using two points:
       t1.approx <- matrix(ncol=4, nrow=nrows)
       t1.approx[,1] <- id
       t1.approx[,2] <- 0
       t1.approx[nrows,2] <- vitstat.splitted[[iii]][ , col.status.ind][1] #Last value
-      t1.approx[,3] <- seq(splitted[[iii]][ , col.age.ind][1], splitted[[iii]][ , col.age.ind][length(splitted[[iii]][ , col.age.ind])], by=dt)
+      t1.approx[,3] <- seq(floor(splitted[[iii]][ , col.age.ind][1]), splitted[[iii]][ , col.age.ind][length(splitted[[iii]][ , col.age.ind])], by=dt)
       if(nrows > 1) {
         t1.approx[,4] <- c(t1.approx[,3][2:nrows], vitstat.splitted[[iii]][ , col.age.event.ind][1])
       } else {
@@ -282,7 +290,6 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.i
       
       j <- 1
       for(ind in col.covar.ind) {
-        #ind <- col.covar.ind[j]
         if ( (length(splitted[[iii]][, ind]) > 1) & (length(which(!is.na(splitted[[iii]][, ind]))) > 0) ) {
           if(length(which(!is.na(splitted[[iii]][, ind]))) == 1) {
             splitted[[iii]][, ind] <- fill_last(splitted[[iii]][, ind])
@@ -307,7 +314,7 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.i
     }
   }
   
-  ans=cbind(tt,par)
+  ans <- cbind(tt,par)
   colnames(ans) <- c("id", "case", "t1", "t2", names(longdat)[col.covar.ind])
   
   ans <- ans[rowSums( matrix(is.na(ans[,5:dim(ans)[2]]), ncol=length(col.covar.ind),byrow=T)) !=length(col.covar.ind),]
@@ -331,17 +338,6 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.i
   dat <- cbind(dat, ans_final[,2]) #sta (outcome)
   dat <- cbind(dat, ans_final[,3]) #tt1 (t1)
   dat <- cbind(dat, ans_final[,4]) #tt3 (t2)
-  
-  
-  #j <- 0
-  #i <- 0
-  #for(i in 0:(length(col.covar.ind)-1)) {
-  #  dat <- cbind(dat, ans_final[,(5+i)]) 
-  #  dat[2:dim(dat)[1],(5+j)] <- dat[1:(dim(dat)[1]-1),(5+j)]
-  #  dat <- cbind(dat, ans_final[,(5+i)]) 
-  #  averages[1,(i+1)] = dat[1,(5+j)]
-  #  j <- j + 2
-  #}
   
   
   for(i in 0:(length(col.covar.ind)-1)) {
@@ -369,21 +365,16 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.i
         dat[(i+1),(5+ii)] = dat[i,(6+ii)]
       }
       pid = dat[i,1]
-      #if(dat[i-1,2] == 0) {
-      #  dat[i-1,4] <- dat[i-1,3] + interval
-      #}
     }
     if(dat[i,2] > 1) {
       dat[i,2] <- 1
     }
   }
   
-  colnames(dat) <- c("id", "case", "t1", "t2", unlist(lapply(1:length(col.covar.ind), function(n) {c(names(longdat)[col.covar.ind[n]], 
-                                                                                                     paste(names(longdat)[col.covar.ind[n]],".next",sep="")
-  )} 
-  )
-  ) 
-  )
+  colnames(dat) <- c("id", "case", "t1", "t2", 
+                     unlist(lapply(1:length(col.covar.ind), 
+                                   function(n) {c(names(longdat)[col.covar.ind[n]], 
+                                                paste(names(longdat)[col.covar.ind[n]],".next",sep=""))})))
   rownames(dat) <- 1:dim(dat)[1]
   dat
 }

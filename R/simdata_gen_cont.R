@@ -91,6 +91,10 @@ simdata_gen_cont <- function(N=10,
     stop("Mode can be set to 'genetic' or 'nongenetic'.")
   }
   
+  if(is.null(nobs)) {
+    nobs <- 0
+  }
+  
   if(length(tstart) > 2) {
     stop(paste("Incorrect tstart:", tstart))
   }

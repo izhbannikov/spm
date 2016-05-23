@@ -1,132 +1,11 @@
-setlb <- function(k, params) {
-  # This function sets lower and upper boundaries for optim.
-  # - k - number of dimensions
-  # - params - initial parameters, a vector
-  #
-  # Lower boundaries:
-  lower_bound <- c()
-  # Setting boundaries for coefficients:
-  # aH, aL
-  start=1; end=k^2
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) }))) 
-  start=end+1; end=start+k^2-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) }))) 
-  
-  # f1H, f1L
-  start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) }))) 
-  start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) }))) 
-  
-  # QH, QL
-  start=end+1; end=start+k^2-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ ifelse(params[n] > 0, 0, params[n]+0.1*params[n]) })))
-  start=end+1; end=start+k^2-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ ifelse(params[n] > 0, 0, params[n]+0.1*params[n]) })))
-  
-  # fH, fL
-  start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) })) )
-  start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) })) )
-  
-  # bH, bL
-  start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) })) )
-  start=end+1; end=start+k-1
-  lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) })) )
-  
-  # mu0h, mu0L
-  start=end+1; end=start
-  lower_bound <- c( lower_bound, params[start:end] - 0.1*params[start:end])
-  start=end+1; end=start
-  lower_bound <- c( lower_bound, params[start:end] - 0.1*params[start:end])
-  
-  # thetah, thetal
-  start=end+1; end=start
-  lower_bound <- c( lower_bound, params[start:end] - 0.1*params[start:end])
-  start=end+1; end=start
-  lower_bound <- c( lower_bound, params[start:end] - 0.1*params[start:end])
-  
-  # p
-  start=end+1; end=start
-  lower_bound <- c( lower_bound, ifelse((params[start:end] - 0.1*params[start:end]) <= 0,
-                                 0,
-                                 params[start:end] - 0.1*params[start:end]))
-  
-  lower_bound
-}
-
-setub <- function(k, params) {
-  # This function sets lower and upper boundaries for optim.
-  # - k - number of dimensions
-  # - params - initial parameters, a vector
-  #
-  #Upper boundaries:
-  upper_bound <- c()
-  # Setting boundaries for coefficients:
-  # aH, aL
-  start=1; end=k^2
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.1*params[n], 0*params[n]) })))
-  start=end+1; end=start+k^2-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.1*params[n], 0*params[n]) })))
-  
-  # f1H, f1L
-  start=end+1; end=start+k-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.1*params[n], params[n]- 0.1*params[n]) })))
-  start=end+1; end=start+k-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.1*params[n], params[n]- 0.1*params[n]) })))
-  
-  # QH, QL
-  start=end+1; end=start+k^2-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {ifelse(params[n] > 0, params[n] + 0.1*params[n], params[n]-0.1*params[n] )})))
-  start=end+1; end=start+k^2-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {ifelse(params[n] > 0, params[n] + 0.1*params[n], params[n]-0.1*params[n] )})))
-  
-  # fH, fL
-  start=end+1; end=start+k-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.1*params[n], params[n]-0.1*params[n]) })))
-  start=end+1; end=start+k-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.1*params[n], params[n]-0.1*params[n]) })))
-  
-  # bH, bL
-  start=end+1; end=start+k-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.1*params[n], params[n]-0.1*params[n]) })))
-  start=end+1; end=start+k-1
-  upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.1*params[n], params[n]-0.1*params[n]) })))
-  
-  # mu0h, mu0L
-  start=end+1; end=start
-  upper_bound <- c( upper_bound, params[start:end] + 0.1*params[start:end])
-  start=end+1; end=start
-  upper_bound <- c( upper_bound, params[start:end] + 0.1*params[start:end])
-  
-  # thetah, thetal
-  start=end+1; end=start
-  upper_bound <- c( upper_bound, params[start:end] + 0.1*params[start:end])
-  start=end+1; end=start
-  upper_bound <- c( upper_bound, params[start:end] + 0.1*params[start:end])
-  
-  # p
-  start=end+1; end=start
-  upper_bound <- c( upper_bound, 
-                    ifelse((params[start:end] + 0.1*params[start:end]) >= 1, 
-                           1, 
-                           (params[start:end] + 0.1*params[start:end])))
-  
-  
-  upper_bound
-}
-
-
-
 #'Continuous multi-dimensional optimization for Genetic SPM (multidimensional GenSPM)
 #'@references Arbeev, K.G. et al (2009). Genetic model for longitudinal studies of aging, health, and longevity
 # and its potential application to incomplete data. Journal of Theoretical
 # Biology 258(1), 103{111 (2009).<doi:10.1016/j.jtbi.2009.01.023>
 #'@references Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
 #'and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.
-#'@param dat A data table.
+#'@param gendat A data table with genetic component.
+#'@param nongendat A data table without genetic component.
 #'@param aH A k by k matrix. Characterizes the rate of the adaptive response for Z = 1.
 #'@param aL A k by k matrix. Characterize the rate of the adaptive response for Z = 0.
 #'@param f1H A deviation from the norm (or optimal) state for Z = 1.
@@ -169,10 +48,10 @@ setub <- function(k, params) {
 #'@examples
 #'library(stpm)
 #'#Reading the data:
-#'data <- simdata_gen_cont(N=5000)
+#'data <- simdata_gen_cont(N=100)
 #'head(data)
 #'#Parameters estimation:
-#'pars <- spm_gen(dat=data)
+#'pars <- spm_gen(gendat=data)
 #'pars
 #'
 spm_gen <- function(gendat, nongendat=NULL,
@@ -193,6 +72,129 @@ spm_gen <- function(gendat, nongendat=NULL,
                     mode="genetic",
                     gomp=FALSE,
                     ftol_rel=1.0e-6) {
+  
+  setlb <- function(k, params) {
+    # This function sets lower and upper boundaries for optim.
+    # - k - number of dimensions
+    # - params - initial parameters, a vector
+    #
+    # Lower boundaries:
+    lower_bound <- c()
+    # Setting boundaries for coefficients:
+    # aH, aL
+    start=1; end=k^2
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) }))) 
+    start=end+1; end=start+k^2-1
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) }))) 
+    
+    # f1H, f1L
+    start=end+1; end=start+k-1
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) }))) 
+    start=end+1; end=start+k-1
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) }))) 
+    
+    # QH, QL
+    start=end+1; end=start+k^2-1
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ ifelse(params[n] > 0, 0, params[n]+0.1*params[n]) })))
+    start=end+1; end=start+k^2-1
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ ifelse(params[n] > 0, 0, params[n]+0.1*params[n]) })))
+    
+    # fH, fL
+    start=end+1; end=start+k-1
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) })) )
+    start=end+1; end=start+k-1
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) })) )
+    
+    # bH, bL
+    start=end+1; end=start+k-1
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) })) )
+    start=end+1; end=start+k-1
+    lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){params[n] + ifelse(params[n] > 0, -0.1*params[n], 0.1*params[n]) })) )
+    
+    # mu0h, mu0L
+    start=end+1; end=start
+    lower_bound <- c( lower_bound, params[start:end] - 0.1*params[start:end])
+    start=end+1; end=start
+    lower_bound <- c( lower_bound, params[start:end] - 0.1*params[start:end])
+    
+    # thetah, thetal
+    start=end+1; end=start
+    lower_bound <- c( lower_bound, params[start:end] - 0.1*params[start:end])
+    start=end+1; end=start
+    lower_bound <- c( lower_bound, params[start:end] - 0.1*params[start:end])
+    
+    # p
+    start=end+1; end=start
+    lower_bound <- c( lower_bound, ifelse((params[start:end] - 0.1*params[start:end]) <= 0,
+                                          0,
+                                          params[start:end] - 0.1*params[start:end]))
+    
+    lower_bound
+  }
+  
+  setub <- function(k, params) {
+    # This function sets lower and upper boundaries for optim.
+    # - k - number of dimensions
+    # - params - initial parameters, a vector
+    #
+    #Upper boundaries:
+    upper_bound <- c()
+    # Setting boundaries for coefficients:
+    # aH, aL
+    start=1; end=k^2
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.1*params[n], 0*params[n]) })))
+    start=end+1; end=start+k^2-1
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.1*params[n], 0*params[n]) })))
+    
+    # f1H, f1L
+    start=end+1; end=start+k-1
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.1*params[n], params[n]- 0.1*params[n]) })))
+    start=end+1; end=start+k-1
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n] + 0.1*params[n], params[n]- 0.1*params[n]) })))
+    
+    # QH, QL
+    start=end+1; end=start+k^2-1
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {ifelse(params[n] > 0, params[n] + 0.1*params[n], params[n]-0.1*params[n] )})))
+    start=end+1; end=start+k^2-1
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {ifelse(params[n] > 0, params[n] + 0.1*params[n], params[n]-0.1*params[n] )})))
+    
+    # fH, fL
+    start=end+1; end=start+k-1
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.1*params[n], params[n]-0.1*params[n]) })))
+    start=end+1; end=start+k-1
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.1*params[n], params[n]-0.1*params[n]) })))
+    
+    # bH, bL
+    start=end+1; end=start+k-1
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.1*params[n], params[n]-0.1*params[n]) })))
+    start=end+1; end=start+k-1
+    upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n){ifelse(params[n] > 0, params[n]+0.1*params[n], params[n]-0.1*params[n]) })))
+    
+    # mu0h, mu0L
+    start=end+1; end=start
+    upper_bound <- c( upper_bound, params[start:end] + 0.1*params[start:end])
+    start=end+1; end=start
+    upper_bound <- c( upper_bound, params[start:end] + 0.1*params[start:end])
+    
+    # thetah, thetal
+    start=end+1; end=start
+    upper_bound <- c( upper_bound, params[start:end] + 0.1*params[start:end])
+    start=end+1; end=start
+    upper_bound <- c( upper_bound, params[start:end] + 0.1*params[start:end])
+    
+    # p
+    start=end+1; end=start
+    upper_bound <- c( upper_bound, 
+                      ifelse((params[start:end] + 0.1*params[start:end]) >= 1, 
+                             1, 
+                             (params[start:end] + 0.1*params[start:end])))
+    
+    
+    upper_bound
+  }
+  
+  
+  
   
   ###=======For DEBUG========###
   #dat = dat

@@ -36,6 +36,7 @@ Note: if not provided then the 3rd column from the y (vital statistics) dataset 
 If covariates not provided, then all columns from longitudinal table having index > 3 will be used as covariates.}
 
 \item{interval}{A number of breaks between observations for data for discrete model. 
+This interval must be numeric.
 Default = 1 unit of time.}
 
 \item{verbose}{A verbosing output indicator. Default=FALSE.}

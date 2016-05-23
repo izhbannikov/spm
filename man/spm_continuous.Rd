@@ -6,8 +6,8 @@
 \usage{
 spm_continuous(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
   mu0 = 2e-05, theta = 0.08, stopifbound = FALSE,
-  algorithm = "NLOPT_LN_COBYLA", lb = NULL, ub = NULL, maxeval = 500,
-  verbose = FALSE, pinv.tol = 0.01)
+  algorithm = "NLOPT_LN_NELDERMEAD", lb = NULL, ub = NULL,
+  maxeval = 500, verbose = FALSE, pinv.tol = 0.01, gomp = FALSE)
 }
 \arguments{
 \item{dat}{A data table.}
@@ -62,9 +62,11 @@ data <- simdata_cont(N=2)
 head(data)
 #Parameters estimation:
 pars <- spm_continuous(dat=data,a=-0.05, f1=80, 
-					 Q=2e-8, f=80, b=5, mu0=2e-5, theta=0.08)
+					           Q=2e-8, f=80, b=5, mu0=2e-5)
 pars
 
+Sets lower boundaries.
+Sets upper boundaries.
 }
 \references{
 Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
