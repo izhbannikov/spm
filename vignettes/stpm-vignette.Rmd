@@ -44,7 +44,7 @@ longdat <- read.csv(system.file("data","longdat.csv",package="stpm"))
 vitstat <- read.csv(system.file("data","vitstat.csv",package="stpm"))
 ```
 
-Below there is an example of clinical data that can be used in ```stpm``` and we will discuss the field later.
+Below there is an example of clinical data that can be used in ```stpm``` and we will discuss the fields later.
 
 Longitudinal table:
 
@@ -211,7 +211,7 @@ Here:
 
 ```ystart``` - A vector with length equal to number of dimensions used, defines starting values of covariates
 
-```tstart``` - A number that defines a start time (30 by default)
+```tstart``` - A number that defines a start time (30 by default). Can be a number (30 by default) or a vector of two numbers: c(a, b) - in this case, starting value of time is simulated via uniform(a,b) distribution.
 
 ```tend``` - A number, defines a final time (105 by default)
 
@@ -229,7 +229,7 @@ head(data)
 
 The corresponding function is (```k``` - a number of variables(covariates), equal to model's dimension):
 
-```simdata_cont(N=100, a=-0.05, f1=80, Q=2e-07, f=80, b=5, mu0=2e-05, theta=0.08, ystart=80, tstart=30, tend=105)```
+```simdata_cont(N=100, a=-0.05, f1=80, Q=2e-07, f=80, b=5, mu0=2e-05, theta=0.08, ystart=80, tstart=c(30,50), tend=105)```
 
 Here:
 
@@ -251,14 +251,14 @@ Here:
 
 ```ystart``` - A vector with length equal to number of dimensions used, defines starting values of covariates
 
-```tstart``` - A number that defines a start time (30 by default)
+```tstart``` - A number that defines a start time (30 by default). Can be a number (30 by default) or a vector of two numbers: c(a, b) - in this case, starting value of time is simulated via uniform(a,b) distribution.
 
 ```tend``` - A number, defines a final time (105 by default)
 
 
 This function returns a table with simulated data, as shown in example below:
 
-```{r}
+```{r, eval=T}
 library(stpm)
 data <- simdata_cont(N=10)
 head(data)
@@ -272,7 +272,7 @@ Stochastic Process Model has many applications in analysis of longitudinal biode
 
 GenSPM (Genetic SPM), presented in 2009 by Arbeev at al [6] and further advanced in [7,8], further elaborates the basic stochastic process model conception by introducing a categorical variable, $Z$, which may be a specific value of a genetic marker or, in general, any categorical variable. Currently, $Z$ has two gradations: 0 or 1 in a genetic group of interest, assuming that $P(Z=1) = p$, $p \in [0, 1]$, were $p$ is the proportion of carriers and non-carriers of an allele in a population. Example of longitudinal data with genetic component $Z$ is provided below.
 
-```{r}
+```{r, eval=T}
 library(stpm)
 data <- simdata_gen(N=10)
 head(data)
@@ -290,7 +290,7 @@ $\mu(t,Y(t)) = \mu_0(t) + (Y(t) - f(Z, t))^*Q(Z, t)(Y(t) - f(Z, t))$
 In this equation: $\mu_0(t)$ is the baseline hazard, which represents a risk when $Y(t)$ follows its optimal trajectory; f(t) ($k \times 1$ matrix) represents the optimal trajectory that minimizes the risk and $Q(Z, t)$ ($k \times k$ matrix) represents a sensitivity of risk function to deviation from the norm. In general, model coefficients $a(Z, t)$, $f1(Z, t)$, $Q(Z, t)$, $f(Z, t)$, $b(Z, t)$ and $\mu_0(t)$ are time(age)-dependent.
 Once we have data, we then can run analysis, i.e. estimate coefficients (they are assumed to be time-independent and data here is simulated):
 
-```{r}
+```{r, eval=T}
 library(stpm)
 #Generating data:
 data <- simdata_gen(N=1000)
@@ -304,7 +304,7 @@ Here \textbf{H} and \textbf{L} represents parameters when $Z$ = 1 (**H**) and 0 
 
 ###Joint analysis of two datasets: first dataset with genetic and second dataset with non-genetic component
 
-```{r}
+```{r, eval=T}
 library(stpm)
 data.genetic <- simdata_gen(N=100, mode='genetic')
 head(data.genetic)
@@ -315,7 +315,7 @@ pars <- spm_gen(gendat=data.genetic, nongendat = data.nongenetic, mode='combined
 pars
 ```
 
-
+Here mode 'genetic' is used for simlation of data with genetic component $Z$ and 'nongenetic' - without genetic component.
 
 ## References
 
