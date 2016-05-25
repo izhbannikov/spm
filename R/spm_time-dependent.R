@@ -37,7 +37,7 @@ trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 #'
 spm_time_dep <- function(x, 
                          start=list(a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3),
-                         f=list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"), 
+                         frm=list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"), 
                          stopifbound=FALSE, 
                          algorithm="NLOPT_LN_NELDERMEAD",
                          lb=NULL, ub=NULL,
@@ -416,7 +416,7 @@ spm_time_dep <- function(x,
   }
   #---------------------End of optimize---------------------------#
   
-  formulas <- f
+  formulas <- frm
   data <- as.matrix(x)
   data <- data[, 2:dim(data)[2]]
   formulas.work = list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
