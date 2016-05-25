@@ -14,7 +14,7 @@ trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 #'spm_time_dep : a function that estimates parameters from the model with time-dependent coefficients.
 #'@param x : input data table.
 #'@param start : a list of starting parameters, default: list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),
-#'@param f : a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
+#'@param frm : a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
 #'@param stopifbound Estimation stops if at least one parameter achieves lower or upper boundaries.
 #'@param algorithm An optimization algorithm used, can be one of those: NLOPT_LN_NEWUOA,NLOPT_LN_NEWUOA_BOUND or NLOPT_LN_NELDERMEAD. Default: NLOPT_LN_NELDERMEAD
 #'@param lb Lower bound of parameters under estimation.

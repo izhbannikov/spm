@@ -5,8 +5,8 @@
 \title{spm_time_dep : a function that estimates parameters from the model with time-dependent coefficients.}
 \usage{
 spm_time_dep(x, start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0
-  = 0.001), f = list(at = "a", f1t = "f1", Qt = "Q", ft = "f", bt = "b", mu0t
-  = "mu0"), stopifbound = FALSE, algorithm = "NLOPT_LN_NELDERMEAD",
+  = 0.001), frm = list(at = "a", f1t = "f1", Qt = "Q", ft = "f", bt = "b",
+  mu0t = "mu0"), stopifbound = FALSE, algorithm = "NLOPT_LN_NELDERMEAD",
   lb = NULL, ub = NULL, verbose = FALSE, maxeval = 100,
   ftol_rel = 1e-06)
 }
@@ -15,7 +15,7 @@ spm_time_dep(x, start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0
 
 \item{start}{: a list of starting parameters, default: list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),}
 
-\item{f}{: a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")}
+\item{frm}{: a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")}
 
 \item{stopifbound}{Estimation stops if at least one parameter achieves lower or upper boundaries.}
 
