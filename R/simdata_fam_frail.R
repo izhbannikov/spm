@@ -1,6 +1,16 @@
 # This script simulates data using familial frailty model
 simdata_fam_frail <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80", bt="5", mu0t="1e-3"),
-                             step=1, tstart=30, tend=105, ystart=80, sd0=1, nobs=NULL, ssq=0.5) {
+                             step=1, tstart=30, tend=105, ystart=80, sd0=1, nobs=NULL, gamma_mu=1, gamma_ssq=0.5) {
+  
+  simGamma <- function(gamma_mu, gamma_ssq) {
+    #Generate a plot of gamma distributions. 
+    # https://www.rocscience.com/help/swedge/webhelp/swedge/Gamma_Distribution.htm
+    aplha <- (gamma_mu)^2/gamma_ssq # shape
+    betta <- gamma_ssq/gamma_mu # scale
+    simgamma <- dgamma(1, shape=aplha, scale = betta) #Make probability density function for default gamma distribution
+    simgamma
+  }
+  
   formulas <- f  
   at <- NULL
   f1t <- NULL
@@ -30,8 +40,8 @@ simdata_fam_frail <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="8
     ans
   }
   
-  mu <- function(y, t) {
-    ans <- mu0t(t) + (y - ft(t))^2*Qt(t)
+  mu <- function(y, t, z) {
+    ans <- z*mu0t(t) + (y - ft(t))^2*Qt(t)
   }
   
   
@@ -40,60 +50,61 @@ simdata_fam_frail <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="8
   data <- matrix(nrow=1,ncol=6, NA)
   record <- 1
   id <- 0
-  
-  for(i in 1:N) {
-    
-    if(length(tstart) == 1) {
-      t2 <- tstart # Starting time
-    } else if(length(tstart) == 2){
-      t2 <- runif(1,tstart[1], tstart[2]) # Starting time
-    } else {
-      stop(paste("Incorrect tstart:", tstart))
-    }
-    
-    # Starting point
-    new_person <- FALSE
-    y2 <- rnorm(1,mean=ystart, sd=sd0) 
-    
-    n_observ <- 0
-    
-    while(new_person == FALSE){
-      t1 <- t2
-      t2 <- t1 + runif(1,-step/10,step/10) + step
-      y1 <- y2
-      
-      S <- exp(-1*mu(y1,t1)*(t2-t1))
-      
-      xi <- 0
-      if (S > runif(1,0,1)) {
-        xi <- 0
-        y2 <- rnorm(1,mean=m(y1, t1, t2), sd=sqrt(sigma_sq(t1,t2)))
-        new_person <- FALSE
-        cov <- c(y1, y2)
-        data <- rbind(data, c(id, xi, t1, t2, cov))
-        
+  famid <- 0
+  for(i in 1:N/2) { # N must be even
+    # Compute Z:
+    Z <- simGamma(gamma_mu, gamma_ssq)
+    for(ii in 1:2) {
+      if(length(tstart) == 1) {
+        t2 <- tstart # Starting time
+      } else if(length(tstart) == 2){
+        t2 <- runif(1,tstart[1], tstart[2]) # Starting time
       } else {
-        xi <- 1
-        y2 <- NA
-        new_person <- TRUE
-        cov <- c(y1, y2)
-        data <- rbind(data, c(id, xi, t1, t2, cov))
+        stop(paste("Incorrect tstart:", tstart))
       }
+    
+      # Starting point
+      new_person <- FALSE
+      y2 <- rnorm(1,mean=ystart, sd=sd0) 
+    
+      n_observ <- 0
+    
+      while(new_person == FALSE){
+        t1 <- t2
+        t2 <- t1 + runif(1,-step/10,step/10) + step
+        y1 <- y2
       
-      n_observ <- n_observ + 1
-      if(!is.null(nobs)) {
-        if(n_observ == nobs) {
-          new_person <- TRUE;
+        S <- exp(-1*mu(y1, t1, Z)*(t2-t1))
+      
+        xi <- 0
+        if (S > runif(1,0,1)) {
+          xi <- 0
+          y2 <- rnorm(1,mean=m(y1, t1, t2), sd=sqrt(sigma_sq(t1,t2)))
+          new_person <- FALSE
+          cov <- c(y1, y2)
+          data <- rbind(data, c(id, xi, t1, t2, cov))
+        } else {
+          xi <- 1
+          y2 <- NA
+          new_person <- TRUE
+          cov <- c(y1, y2)
+          data <- rbind(data, c(id, xi, t1, t2, cov))
+        }
+      
+        n_observ <- n_observ + 1
+        if(!is.null(nobs)) {
+          if(n_observ == nobs) {
+            new_person <- TRUE;
+          }
+        }
+      
+        if(t2 > tend & new_person == FALSE) {
+          new_person <- TRUE
         }
       }
-      
-      if(t2 > tend & new_person == FALSE) {
-        new_person <- TRUE
-        
-      }
+      id <- id + 1
     }
-    
-    id <- id + 1
+    famid <- famid + 1
   }
   
   # One last step:
