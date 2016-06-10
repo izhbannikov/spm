@@ -168,7 +168,7 @@ spm <- function(x, model="discrete", formulas = NULL, start=NULL, tol=NULL,
     }
     
     res <- spm_time_dep(x[[1]], 
-                        f=formulas,
+                        frm=formulas,
                         start=start,
                         algorithm=algorithm,
                         lb=lb, ub=ub,

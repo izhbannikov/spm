@@ -54,6 +54,7 @@ prepare_data <- function(x, y,
     stop(paste(x, ":", "unknown file format, it must be csv or sas7bdat."))
   }
   
+  
   if(file_ext(y) == "csv") {
     vitstat <- read.csv(y)
   } else if(file_ext(y) == "sas7bdat") {
