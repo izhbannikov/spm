@@ -10,6 +10,10 @@
 * Time-dependant coefficients (one-dimensional optimisation)
 
 ### How to install
+
+\textbf{Note: for Windows, please install Rtools: https://cran.r-project.org/bin/windows/Rtools/}
+
+Then:
 ```
 install.packages("devtools")
 library(devtools)
