@@ -12,7 +12,7 @@
 ### How to install
 
 **Note:** for Windows, please install Rtools: https://cran.r-project.org/bin/windows/Rtools/
-
+**Note:** compilation under Windows may fail if you run Windows on a virtual machine!
 Then:
 ```
 install.packages("devtools")
