@@ -11,7 +11,7 @@
 
 ### How to install
 
-\textbf{Note: for Windows, please install Rtools: https://cran.r-project.org/bin/windows/Rtools/}
+**Note:** for Windows, please install Rtools: https://cran.r-project.org/bin/windows/Rtools/
 
 Then:
 ```
