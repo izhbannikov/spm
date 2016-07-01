@@ -2,7 +2,7 @@ exportPattern("^[[:alpha:]]+")
 # Import required packages:
 import(stats)
 import(Rcpp)
-import(RcppArmadillo)
+#import(RcppArmadillo)
 import(sas7bdat)
 import(mice) 
 import(tools)

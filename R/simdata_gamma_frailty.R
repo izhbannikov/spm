@@ -1,4 +1,27 @@
-# This script simulates data using familial frailty model
+#' This script simulates data using familial frailty model. 
+#' We use the following variation: gamma(mu, ssq), where mu is the mean and ssq is sigma square.
+#' See: https://www.rocscience.com/help/swedge/webhelp/swedge/Gamma_Distribution.htm
+#' @param N Number of individuals.
+#' @param f a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q*exp(theta*t)", ft="f", bt="b", mu0t="mu0*exp(theta*t)")
+#' @param step An interval between two observations, a random uniformally-distributed value is then added to this step.
+#' @param tstart Starting time (age).
+#' Can be a number (30 by default) or a vector of two numbers: c(a, b) - in this case, starting value of time 
+#' is simulated via uniform(a,b) distribution.
+#' @param tend A number, defines final time (105 by default).
+#' @param ystart A starting value of covariates.
+#' @param sd0 A standard deviation for modelling the next covariate value, sd0 = 1 by default. 
+#' @param nobs A number of observations (lines) for individual observations.
+#' @param gamma_mu A parameter which is a mean value, default = 1
+#' @param gamma_ssq A sigma squared, default = 0.5.
+#' @return A table with simulated data.
+#'@references Yashin, A. et al (2007), Health decline, aging and mortality: how are they related? 
+#'Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
+#' @examples
+#' library(stpm)
+#' dat <- simdata_gamma_frailty(N=100)
+#' head(dat)
+#'
+
 simdata_gamma_frailty <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80", bt="5", mu0t="1e-3"),
                              step=1, tstart=30, tend=105, ystart=80, sd0=1, nobs=NULL, gamma_mu=1, gamma_ssq=0.5) {
   
