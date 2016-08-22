@@ -44,7 +44,7 @@ See: https://www.rocscience.com/help/swedge/webhelp/swedge/Gamma_Distribution.ht
 }
 \examples{
 library(stpm)
-dat <- simdata_time_dep(N=100)
+dat <- simdata_gamma_frailty(N=100)
 head(dat)
 
 }

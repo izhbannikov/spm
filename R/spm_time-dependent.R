@@ -243,7 +243,7 @@ spm_time_dep <- function(x,
     # Lower and upper boundaries calculation:
     
     lower_bound <- c()
-    print(stpar)
+    
     if(is.null(lb)) {
       for(i in 1:length(stpar)) {
         if(stpar[[i]] == 0) {stpar[[i]] = 1e-12}
@@ -306,6 +306,7 @@ spm_time_dep <- function(x,
       }
       
       mu <- function(y,t) {
+        #print(paste(t, mu0t(t)))
         ans <- mu0t(t) + (y - ft(t))^2*Qt(t)
         ans
       }
@@ -330,6 +331,8 @@ spm_time_dep <- function(x,
           t1 <- data[i, 2]; t2 <- data[i, 3]
           ind <- ifelse(is.na(data[i, 5]), 0, 1)
           S <- exp(-1*mu(data[i, 4],t1)*(t2-t1))
+          #print(paste(data[i, 4], t2, t1, t2-t1))
+          #print(-1*mu(data[i, 4],t1)*(t2-t1))
           if(ind == 0) {
             L <- L + (1 - delta)*log(S) + delta*log(1-S)
           } else {
@@ -338,6 +341,8 @@ spm_time_dep <- function(x,
             pn <- -1*log(sqrt(2*pi)*sqrt(sigma_sq(t1, t2))) - (yj - mj)^2/(2*sigma_sq(t1, t2))
             L <- L + pn + (1 - delta)*log(S) + delta*log(1-S)
           }
+          
+          
         }
         
         #assign("results", results, envir=.GlobalEnv)
@@ -388,6 +393,7 @@ spm_time_dep <- function(x,
       print(lower_bound)
       cat("Upper bound:\n")
       print(upper_bound)
+      
     }
     tryCatch({ans <- nloptr(x0 = unlist(stpar), 
                             eval_f = maxlik_t, opts = list("algorithm"=algorithm, 
@@ -408,8 +414,6 @@ spm_time_dep <- function(x,
     },  
     error=function(e) {if(verbose  == TRUE) {print(e)}}, 
     finally=NA)
-    
-    
     
     final_res <- list(results)
     final_res

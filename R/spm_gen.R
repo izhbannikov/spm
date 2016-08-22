@@ -1,11 +1,11 @@
-#'Continuous multi-dimensional optimization for Genetic SPM (multidimensional GenSPM)
+#'Continuous-time multi-dimensional optimization for SPM with partially observed covariates (multidimensional GenSPM)
 #'@references Arbeev, K.G. et al (2009). Genetic model for longitudinal studies of aging, health, and longevity
 # and its potential application to incomplete data. Journal of Theoretical
 # Biology 258(1), 103{111 (2009).<doi:10.1016/j.jtbi.2009.01.023>
 #'@references Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
 #'and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.
-#'@param gendat A data table with genetic component.
-#'@param nongendat A data table without genetic component.
+#'@param x A data table with genetic component.
+#'@param y A data table without genetic component.
 #'@param aH A k by k matrix. Characterizes the rate of the adaptive response for Z = 1.
 #'@param aL A k by k matrix. Characterize the rate of the adaptive response for Z = 0.
 #'@param f1H A deviation from the norm (or optimal) state for Z = 1.
@@ -22,7 +22,7 @@
 #'@param mu0L A baseline mortality for Z = 0.
 #'@param thetaH A displacement coefficient for Z = 1.
 #'@param thetaL A displacement coefficient for Z = 0.
-#'@param p A percentage of carriers in a population (default p=0.25).
+#'@param p a hyphotetical percentage of presence of partially observed covariate in a population (default p=0.25).
 #'@param stopifbound If TRUE then estimation stops if at least one parameter achieves lower or upper boundaries.
 #'@param algorithm An optimization algorithm used, can be one of those provided by \code{nloptr}. 
 #'#'Check the NLopt website for a description of
@@ -34,27 +34,26 @@
 #'@param verbose An indicator of verbosing output (FALSE by default).
 #'@param pinv.tol A tolerance value for pseudo-inverse of matrix gamma (see Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
 #'and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.)
-#'@param mode Can be one of the following: "genetic" (default), "nongenetic" or "combined". 
-#'mode = "genetic" represents analysing only data of genetic group (which contains a value of genetic marker);
-#'mode = "nongenetic" represents analysing only data of non-genetic group (not genotyped group).
-#'mode = "combined" denoted joint analysis of both genetic and non-genetic groups.
-#'@param gomp A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
-#' mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).
+#'@param mode Can be one of the following: "observed" (default), "unobserved" or "combined". 
+#'mode = "observed" represents analysing only dataset with observed variable Z.
+#'mode = "unobserved" represents analysing only dataset of unobserved variable Z.
+#'mode = "combined" denoted joint analysis of both observed and unobserved datasets.
+#'@param gomp A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 is used:
+#' mu0 = mu0*exp(theta*t).
 #'@param ftol_rel Relative tolerance threshold for likelihood function (defalult: 1e-6), see http://ab-initio.mit.edu/wiki/index.php/NLopt_Reference
 #'@return A set of estimated parameters aH, aL, f1H, f1H, QH, QL, fH, fL, bH, bL, mu0H, mu0L, thetaH, thetaL, p and
 #'additional variable \code{limit} which indicates if any parameter 
 #'achieved lower or upper boundary conditions (FALSE by default).
-#'@details \code{spm_continuous} runs much slower that discrete but more precise and can handle time intervals with different lengths.
 #'@examples
 #'library(stpm)
 #'#Reading the data:
-#'data <- simdata_gen(N=100)
+#'data <- sim_pobs(N=100)
 #'head(data)
 #'#Parameters estimation:
-#'pars <- spm_gen(gendat=data)
+#'pars <- spm_pobs(x=data)
 #'pars
 #'
-spm_gen <- function(gendat, nongendat=NULL,
+spm_pobs <- function(x=NULL, y=NULL,
                     aH=-0.05, aL=-0.01, 
                     f1H=60, f1L=80, 
                     QH=2e-8, QL=2.5e-8, 
@@ -69,7 +68,7 @@ spm_gen <- function(gendat, nongendat=NULL,
                     maxeval=500,
                     verbose=FALSE,
                     pinv.tol=0.01,
-                    mode="genetic",
+                    mode="observed",
                     gomp=FALSE,
                     ftol_rel=1.0e-6) {
   
@@ -241,21 +240,25 @@ spm_gen <- function(gendat, nongendat=NULL,
     stop(cat("Provided algorithm", algorithm, "not in the list of available optimization methods."))
   }
   
-  mode_avail <- c("genetic", "nongenetic", "combined")
+  mode_avail <- c("observed", "unobserved", "combined")
   if(!(mode %in% mode_avail)){
     stop(cat("Provided mode ", mode, " not found in a set of available modes: ", mode_avail))
   }
   
-  
-  dat <- as.matrix(gendat[, 2:dim(gendat)[2]])
-  
-  if( !is.null(nongendat) & (mode == "nongenetic" | mode == "combined") ) {
+  if(verbose)
     cat("Provided mode: ", mode, "\n")
-    nongendat <- as.matrix(nongendat[, 2:dim(nongendat)[2]])
-  } else if( is.null(nongendat) & (mode == "genetic") ){
-    cat("Provided mode: ", mode, "\n")
-  } else {
-    stop(cat("Provided mode:", mode, " but non-genetic data is NULL"))
+  
+  if((mode == "observed" | mode == "combined") & !is.null(x)) {
+    dat <- as.matrix(x[, 2:dim(x)[2]])
+  }
+  
+  if( !is.null(y) & (mode == "unobserved" | mode == "combined") ) {
+    #cat("Provided mode: ", mode, "\n")
+    unobsdat <- as.matrix(y[, 2:dim(y)[2]])
+  } 
+  
+  if(!(mode %in% mode_avail)) {
+    stop(cat("Provided mode:", mode, " is unknown or provided data is null."))
   }
   
   
@@ -266,12 +269,14 @@ spm_gen <- function(gendat, nongendat=NULL,
   if(mu0L < 0) {mu0L <- 0}
   
   #######################################################################################################
-  dd <- cbind(dat[,1], dat[,5])
-  colnames(dd) <- c("id", "G")
-  ddd <- data.frame(dd)
-  d<-aggregate(G ~ id, data=ddd, FUN=mean)
-  N.c <- length(which(d$G == 1)) # Carriers
-  N.nc <- length(which(d$G == 0)) # Non-carriers
+  if(mode == "observed" | mode == "combined") {
+    dd <- cbind(dat[,1], dat[,5])
+    colnames(dd) <- c("id", "Z")
+    ddd <- data.frame(dd)
+    d<-aggregate(Z ~ id, data=ddd, FUN=mean)
+    N.c <- length(which(d$Z == 1)) # Carriers
+    N.nc <- length(which(d$Z == 0)) # Non-carriers
+  }
   #######################################################################################################
   
   parameters <- c(t(aH), t(aL), f1H, f1L, t(QH), t(QL), fH, fL, bH, bL, mu0H, mu0L, thetaH, thetaL, p)
@@ -412,8 +417,7 @@ spm_gen <- function(gendat, nongendat=NULL,
     
     res <- 0
     if(stopflag == FALSE) {
-      
-      if(mode == "genetic" | mode == "combined") {
+      if(mode == "observed" | mode == "combined") {
         res1 <- .Call("complik_gen", dat, dim(dat)[1], dim(dat)[2], 
                    ah, al,
                    f1h, f1l,
@@ -427,7 +431,7 @@ spm_gen <- function(gendat, nongendat=NULL,
                    k, pinv.tol,
                    gomp)
         if(mode == "combined") {
-          res2 <- .Call("complikGenNonGenetic", nongendat, dim(nongendat)[1], dim(nongendat)[2], 
+          res2 <- .Call("complikGenNonGenetic", unobsdat, dim(unobsdat)[1], dim(unobsdat)[2], 
                         ah, al,
                         f1h, f1l,
                         Qh, Ql,
@@ -442,8 +446,8 @@ spm_gen <- function(gendat, nongendat=NULL,
         } else {
           res <- res1
         }
-      } else if(mode == "nongenetic") {
-        res <- .Call("complikGenNonGenetic", nongendat, dim(nongendat)[1], dim(nongendat)[2],
+      } else if(mode == "unobserved") {
+        res <- .Call("complikGenNonGenetic", unobsdat, dim(unobsdat)[1], dim(unobsdat)[2],
                      ah, al,
                      f1h, f1l,
                      Qh, Ql,
@@ -501,7 +505,7 @@ spm_gen <- function(gendat, nongendat=NULL,
   }
   final_results$limit <- limit
   #assign("results", final_results, envir=baseenv())
-  class(final_results) <- "gen.spm"
+  class(final_results) <- "pobs.spm"
   
   invisible(final_results)
 }

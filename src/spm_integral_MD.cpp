@@ -56,17 +56,35 @@ void func1(arma::mat *res, double t, arma::mat *y, arma::mat fH, arma::mat f1H, 
   
   res[0] = -1.00 * (aH*hf1H) + 2.00 * ((y[1]*Q(t, QH, theta))*hfH);
   res[1] = aH*y[1] + y[1]*aH.t() + bH*bH.t() - 2.00 * ((y[1]*Q(t, QH, theta))*y[1]);
-  
+  //std::cout << "theta: " << theta << " QH:" << QH << " y[0]:" << y[0] << " y[1]:" << y[1] << " Q:" << Q(t, QH, theta) << " res0:" << res[0] << " res1:" << res[1]<< std::endl;
 }
+
+//Calculating m (y[1]) & gamma(y[2]):
+std::vector<arma::mat> func1(std::vector<arma::mat> res, double t, std::vector<arma::mat> y, arma::mat fH, arma::mat f1H, arma::mat aH, 
+           arma::mat bH, arma::mat QH, double theta) {
+  
+  arma::mat hfH, hf1H, dy1, dy2;
+  //hfH = fH.t() - y[0]; 
+  //hf1H = f1H.t() - y[0];
+  hfH = fH - y[0]; 
+  hf1H = f1H - y[0];
+  
+  res[0] = -1.00 * (aH*hf1H) + 2.00 * ((y[1]*Q(t, QH, theta))*hfH);
+  res[1] = aH*y[1] + y[1]*aH.t() + bH*bH.t() - 2.00 * ((y[1]*Q(t, QH, theta))*y[1]);
+  //std::cout << "theta: " << theta << " QH:" << QH << " y[0]:" << y[0] << " y[1]:" << y[1] << " Q:" << Q(t, QH, theta) << " res0:" << res[0] << " res1:" << res[1]<< std::endl;
+  return res;
+}
+
 
 
 arma::mat Q(double t, arma::mat QH, double theta) {
   arma::mat Q;
-  if(gomp) {
+  /*if(gomp) {
     Q = QH*exp(theta*t);
   } else {
     Q = QH;
-  }
+  }*/
+  Q = QH;
   return Q;
 }
 
@@ -175,6 +193,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
         s = s + ifactor*h/3.00*(-1.00)*mu(t,out[0],out[1], fH, f1H, mu0H, thetaH, QH);
         
       }
+      
       
       arma::mat m2 = out[0];
       arma::mat gamma2 = out[1];
@@ -449,21 +468,29 @@ RcppExport SEXP complik_gen(SEXP dat, SEXP n, SEXP m,
   double p = as<double>(p_);
   
   //End of data loading
-  arma::mat *out, *k1ar, *yfin, *ytmp, *k2ar, *k3ar, *k4ar;
+  /*arma::mat *out, *k1ar, *yfin, *ytmp, *k2ar, *k3ar, *k4ar;
   out = new arma::mat[2];
-  k1ar = new arma::mat[2];
-  yfin = new arma::mat[2];
-  ytmp = new arma::mat[2];
-  k2ar = new arma::mat[2];
-  k3ar = new arma::mat[2];
-  k4ar = new arma::mat[2];
+  k1ar = new arma::mat[2]; k1ar->resize(2,1);
+  yfin = new arma::mat[2]; yfin->resize(2,1);
+  ytmp = new arma::mat[2]; ytmp->resize(2,1);
+  k2ar = new arma::mat[2]; k2ar->resize(2,1);
+  k3ar = new arma::mat[2]; k3ar->resize(2,1);
+  k4ar = new arma::mat[2]; k4ar->resize(2,1);
+  */
+  std::vector<arma::mat> out; out.resize(2);
+  std::vector<arma::mat> k1ar; k1ar.resize(2);
+  std::vector<arma::mat> yfin; yfin.resize(2);
+  std::vector<arma::mat> ytmp; ytmp.resize(2);
+  std::vector<arma::mat> k2ar; k2ar.resize(2);
+  std::vector<arma::mat> k3ar; k3ar.resize(2);
+  std::vector<arma::mat> k4ar; k4ar.resize(2);
   
   arma::mat y1(dim,1);
   arma::mat y2(dim,1);
   arma::mat gamma1(dim,dim);
   
-  L = 0;
-  double  nsteps = 2;
+  L = 0.0;
+  double  nsteps = 16;
   
   int G = 0; // Genetic variable
   
@@ -481,9 +508,9 @@ RcppExport SEXP complik_gen(SEXP dat, SEXP n, SEXP m,
     }
     
     double tdiff = t2-t1;
-    if(tdiff > 2) {
+    /*if(tdiff > 2) {
       nsteps = 2*tdiff;
-    }
+    }*/
     
     double h = tdiff/nsteps;
     
@@ -504,9 +531,9 @@ RcppExport SEXP complik_gen(SEXP dat, SEXP n, SEXP m,
     for(int j = 0; j < nsteps; j++) {
       //Runge-Kutta method:
       if(G == 1) {
-        func1(k1ar, t, out, fH, f1H, aH, bH, QH, thetaH);
+        k1ar = func1(k1ar, t, out, fH, f1H, aH, bH, QH, thetaH);
       } else {
-        func1(k1ar, t, out, fL, f1L, aL, bL, QL, thetaL);
+        k1ar = func1(k1ar, t, out, fL, f1L, aL, bL, QL, thetaL);
       }
       yfin[0] = out[0] + h/6.00*k1ar[0];
       yfin[1] = out[1] + h/6.00*k1ar[1];
@@ -514,9 +541,9 @@ RcppExport SEXP complik_gen(SEXP dat, SEXP n, SEXP m,
       ytmp[1] = out[1] + h/2.00*k1ar[1];
       
       if(G == 1) {
-        func1(k2ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
+        k2ar = func1(k2ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
       } else {
-        func1(k2ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL);
+        k2ar = func1(k2ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL);
       }
       yfin[0] = yfin[0] + h/3.00*k2ar[0];
       yfin[1] = yfin[1] + h/3.00*k2ar[1];
@@ -524,9 +551,9 @@ RcppExport SEXP complik_gen(SEXP dat, SEXP n, SEXP m,
       ytmp[1] = out[1] + h/2.00*k2ar[1];
       
       if(G == 1) {
-        func1(k3ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
+        k3ar = func1(k3ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
       } else {
-        func1(k3ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL);
+        k3ar = func1(k3ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL);
       }
       yfin[0] = yfin[0] + h/3.00*k3ar[0];
       yfin[1] = yfin[1] + h/3.00*k3ar[1];
@@ -534,9 +561,9 @@ RcppExport SEXP complik_gen(SEXP dat, SEXP n, SEXP m,
       ytmp[1] = out[1] + h*k3ar[1];
       
       if(G == 1) {
-        func1(k4ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
+        k4ar = func1(k4ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
       } else {
-        func1(k4ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL);
+        k4ar = func1(k4ar, t, ytmp, fL, f1L, aL, bL, QL, thetaL);
       }
       out[0] = yfin[0] + h/6.00*k4ar[0];
       out[1] = yfin[1] + h/6.00*k4ar[1];
@@ -576,27 +603,33 @@ RcppExport SEXP complik_gen(SEXP dat, SEXP n, SEXP m,
       //arma::mat exp = -0.50*dim*log(2.00*pi*det(gamma2)) - 0.50*(m2-y2).t()*inv(gamma2)*(m2-y2); // inv() fails very ofter
       
       L += s + exp(0,0); 
+      
     } else {
       double logprobi; 
       if(G == 1) {
         //logprobi = log(1.00 - exp(-1.00*mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH)));
         logprobi = log(mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH));
+        
       } else {
         //logprobi = log(1.00 - exp(-1.00*mu(t2, m2, gamma2, fL, f1L, mu0L, thetaL, QL)));
         logprobi = log(mu(t2, m2, gamma2, fL, f1L, mu0L, thetaL, QL));
+       
       }
+      
       L += s + logprobi;
+      
     }
+    
   }
   
-  delete[] out;
+  /*delete[] out;
   delete[] k1ar;
   delete[] yfin;
   delete[] ytmp;
   delete[] k2ar;
   delete[] k3ar;
   delete[] k4ar;
-  
+  */
   //L = pow(p, nc)*pow(1-p, nnc)*L;
   L = log(pow(p, nc)*pow(1-p, nnc)) + L;
   
@@ -656,7 +689,7 @@ RcppExport SEXP simGenCont(SEXP n,
   arma::mat y2(dim,1);
   arma::mat gamma1(dim,dim);
   
-  double  nsteps = 2;
+  double  nsteps = 8;
   
   Rcpp::NumericVector tstart = Rcpp::NumericVector(tstart_);
   arma::mat ystart = as<arma::mat>(ystart_);
@@ -708,7 +741,7 @@ RcppExport SEXP simGenCont(SEXP n,
     n_observ = 0;
     
     while(new_person == false) {
-      nsteps = 10;
+      //nsteps = 10;
       double tdiff = t2-t1;
       
       double h = tdiff/nsteps;
@@ -932,6 +965,7 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
   //===============================End of data loading========================================//
   
   // Carriers
+  /*
   arma::mat *out1, *k1ar1, *yfin1, *ytmp1, *k2ar1, *k3ar1, *k4ar1;
   out1 = new arma::mat[2];
   k1ar1 = new arma::mat[2];
@@ -940,8 +974,17 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
   k2ar1 = new arma::mat[2];
   k3ar1 = new arma::mat[2];
   k4ar1 = new arma::mat[2];
+  */
+  std::vector<arma::mat> out1; out1.resize(2);
+  std::vector<arma::mat> k1ar1; k1ar1.resize(2);
+  std::vector<arma::mat> yfin1; yfin1.resize(2);
+  std::vector<arma::mat> ytmp1; ytmp1.resize(2);
+  std::vector<arma::mat> k2ar1; k2ar1.resize(2);
+  std::vector<arma::mat> k3ar1; k3ar1.resize(2);
+  std::vector<arma::mat> k4ar1; k4ar1.resize(2);
   //=====================//
   // Non-carriers
+  /*
   arma::mat *out0, *k1ar0, *yfin0, *ytmp0, *k2ar0, *k3ar0, *k4ar0;
   out0 = new arma::mat[2];
   k1ar0 = new arma::mat[2];
@@ -950,6 +993,15 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
   k2ar0 = new arma::mat[2];
   k3ar0 = new arma::mat[2];
   k4ar0 = new arma::mat[2];
+  */
+  std::vector<arma::mat> out0; out0.resize(2);
+  std::vector<arma::mat> k1ar0; k1ar0.resize(2);
+  std::vector<arma::mat> yfin0; yfin0.resize(2);
+  std::vector<arma::mat> ytmp0; ytmp0.resize(2);
+  std::vector<arma::mat> k2ar0; k2ar0.resize(2);
+  std::vector<arma::mat> k3ar0; k3ar0.resize(2);
+  std::vector<arma::mat> k4ar0; k4ar0.resize(2);
+  
   //=====================//
   
   arma::mat y1(dim,1);
@@ -957,7 +1009,7 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
   arma::mat gamma1(dim,dim);
   
   L = 0.0;
-  long double  nsteps = 2;
+  long double  nsteps = 16;
   
   for(int i=0; i<N; i++) {
     //Solving differential equations on intervals:
@@ -972,9 +1024,9 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
     }
     
     long double tdiff = t2-t1;
-    if(tdiff > 2) {
+    /*if(tdiff > 2) {
       nsteps = 2*tdiff;
-    }
+    }*/
     
     long double h = tdiff/nsteps;
     
@@ -1002,9 +1054,11 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
     for(int j = 0; j < nsteps; j++) {
       //Runge-Kutta method:
       // Carriers
-      func1(k1ar1, t, out1, fH, f1H, aH, bH, QH, thetaH);
+      //func1(k1ar1, t, out1, fH, f1H, aH, bH, QH, thetaH);
+      k1ar1 = func1(k1ar1, t, out1, fH, f1H, aH, bH, QH, thetaH);
       // Non-carriers
-      func1(k1ar0, t, out0, fL, f1L, aL, bL, QL, thetaL);
+      //func1(k1ar0, t, out0, fL, f1L, aL, bL, QL, thetaL);
+      k1ar0 = func1(k1ar0, t, out0, fL, f1L, aL, bL, QL, thetaL);
       // Carriers
       yfin1[0] = out1[0] + h/6.00*k1ar1[0];
       yfin1[1] = out1[1] + h/6.00*k1ar1[1];
@@ -1017,9 +1071,11 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
       ytmp0[1] = out0[1] + h/2.00*k1ar0[1];
       
       // Carriers
-      func1(k2ar1, t, ytmp1, fH, f1H, aH, bH, QH, thetaH);
+      //func1(k2ar1, t, ytmp1, fH, f1H, aH, bH, QH, thetaH);
+      k2ar1 = func1(k2ar1, t, ytmp1, fH, f1H, aH, bH, QH, thetaH);
       // Non-carriers
-      func1(k2ar0, t, ytmp0, fL, f1L, aL, bL, QL, thetaL);
+      //func1(k2ar0, t, ytmp0, fL, f1L, aL, bL, QL, thetaL);
+      k2ar0 = func1(k2ar0, t, ytmp0, fL, f1L, aL, bL, QL, thetaL);
       // Carriers
       yfin1[0] = yfin1[0] + h/3.00*k2ar1[0];
       yfin1[1] = yfin1[1] + h/3.00*k2ar1[1];
@@ -1032,9 +1088,11 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
       ytmp0[1] = out0[1] + h/2.00*k2ar0[1];
       
       // Carriers
-      func1(k3ar1, t, ytmp1, fH, f1H, aH, bH, QH, thetaH);
+      //func1(k3ar1, t, ytmp1, fH, f1H, aH, bH, QH, thetaH);
+      k3ar1 = func1(k3ar1, t, ytmp1, fH, f1H, aH, bH, QH, thetaH);
       // Non-carriers
-      func1(k3ar0, t, ytmp0, fL, f1L, aL, bL, QL, thetaL);
+      //func1(k3ar0, t, ytmp0, fL, f1L, aL, bL, QL, thetaL);
+      k3ar0 = func1(k3ar0, t, ytmp0, fL, f1L, aL, bL, QL, thetaL);
       // Carriers
       yfin1[0] = yfin1[0] + h/3.00*k3ar1[0];
       yfin1[1] = yfin1[1] + h/3.00*k3ar1[1];
@@ -1047,9 +1105,11 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
       ytmp0[1] = out0[1] + h*k3ar0[1];
       
       // Carriers
-      func1(k4ar1, t, ytmp1, fH, f1H, aH, bH, QH, thetaH);
+      //func1(k4ar1, t, ytmp1, fH, f1H, aH, bH, QH, thetaH);
+      k4ar1 = func1(k4ar1, t, ytmp1, fH, f1H, aH, bH, QH, thetaH);
       // Non-carriers
-      func1(k4ar0, t, ytmp0, fL, f1L, aL, bL, QL, thetaL);
+      //func1(k4ar0, t, ytmp0, fL, f1L, aL, bL, QL, thetaL);
+      k4ar0 = func1(k4ar0, t, ytmp0, fL, f1L, aL, bL, QL, thetaL);
       // Carriers
       out1[0] = yfin1[0] + h/6.00*k4ar1[0];
       out1[1] = yfin1[1] + h/6.00*k4ar1[1];
@@ -1142,7 +1202,7 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
   }
   
   // Cleaning up
-  delete[] out1;
+  /*delete[] out1;
   delete[] k1ar1;
   delete[] yfin1;
   delete[] ytmp1;
@@ -1157,7 +1217,7 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
   delete[] k2ar0;
   delete[] k3ar0;
   delete[] k4ar0;
-  
+  */
   return(Rcpp::wrap(L));
 }
 
