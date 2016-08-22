@@ -136,8 +136,23 @@ spm_projection <- function(x,
       stat[["mean.by.age"]][[colnames(res.discr)[i]]] <- mean.cov
     }
     
+    vt <- data.frame(matrix(nrow=N, ncol=5))
+    df <- data.frame(res.discr)
+    ddg <- split(df, f=df$id)
+    
+    invisible(sapply(1:N, 
+                     function(i) {  dg <- ddg[[i]]
+                     vt[i,] <<- c(dg[1,1], # id
+                                  dg[dim(dg)[1], 4] - dg[1, 3], # time
+                                  dg[dim(dg)[1], 2], # case
+                                  dg[1, 3], # start
+                                  dg[dim(dg)[1], 4])} # end
+    ))
+    
+    colnames(vt) = c("id", "time", "case", "start", "end")
+    
     #Survival probabilities:
-    srv.prob <- survfit( Surv(t1, xi) ~ 1, conf.type="none", data = data.frame(res.discr))
+    srv.prob <- survfit( Surv(time, case) ~ 1, data = vt, conf.type="none")
     stat[["srv.prob"]] <- srv.prob
     
     res <- list(data=res.discr, stat=stat)
@@ -175,7 +190,23 @@ spm_projection <- function(x,
     }
     
     #Survival probabilities:
-    srv.prob <- survfit( Surv(t1, xi) ~ 1, conf.type="none", data = data.frame(res.cont))
+    vt <- data.frame(matrix(nrow=N, ncol=5))
+    df <- data.frame(res.cont)
+    ddg <- split(df, f=df$id)
+    
+    invisible(sapply(1:N, 
+                     function(i) {  dg <- ddg[[i]]
+                                    vt[i,] <<- c(dg[1,1], # id
+                                                dg[dim(dg)[1], 4] - dg[1, 3], # time
+                                                dg[dim(dg)[1], 2], # case
+                                                dg[1, 3], # start
+                                                dg[dim(dg)[1], 4])} # end
+    ))
+    
+    colnames(vt) = c("id", "time", "case", "start", "end")
+    
+    #Survival probabilities:
+    srv.prob <- survfit( Surv(time, case) ~ 1, data = vt, conf.type="none")
     stat[["srv.prob"]] <- srv.prob
     
     res <- list(data=res.cont, stat=stat)
