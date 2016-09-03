@@ -47,7 +47,7 @@
 #'@examples
 #'library(stpm)
 #'#Reading the data:
-#'data <- sim_pobs(N=100)
+#'data <- sim_pobs(N=5)
 #'head(data)
 #'#Parameters estimation:
 #'pars <- spm_pobs(x=data)
@@ -69,7 +69,7 @@ spm_pobs <- function(x=NULL, y=NULL,
                     verbose=FALSE,
                     pinv.tol=0.01,
                     mode="observed",
-                    gomp=FALSE,
+                    gomp=TRUE,
                     ftol_rel=1.0e-6) {
   
   setlb <- function(k, params) {

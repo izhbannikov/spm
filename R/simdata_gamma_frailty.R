@@ -18,10 +18,9 @@
 #'Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
 #' @examples
 #' library(stpm)
-#' dat <- simdata_gamma_frailty(N=100)
+#' dat <- simdata_gamma_frailty(N=10)
 #' head(dat)
 #'
-
 simdata_gamma_frailty <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80", bt="5", mu0t="1e-3"),
                              step=1, tstart=30, tend=105, ystart=80, sd0=1, nobs=NULL, gamma_mu=1, gamma_ssq=0.5) {
   
