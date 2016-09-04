@@ -7,7 +7,8 @@ output: rmarkdown::html_document
 vignette: >
   
   %\VignetteIndexEntry{stpm}
-  %\VignetteEngine{knitr::r_markdown}
+  %\VignetteEngine{knitr::rmarkdown}
+  usepackage[utf8]{inputenc}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -172,12 +173,12 @@ The corresponding equations will be equivalent to one-dimensional continuous cas
 ```{r}
 library(stpm)
 #Data preparation:
-n <- 500
+n <- 50
 data <- simdata_time_dep(N=n)
 # Estimation:
 opt.par <- spm_time_dep(data, 
                         start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0 = 0.001), 
-                        f = list(at = "a", f1t = "f1", Qt = "Q", ft = "f", bt = "b", mu0t= "mu0"))
+                        frm = list(at = "a", f1t = "f1", Qt = "Q", ft = "f", bt = "b", mu0t= "mu0"))
 opt.par
 ```
 
@@ -264,17 +265,17 @@ data <- simdata_cont(N=10)
 head(data)
 ```
 
-## SPM with genetic component: GenSPM
+## SPM with partially observed covariates
 
 Stochastic Process Model has many applications in analysis of longitudinal biodemographic data. Such data contain various physiological variables (known as covariates). Data can also potentially contain genetic information available for all or a part of participants. Taking advantage from both genetic and non-genetic information can provide future insights into a broad range of processes describing aging-related changes in the organism.
 
 ### Method
 
-GenSPM (Genetic SPM), presented in 2009 by Arbeev at al [6] and further advanced in [7,8], further elaborates the basic stochastic process model conception by introducing a categorical variable, $Z$, which may be a specific value of a genetic marker or, in general, any categorical variable. Currently, $Z$ has two gradations: 0 or 1 in a genetic group of interest, assuming that $P(Z=1) = p$, $p \in [0, 1]$, were $p$ is the proportion of carriers and non-carriers of an allele in a population. Example of longitudinal data with genetic component $Z$ is provided below.
+In this package, SPM with partially observed covariates is implemented in form of GenSPM (Genetic SPM), presented in 2009 by Arbeev at al [6] and further advanced in [7,8], further elaborates the basic stochastic process model conception by introducing a categorical variable, $Z$, which may be a specific value of a genetic marker or, in general, any categorical variable. Currently, $Z$ has two gradations: 0 or 1 in a genetic group of interest, assuming that $P(Z=1) = p$, $p \in [0, 1]$, were $p$ is the proportion of carriers and non-carriers of an allele in a population. Example of longitudinal data with genetic component $Z$ is provided below.
 
 ```{r, eval=T}
 library(stpm)
-data <- simdata_gen(N=10)
+data <- sim_pobs(N=10)
 head(data)
 ```
 
@@ -293,10 +294,10 @@ Once we have data, we then can run analysis, i.e. estimate coefficients (they ar
 ```{r, eval=T}
 library(stpm)
 #Generating data:
-data <- simdata_gen(N=1000)
+data <- sim_pobs(N=10)
 head(data)
 #Parameters estimation:
-pars <- spm_gen(gendat=data)
+pars <- spm_pobs(x=data)
 pars
 ```
 
@@ -306,16 +307,16 @@ Here \textbf{H} and \textbf{L} represents parameters when $Z$ = 1 (**H**) and 0 
 
 ```{r, eval=T}
 library(stpm)
-data.genetic <- simdata_gen(N=100, mode='genetic')
+data.genetic <- sim_pobs(N=10, mode='observed')
 head(data.genetic)
-data.nongenetic <- simdata_gen(N=500, mode='nongenetic')
+data.nongenetic <- sim_pobs(N=50, mode='unobserved')
 head(data.nongenetic)
 #Parameters estimation:
-pars <- spm_gen(gendat=data.genetic, nongendat = data.nongenetic, mode='combined')
+pars <- spm_pobs(x=data.genetic, y = data.nongenetic, mode='combined')
 pars
 ```
 
-Here mode 'genetic' is used for simlation of data with genetic component $Z$ and 'nongenetic' - without genetic component.
+Here mode 'observed' is used for simlation of data with genetic component $Z$ and 'unobserved' - without genetic component.
 
 ## References
 
@@ -329,7 +330,7 @@ Here mode 'genetic' is used for simlation of data with genetic component $Z$ and
 
 [5] Yashin, A. et al.  Health decline, aging and mortality: how are they related? Biogerontology, 2007 8(3), 291-302.
 
-[6]	Arbeev, K.G., Akushevich, I., Kulminski, A.M., Arbeeva, L.S., Akushevich, L., Ukraintseva, S.V., Culminskaya, I.V., Yashin, A.I.: Genetic model for longitudinal studies of aging, health, and longevity and its potential application to incomplete data. Journal of Theoretical Biology 258(1), 103{111 (2009). doi:10.1016/j.jtbi.2009.01.023
+[6]	Arbeev, K.G., Akushevich, I., Kulminski, A.M., Arbeeva, L.S., Akushevich, L., Ukraintseva, S.V., Culminskaya, I.V., Yashin, A.I.: Genetic model for longitudinal studies of aging, health, and longevity and its potential application to incomplete data. Journal of Theoretical Biology 258(1), 103{111 (2009).
 
 [7] Arbeev K.G, Akushevich I., Kulminski A.M., Ukraintseva S.V., Yashin A.I., Joint Analyses of Longitudinal and Time-to-Event Data in Research on Aging: Implications for Predicting Health and Survival, Front Public Health. 2014 Nov 6;2:228. doi: 10.3389/fpubh.2014.00228
 
