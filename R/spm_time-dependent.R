@@ -173,7 +173,6 @@ spm_time_dep <- function(x,
     #---
     parameters <- trim(unlist(strsplit(formulas$bt,"[\\+\\*\\(\\)]",fixed=F)))
     parameters <- parameters[which(!(parameters %in% c("t","exp")))]
-    #for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
     for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);}
     variables <- unique(variables)
     p.constants <- c()
@@ -198,7 +197,6 @@ spm_time_dep <- function(x,
     #---
     parameters <- trim(unlist(strsplit(formulas$mu0t,"[\\+\\*\\(\\)]",fixed=F)))
     parameters <- parameters[which(!(parameters %in% c("t","exp")))]
-    #for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
     for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);}
     variables <- unique(variables)
     p.constants <- c()
@@ -225,18 +223,17 @@ spm_time_dep <- function(x,
     p.const.ind <- unique(p.const.ind)
     p.coeff.ind <- unique(p.coeff.ind)
     
-    #variables <- unique(variables)
+    variables <- variables[which(variables != "0")]
+    
     
     stpar <- rep(0, length(variables))
     for(i in 1:length(stpar)) {
-      #stpar[p.const.ind[i]] <- unlist(starting_params, use.names = FALSE)[i]
       stpar[i] <- unlist(starting_params, use.names = FALSE)[i]
     }
     names(stpar) <- variables
     
     for(p in names(stpar)) {
       results[[p]] <- stpar[p]
-      #assign(p, stpar[p], envir = globalenv())
       assign(p, stpar[p], envir=baseenv())
     }
     
@@ -285,7 +282,6 @@ spm_time_dep <- function(x,
       names(params) <- names(stpar)
       
       for(p in names(stpar)) {
-        #assign(p, params[[p]], envir = globalenv())
         assign(p, params[[p]], envir=baseenv())
         results[[p]] <<- params[[p]]
         if(verbose)
@@ -306,7 +302,6 @@ spm_time_dep <- function(x,
       }
       
       mu <- function(y,t) {
-        #print(paste(t, mu0t(t)))
         ans <- mu0t(t) + (y - ft(t))^2*Qt(t)
         ans
       }
@@ -331,8 +326,6 @@ spm_time_dep <- function(x,
           t1 <- data[i, 2]; t2 <- data[i, 3]
           ind <- ifelse(is.na(data[i, 5]), 0, 1)
           S <- exp(-1*mu(data[i, 4],t1)*(t2-t1))
-          #print(paste(data[i, 4], t2, t1, t2-t1))
-          #print(-1*mu(data[i, 4],t1)*(t2-t1))
           if(ind == 0) {
             L <- L + (1 - delta)*log(S) + delta*log(1-S)
           } else {
@@ -345,7 +338,6 @@ spm_time_dep <- function(x,
           
         }
         
-        #assign("results", results, envir=.GlobalEnv)
         assign("results", results, envir=baseenv())
         
         iteration <<- iteration + 1
@@ -395,6 +387,8 @@ spm_time_dep <- function(x,
       print(upper_bound)
       
     }
+    
+    
     tryCatch({ans <- nloptr(x0 = unlist(stpar), 
                             eval_f = maxlik_t, opts = list("algorithm"=algorithm, 
                                                            "ftol_rel"=ftol_rel, maxeval=maxeval),
