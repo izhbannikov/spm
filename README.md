@@ -69,22 +69,22 @@ head(data[[1]])
 head(data[[2]])
 ```
 
-### Test simdata_gen_cont()
+### Test sim_pobs()
 
 ```
 library(stpm)
-dat <- simdata_gen(N=500)
+dat <- sim_pobs(N=500)
 head(dat)
 ```
 
-### Test spm_gen()
+### Test spm_pobs()
 ```
 library(stpm)
 #Reading the data:
-data <- simdata_gen(N=100)
+data <- sim_pobs(N=100)
 head(data)
 #Parameters estimation:
-pars <- spm_gen(gendat=data)
+pars <- spm_pobs(x=data)
 pars
 ```
 
