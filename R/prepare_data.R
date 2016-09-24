@@ -21,7 +21,8 @@
 #'@param interval A number of breaks between observations for data for discrete model. 
 #'This interval must be numeric (integer).
 #'Default = 1 unit of time.
-#'@param impute Multiple imputation ndicator. Default=TRUE.
+#'@param impute Multiple imputation ndicator. If TRUE then missing observations will be imputed with multiple imputation.
+#'Default = TRUE.
 #'@param verbose A verbosing output indicator. Default=FALSE.
 #'@return A list of two elements: first element contains a preprocessed data for continuous model, with arbitrary intervals between observations  and 
 #'second element contains a prepocessed data table for a discrete model (with constant intervals between observations).
@@ -141,6 +142,7 @@ prepare_data <- function(x, y,
 #'@param col.age.event.ind an index of the column which represents the time in which event occured.
 #'@param col.covar.ind a set of column indexes which represent covariates.
 #'@param verbose turns on/off verbosing output.
+#'@param impute Multiple imputation ndicator. If TRUE then missing observations will be imputed with multiple imputation.
 prepare_data_cont <- function(longdat, 
                               vitstat, 
                               col.status.ind, 
@@ -234,6 +236,7 @@ prepare_data_cont <- function(longdat,
 #'@param col.age.event.ind an index of the column which represents the time in which event occured.
 #'@param col.covar.ind a set of column indexes which represent covariates.
 #'@param verbose turns on/off verbosing output.
+#'@param impute Multiple imputation ndicator. If TRUE then missing observations will be imputed with multiple imputation.
 prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute) {
   #---DEBUG---#
   #longdat <- read.sas7bdat("/Volumes/G/spm/data/covar_aric_gru.sas7bdat")

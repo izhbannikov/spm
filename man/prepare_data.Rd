@@ -5,7 +5,7 @@
 \title{Data pre-processing for analysis with stochastic process model methodology.}
 \usage{
 prepare_data(x, y, col.id = NULL, col.status = NULL, col.age = NULL,
-  col.age.event = NULL, covariates = NULL, interval = 1,
+  col.age.event = NULL, covariates = NULL, interval = 1, impute = TRUE,
   verbose = FALSE)
 }
 \arguments{
@@ -38,6 +38,9 @@ If covariates not provided, then all columns from longitudinal table having inde
 \item{interval}{A number of breaks between observations for data for discrete model. 
 This interval must be numeric (integer).
 Default = 1 unit of time.}
+
+\item{impute}{Multiple imputation ndicator. If TRUE then missing observations will be imputed with multiple imputation.
+Default = TRUE.}
 
 \item{verbose}{A verbosing output indicator. Default=FALSE.}
 }

@@ -5,7 +5,7 @@
 \title{Prepares discrete-time dataset.}
 \usage{
 prepare_data_discr(longdat, vitstat, interval, col.status.ind, col.id.ind,
-  col.age.ind, col.age.event.ind, col.covar.ind, verbose)
+  col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute)
 }
 \arguments{
 \item{longdat}{a longitudinal study dataset.}
@@ -24,7 +24,9 @@ prepare_data_discr(longdat, vitstat, interval, col.status.ind, col.id.ind,
 
 \item{col.covar.ind}{a set of column indexes which represent covariates.}
 
-\item{verbose}{turns on/off verbosing output.
+\item{verbose}{turns on/off verbosing output.}
+
+\item{impute}{Multiple imputation ndicator. If TRUE then missing observations will be imputed with multiple imputation.
 Filling the last cell}
 }
 \description{
