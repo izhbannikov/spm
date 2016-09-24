@@ -21,6 +21,7 @@
 #'@param interval A number of breaks between observations for data for discrete model. 
 #'This interval must be numeric (integer).
 #'Default = 1 unit of time.
+#'@param impute Multiple imputation ndicator. Default=TRUE.
 #'@param verbose A verbosing output indicator. Default=FALSE.
 #'@return A list of two elements: first element contains a preprocessed data for continuous model, with arbitrary intervals between observations  and 
 #'second element contains a prepocessed data table for a discrete model (with constant intervals between observations).
@@ -38,7 +39,9 @@ prepare_data <- function(x, y,
                          col.age.event=NULL, 
                          covariates=NULL, 
                          interval=1, 
+                         impute=TRUE,
                          verbose=FALSE) {
+  
   
   if(interval < 1) {
     stop("Interval must be more or equal to 1.")
@@ -121,10 +124,10 @@ prepare_data <- function(x, y,
   longdat <- longdat[which(!is.na(longdat[ , col.age.ind])),]
   
   # Prepare data for continuous optimisation:
-  data_cont <- prepare_data_cont(longdat, vitstat, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose)
+  data_cont <- prepare_data_cont(longdat, vitstat, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute)
   
   # Prepare data for fast discrete optimization:
-  data_discr <- prepare_data_discr(longdat, vitstat, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose)
+  data_discr <- prepare_data_discr(longdat, vitstat, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute)
   
   list(model.continuous=data_cont, model.discrete=data_discr)
 }
@@ -145,7 +148,8 @@ prepare_data_cont <- function(longdat,
                               col.age.ind, 
                               col.age.event.ind, 
                               col.covar.ind, 
-                              verbose) {
+                              verbose,
+                              impute) {
   
   # Split records by ID:
   prep.dat <- matrix(ncol=(4+2*length(col.covar.ind)),nrow=0)
@@ -183,11 +187,15 @@ prepare_data_cont <- function(longdat,
   if(length(which(is.na(prep.dat[,5:dim(prep.dat)[2]]) == TRUE)) > 0) {
     if(verbose)
       cat("Filing missing values with multiple imputations:\n")
-    
-    tmp_ans <- mice(prep.dat[,5:dim(prep.dat)[2]], printFlag=ifelse(verbose, TRUE, FALSE),m = 2, maxit=2)
-    ans1 <- complete(tmp_ans)
-    #ans_final <- cbind(prep.dat[,1:3], ans1)
-    ans_final <- cbind(prep.dat[,1:4], ans1)
+    if(impute) {
+      tmp_ans <- mice(prep.dat[,5:dim(prep.dat)[2]], printFlag=ifelse(verbose, TRUE, FALSE),m = 2, maxit=2)
+      ans1 <- complete(tmp_ans)
+      #ans_final <- cbind(prep.dat[,1:3], ans1)
+      ans_final <- cbind(prep.dat[,1:4], ans1)
+    } else {
+      if(verbose)
+        cat("There are some NAs in the data. We recommend impute=TRUE.\n")
+    }
   }
   
   if(verbose)
@@ -226,7 +234,7 @@ prepare_data_cont <- function(longdat,
 #'@param col.age.event.ind an index of the column which represents the time in which event occured.
 #'@param col.covar.ind a set of column indexes which represent covariates.
 #'@param verbose turns on/off verbosing output.
-prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose) {
+prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute) {
   #---DEBUG---#
   #longdat <- read.sas7bdat("/Volumes/G/spm/data/covar_aric_gru.sas7bdat")
   #vitstat <- read.sas7bdat("/Volumes/G/spm/data/mortality_aric_all_gru.sas7bdat")
@@ -243,6 +251,21 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.i
   #col.covar.ind <-  grep(paste("\\b", "BMI", "\\b", sep=""), colnames(longdat))
   #verbose <- TRUE
   #longdat <- longdat[which(!is.na(longdat[ , col.age.ind])),]
+  
+  
+  #longdat = longdat
+  #vitstat = vitstat
+  #col.id = "ID"
+  #col.status = "IsDead"
+  #col.age = "Age"
+  #col.age.event = "LSmort"
+  #covariates = "DBP"
+  #
+  #col.status.ind = col.status.ind
+  #col.id.ind  = col.id.ind
+  #col.age.ind = col.age.ind
+  #col.age.event.ind = col.age.event.ind
+  #col.covar.ind = col.covar.ind
   #---END DEBUG---#
   
   #'Filling the last cell
@@ -265,6 +288,7 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.i
   vitstat.splitted <- split(vitstat, vitstat[, col.id.ind])
   # For each particular person's record:
   for(iii in 1:length(splitted)) {
+    
     if(!is.na(vitstat.splitted[[iii]][ , col.age.event.ind]) & !is.na(vitstat.splitted[[iii]][ , col.status.ind]) ) {
       if(verbose) {
         print(paste(iii, "individual processed."))
@@ -272,6 +296,7 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.i
       # Individual ID:
       id <- splitted[[iii]][ , col.id.ind][1]
       nrows <- (tail(splitted[[iii]][ , col.age.ind], n=1) - floor(splitted[[iii]][ , col.age.ind][1]))/dt + 1
+      
       # Perform approximation using two points:
       t1.approx <- matrix(ncol=4, nrow=nrows)
       t1.approx[,1] <- id
@@ -294,14 +319,18 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.i
             splitted[[iii]][, ind] <- fill_last(splitted[[iii]][, ind])
           }
           # Fill NAs by linear approximation with approx():
-          nn <- length(splitted[[iii]][, ind])
-          splitted[[iii]][, ind] <- approx(splitted[[iii]][, ind],n=nn)$y
+          #nn <- length(splitted[[iii]][, ind])
+          #splitted[[iii]][, ind] <- approx(splitted[[iii]][, ind],n=nn)$y
           
-          aprx <- c()
-          for(k in 1:(length(splitted[[iii]][, col.age.ind])-1)) {
-            nr <- ceiling((splitted[[iii]][, col.age.ind][k+1] - splitted[[iii]][, col.age.ind][k])/dt) + 1
-            aprx <- c(aprx[1:length(aprx)-1], approx(splitted[[iii]][, ind][k:(k+1)], n=nr)$y)
-          }
+          #aprx <- c()
+          #for(k in 1:(length(splitted[[iii]][, col.age.ind])-1)) {
+          #  nr <- ceiling((splitted[[iii]][, col.age.ind][k+1] - splitted[[iii]][, col.age.ind][k])/dt) + 1
+          #  aprx <- c(aprx[1:length(aprx)-1], approx(splitted[[iii]][, ind][k:(k+1)], n=nr)$y)
+          #  print(nr)
+          #  print(aprx)
+          #}
+          aprx <- approx(splitted[[iii]][, ind],n=nrows)$y
+          #print(par1.approx[,j])
           par1.approx[,j] <- aprx
           #par1.approx[,j] <-  approx(splitted[[iii]][, ind], n=nrows)$y
         }
@@ -320,12 +349,18 @@ prepare_data_discr <- function(longdat, vitstat, interval, col.status.ind, col.i
   
   ans_final <- ans
   if(length(which(is.na(ans[,5:dim(ans)[2]]) == TRUE)) > 0) {
-    if(verbose)
-      cat("Filing missing values with multiple imputations:\n")
     
-    tmp_ans <- mice(ans[,5:dim(ans)[2]], printFlag=ifelse(verbose, TRUE, FALSE), m = 2, maxit = 2)
-    ans1 <- complete(tmp_ans)
-    ans_final <- cbind(ans[,1:4], ans1)
+    if(impute) {
+      if(verbose)
+        cat("Filing missing values with multiple imputations:\n")
+    
+      tmp_ans <- mice(ans[,5:dim(ans)[2]], printFlag=ifelse(verbose, TRUE, FALSE), m = 2, maxit = 2)
+      ans1 <- complete(tmp_ans)
+      ans_final <- cbind(ans[,1:4], ans1)
+    } else {
+      if(verbose)
+        cat("There are some NAs in the data. We recommend impute=TRUE.\n")
+    }
   }
   
   if(verbose)

@@ -19,7 +19,9 @@
 #'pars
 #'
 spm_discrete <- function(dat, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verbose=FALSE) {
-  
+  #dat <- data
+  #theta_range=seq(0.02,0.2,by=0.001)
+  #verbose=T
   k <- (dim(dat)[2] - 4)/2
   
   options(digits=10)
@@ -27,7 +29,7 @@ spm_discrete <- function(dat, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verb
   total_cols <- (1 + k + (k*(k+1))/2) + 2
   result <- matrix(nrow=0, ncol=total_cols,0)
   for(theta in theta_range) {
-    #theta = 0.1
+    #theta = 0.07
     ethetat <- exp(theta*dat[,3])
     newdat <- dat[,2] # Outcome
     newdat <- cbind(newdat,ethetat) #x0
@@ -74,7 +76,7 @@ spm_discrete <- function(dat, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verb
                          control=list(maxit = 250, trace=verbose))
              },  
              error=function(e) {if(verbose  == TRUE) {print(e)}}, 
-             finally=res.pois
+             finally=function() {res <- res.pois}
              )
     
     coef <- -1*res$coefficients 
