@@ -106,6 +106,7 @@ spm_discrete <- function(dat, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verb
     res <- lm(as.formula(reg_formula),data=as.data.frame(newdat2),na.action = na.omit)
     #res <- gls(as.formula(reg_formula),data=as.data.frame(newdat2),na.action = na.omit)
     #print(reg_formula)
+    #print(res)
     coef <- res$coefficients # intercept, y1
     parameters_lsq <- rbind(parameters_lsq, c(coef, sd(res$residuals), logLik(res)[1]))
   
@@ -146,7 +147,7 @@ spm_discrete <- function(dat, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verb
   #------end of calculating of Q-matrix--------#
   parameters_lsq <- unname(parameters_lsq);
   u <- parameters_lsq[,1]
-  R <- parameters_lsq[,2:(2+k-1)]
+  R <- t(parameters_lsq[,2:(2+k-1)])
   Sigma <- parameters_lsq[,(2+k)]
   
   pars1 <- list(theta=theta, mu0=mu0, b=b, Q=Q, u=u, R=R, Sigma=Sigma)
