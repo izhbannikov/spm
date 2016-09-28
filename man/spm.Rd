@@ -7,7 +7,7 @@
 spm(x, model = "discrete", formulas = NULL, start = NULL, tol = NULL,
   stopifbound = FALSE, algorithm = "NLOPT_LN_NELDERMEAD", lb = NULL,
   ub = NULL, maxeval = 100, pinv.tol = 0.01, theta.range = seq(0.01,
-  0.2, by = 0.001), verbose = FALSE, gomp = FALSE)
+  0.2, by = 0.001), verbose = FALSE, gomp = FALSE, ftol_rel = 1e-06)
 }
 \arguments{
 \item{x}{A dataset: is the output from prepare_data(...) function and consists of two separate data tables:
@@ -43,6 +43,9 @@ discrete-time optimization and estimating of starting point for continuous-time 
 
 \item{gomp}{A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
 mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).}
+
+\item{ftol_rel}{Stops when an optimization step (or an estimate of the optimum) changes the objective function. 
+Default value 1e-6.}
 }
 \value{
 For "discrete" and "continuous" model types: 

@@ -26,6 +26,8 @@
 #'@param verbose A verbosing output indicator (FALSE by default).
 #'@param gomp A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
 #' mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).
+#'@param ftol_rel Stops when an optimization step (or an estimate of the optimum) changes the objective function. 
+#'Default value 1e-6.
 #'@return For "discrete" and "continuous" model types: 
 #'(1) a list of model parameter estimates for the discrete model type described in 
 #'"Life tables with covariates: Dynamic Model for Nonlinear Analysis of Longitudinal Data", 
@@ -54,7 +56,7 @@ spm <- function(x, model="discrete", formulas = NULL, start=NULL, tol=NULL,
                 lb=NULL, ub=NULL, maxeval=100,
                 pinv.tol = 0.01,
                 theta.range=seq(0.01, 0.2, by=0.001),
-                verbose=FALSE, gomp=FALSE) {
+                verbose=FALSE, gomp=FALSE, ftol_rel=1e-6) {
   
   # List of available models:
   models <- c("discrete", "continuous", "time-dependent")
@@ -120,7 +122,9 @@ spm <- function(x, model="discrete", formulas = NULL, start=NULL, tol=NULL,
                     lb = lb, ub = ub,
                     maxeval = maxeval, 
                     pinv.tol = pinv.tol,
-                    verbose = verbose, gomp)
+                    verbose = verbose, 
+                    gomp=gomp, 
+                    ftol_rel=ftol_rel)
       
       Q.c <- res.t$Q
       R.c <- res.t$a + diag(k)
@@ -172,7 +176,9 @@ spm <- function(x, model="discrete", formulas = NULL, start=NULL, tol=NULL,
                         start=start,
                         algorithm=algorithm,
                         lb=lb, ub=ub,
-                        verbose=verbose, maxeval=maxeval)
+                        verbose=verbose, 
+                        maxeval=maxeval,
+                        ftol_rel=ftol_rel)
     
     #res <- get("results",envir=.GlobalEnv)
   }

@@ -11,11 +11,11 @@ spm_time_dep(x, start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0
   ftol_rel = 1e-06)
 }
 \arguments{
-\item{x}{: input data table.}
+\item{x}{Input data table.}
 
-\item{start}{: a list of starting parameters, default: list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),}
+\item{start}{A list of starting parameters, default: list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),}
 
-\item{frm}{: a list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")}
+\item{frm}{A list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")}
 
 \item{stopifbound}{Estimation stops if at least one parameter achieves lower or upper boundaries.}
 
@@ -29,11 +29,19 @@ spm_time_dep(x, start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0
 
 \item{maxeval}{A maximum number of iterations of optimization algorithm, default 100.}
 
-\item{ftol_rel}{Stop when an optimization step (or an estimate of the optimum) changes the objective function. 
-Default value 1e-6}
+\item{ftol_rel}{Stops when an optimization step (or an estimate of the optimum) changes the objective function. 
+Default value 1e-6.}
 }
 \value{
-a set of estimated coefficients of a, f1, Q, f, b, mu0 and (if used) theta.
+A set of estimated coefficients of a, f1, Q, f, b, mu0.
+
+status Optimization status (see documentation for nloptr package).
+
+LogLik A logarithm likelihood.
+
+objective A value of objective function (given by nloptr).
+
+message A message given by nloptr optimization function (see documentation for nloptr package).
 }
 \description{
 spm_time_dep : a function that estimates parameters from the model with time-dependent coefficients.

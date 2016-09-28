@@ -22,6 +22,8 @@
 #'and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.)
 #'@param gomp A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
 #' mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).
+#'@param ftol_rel Stops when an optimization step (or an estimate of the optimum) changes the objective function. 
+#'Default value 1e-6.
 #'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta and
 #'additional variable \code{limit} which indicates if any parameter 
 #'achieved lower or upper boundary conditions (FALSE by default).
@@ -50,7 +52,8 @@ spm_continuous <- function(dat,
                            maxeval=500,
                            verbose=FALSE,
                            pinv.tol=0.01,
-                           gomp=FALSE) {
+                           gomp=FALSE,
+                           ftol_rel=1e-6) {
   
   
   
@@ -303,7 +306,7 @@ spm_continuous <- function(dat,
   
   nloptr(x0 = parameters, 
   		 eval_f = maxlik, 
-  		 opts = list("algorithm"=algorithm, "ftol_rel"=1.0e-6, "maxeval"=maxeval),
+  		 opts = list("algorithm"=algorithm, "ftol_rel"=ftol_rel, "maxeval"=maxeval),
        lb = bounds$lower_bound, ub = bounds$upper_bound)
   
   final_results <- get("results",envir=baseenv())

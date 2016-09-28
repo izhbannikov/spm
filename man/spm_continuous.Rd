@@ -7,7 +7,8 @@
 spm_continuous(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
   mu0 = 2e-05, theta = 0.08, stopifbound = FALSE,
   algorithm = "NLOPT_LN_NELDERMEAD", lb = NULL, ub = NULL,
-  maxeval = 500, verbose = FALSE, pinv.tol = 0.01, gomp = FALSE)
+  maxeval = 500, verbose = FALSE, pinv.tol = 0.01, gomp = FALSE,
+  ftol_rel = 1e-06)
 }
 \arguments{
 \item{dat}{A data table.}
@@ -46,6 +47,9 @@ and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006
 
 \item{gomp}{A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
 mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).}
+
+\item{ftol_rel}{Stops when an optimization step (or an estimate of the optimum) changes the objective function. 
+Default value 1e-6.}
 }
 \value{
 A set of estimated parameters a, f1, Q, f, b, mu0, theta and
