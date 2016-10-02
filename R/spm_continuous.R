@@ -13,20 +13,24 @@
 #'@param stopifbound Estimation stops if at least one parameter achieves lower or upper boundaries.
 #'@param algorithm An optimization algorithm used, can be one of those provided by \code{nloptr}. 
 #'#'Check the NLopt website for a description of
-#'the algorithms. Default: NLOPT_LN_COBYLA
+#'the algorithms. Default: NLOPT_LN_NELDERMEAD
 #'@param lb Lower bound of parameters under estimation.
 #'@param ub Upper bound of parameters under estimation.
 #'@param maxeval Maximum number of iterations of the algorithm for \code{nloptr} optimization. 
 #'The program stops when the number of function evaluations exceeds maxeval. Default: 500.
 #'@param pinv.tol A tolerance value for pseudo-inverse of matrix gamma (see Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
 #'and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.)
-#'@param gomp A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
-#' mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).
+#'@param gomp A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 is used:
+#' mu0 = mu0*exp(theta*t).
 #'@param ftol_rel Stops when an optimization step (or an estimate of the optimum) changes the objective function. 
 #'Default value 1e-6.
 #'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta and
 #'additional variable \code{limit} which indicates if any parameter 
 #'achieved lower or upper boundary conditions (FALSE by default).
+#'@return status Optimization status (see documentation for nloptr package).
+#'@return LogLik A logarithm likelihood.
+#'@return objective A value of objective function (given by nloptr).
+#'@return message A message given by nloptr optimization function (see documentation for nloptr package).
 #'@details \code{spm_continuous} runs much slower that discrete but more precise and can handle time intervals with different lengths.
 #'@examples
 #'library(stpm)
@@ -229,7 +233,7 @@ spm_continuous <- function(dat,
   #results$theta <- theta
   ##print(results$theta)
   ## End of reading parameters
-  
+  L.prev <- NA
   maxlik <- function(par) {
     
     stopflag <- F
@@ -273,6 +277,8 @@ spm_continuous <- function(dat,
       res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k, pinv.tol, gomp)
       assign("results", results_tmp, envir=baseenv())
       iteration <<- iteration + 1
+      L.prev <<- res
+      
       if(verbose) {
         cat("L = ", res,"\n")
         cat("Iteration: ", iteration,  "\nResults:\n") 
@@ -304,12 +310,16 @@ spm_continuous <- function(dat,
   #print(bounds$lower_bound)
   #print(bounds$upper_bound)
   
-  nloptr(x0 = parameters, 
+  ans <- nloptr(x0 = parameters, 
   		 eval_f = maxlik, 
   		 opts = list("algorithm"=algorithm, "ftol_rel"=ftol_rel, "maxeval"=maxeval),
        lb = bounds$lower_bound, ub = bounds$upper_bound)
   
   final_results <- get("results",envir=baseenv())
+  final_results[["status"]] <- ans$status
+  final_results[["LogLik"]] <- L.prev
+  final_results[["objective"]] <- ans$objective
+  final_results[["message"]] <- ans$message
   
   # Check if any parameter achieved upper/lower limit and report it:
   limit <- FALSE

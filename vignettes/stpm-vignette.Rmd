@@ -18,18 +18,15 @@ The Stochastic Process Model (SPM) was developed several decades ago [1,2], and 
 
 
 ## Installation
+### Stable version from CRAN
+```{r,eval=FALSE}
+install.packages("stpm")
+```
 
+### Most-recent version from GitHub
 ```{r,eval=FALSE}
 require(devtools)
 devtools::install_github("izhbannikov/stpm")
-```
-
-If you experience errors during installation, please download a binary file from the following url: \url{https://github.com/izhbannikov/stpm/blob/master/bin/win/stpm_1.0.zip}
-
-Than, execute this command (from R environment):
-
-```{r,eval=FALSE}
-install.packages("<path to the downloaded r-package stpm>", repos=NULL, type="binary")
 ```
 
 
@@ -181,6 +178,134 @@ opt.par <- spm_time_dep(data,
                         frm = list(at = "a", f1t = "f1", Qt = "Q", ft = "f", bt = "b", mu0t= "mu0"))
 opt.par
 ```
+
+
+## Setting lower and upper boundaries of the model parameters
+
+Lower and upper boundaries can be set up with parameters $lb$ and $ub$, which represents simple numeric vectors. Note: lengths of  $lb$ and $ub$ must be the same as the total length of the parameters. Lower and upper boundaries can be set for continuous-time and time-dependent models only.
+
+### Setting lb and ub for continuous-time model
+#### One covariate
+
+Below we show the example of setting up $lb$ and $ub$ when we have a single covariate:
+
+```{r}
+library(stpm)
+data <- simdata_cont(N=100, ystart = 80, a = -0.1, Q = 1e-06, mu0 = 1e-5, theta = 0.08, f1 = 80, f=80, b=1, dt=1, sd0=5)
+ans <- spm_continuous(dat=data,
+                      a = -0.1,
+                      f1 = 80+runif(1,-5,5), 
+                      Q = 1.0e-6+runif(1,-1e-7,1e-7),
+                      f = 80+runif(1,-5,5),
+                      b = 1,
+                      mu0 = 1.0e-5+runif(1,-1e-6,1e-6),
+                      theta = 0.08+runif(1,-1e-3,1e-3),
+                      stopifbound = FALSE, maxeval=300,
+                      lb=c(-0.12, 60, 0.6e-6, 60, 0.5, 0.6e-5, 0.06), 
+                      ub=c(-0.08, 140, 1.3e-06, 140, 1.5, 1.2e-5, 0.10),
+                      algorithm="NLOPT_LN_NELDERMEAD")
+ans
+```
+
+#### Two covariates
+
+This is an example for two physiological variables (covariates).
+
+```{r}
+library(stpm)
+
+data <- simdata_cont(N=100, 
+                     a=matrix(c(-0.1,  0.001, 0.001, -0.1), nrow = 2, ncol = 2, byrow = T),
+                     f1=t(matrix(c(100, 200), nrow = 2, ncol = 1, byrow = F)),
+                     Q=matrix(c(1e-06, 1e-7, 1e-7,  1e-06), nrow = 2, ncol = 2, byrow = T),
+                     f=t(matrix(c(100, 200), nrow = 2, ncol = 1, byrow = F)),
+                     b=matrix(c(1, 2), nrow = 2, ncol = 1, byrow = F),
+                     mu0=1e-4,
+                     theta=0.08,
+                     ystart = c(100,200), sd0=c(5, 10), dt=1)
+
+a.d <- matrix(c(-0.1+runif(1,-1e-2,1e-2),  0.001+runif(1,-1e-4,1e-4), 0.001+runif(1,-1e-4,1e-4), -0.1+runif(1,-1e-2,1e-2)), nrow = 2, ncol = 2, byrow = T)
+f1.d <- t(matrix(c(100+runif(1,-5,5), 200+runif(1,-5,5)), nrow = 2, ncol = 1, byrow = F))
+Q.d <- matrix(c(1e-06+runif(1,-1e-7,1e-7), 1e-7+runif(1,-1e-8,1e-8), 1e-7+runif(1,-1e-8,1e-8),  1e-06+runif(1,-1e-7,1e-7)), nrow = 2, ncol = 2, byrow = T)
+f.d <- t(matrix(c(100+runif(1,-5,5), 200+runif(1,-5,5)), nrow = 2, ncol = 1, byrow = F))
+b.d <- matrix(c(1, 2), nrow = 2, ncol = 1, byrow = F)
+mu0.d <- 1e-4 + runif(1,-1e-5,1e-5)
+theta.d <- 0.08+ runif(1,-1e-4,1e-4)
+
+ans <- spm_continuous(dat=data,
+                      a = a.d, 
+                      f1 = f1.d,
+                      Q = Q.d,
+                      f = f.d,
+                      b = b.d,
+                      mu0 = mu0.d,
+                      theta = theta.d,
+                      maxeval=150,
+                      lb=c(-0.12, ifelse(a.d[2,1] > 0, a.d[2,1]-0.1*a.d[2,1], a.d[2,1]+0.1*a.d[2,1]), ifelse(a.d[1,2] > 0, a.d[1,2]-0.1*a.d[1,2], a.d[1,2]+0.1*a.d[1,2]), -0.12,  
+                           95, 195, 
+                           Q.d[1,1]-0.1*Q.d[1,1], ifelse(Q.d[2,1] > 0, Q.d[2,1]-0.1*Q.d[2,1], Q.d[2,1]+0.1*Q.d[2,1]), ifelse(Q.d[1,2] > 0, Q.d[1,2]-0.1*Q.d[1,2], Q.d[1,2]+0.1*Q.d[1,2]), Q.d[2,2]-0.1*Q.d[2,2],
+                           95, 195,
+                           0.5, 1.5,
+                           0.8e-4,
+                           0.06),
+                      ub=c(-0.08,  0.002,  0.002, -0.08,  
+                           110, 220, 
+                           Q.d[1,1]+0.1*Q.d[1,1], ifelse(Q.d[2,1] > 0, Q.d[2,1]+0.1*Q.d[2,1], Q.d[2,1]-0.1*Q.d[2,1]), ifelse(Q.d[1,2] > 0, Q.d[1,2]+0.1*Q.d[1,2], Q.d[1,2]-0.1*Q.d[1,2]), Q.d[2,2]+0.1*Q.d[2,2],
+                           110, 220,
+                           1.5, 2.5,
+                           1.2e-4,
+                           0.10), algorithm = "NLOPT_LN_NELDERMEAD")
+ans
+
+```
+
+
+### Setting lb and ub for model with time-dependent coefficients
+
+This model uses only one covariate, therefore setting-up model parameters is easy:
+
+```{r}
+n <- 10
+data <- simdata_time_dep(N=n)
+# Estimation:
+opt.par <- spm_time_dep(data, start=list(a=-0.05, f1=80, Q=2e-08, f=80, b=5, mu0=0.001), 
+                        lb=c(-1, 30, 1e-8, 30, 1, 1e-6), ub=c(0, 120, 5e-8, 130, 10, 1e-2))
+opt.par
+
+
+```
+
+
+#### Special case when some model parameter functions are equal to zero
+
+Imagine a situation when one parameter function you want to be equal to zero: $f=0$. Let's emulate this case:
+
+```{r}
+library(stpm)
+n <- 10
+data <- simdata_time_dep(N=n)
+# Estimation:
+opt.par <- spm_time_dep(data, frm = list(at="a", f1t="f1", Qt="Q", ft="0", bt="b", mu0t="mu0"))
+opt.par
+```
+
+As you can see, there is no parameter $f$ in $opt.par$. This because we set $f=0$ in $frm$!
+
+Then, is you want to set the constraints, you must not specify the starting value (parameter $start$) and $lb$/$ub$ for the parameter $f$ (otherwise, the function raises an error):
+
+```{r}
+
+n <- 10
+data <- simdata_time_dep(N=n)
+# Estimation:
+opt.par <- spm_time_dep(data, frm = list(at="a", f1t="f1", Qt="Q", ft="0", bt="b", mu0t="mu0"), 
+                        start=list(a=-0.05, f1=80, Q=2e-08, b=5, mu0=0.001), 
+                        lb=c(-1, 30, 1e-8, 1, 1e-6), ub=c(0, 120, 5e-8, 10, 1e-2))
+opt.par
+
+```
+
+You can do the same manner if you want two or more parameters to be equal to zero.
 
 ## Simulation (individual trajectory projection, also known as microsimulations)
 

@@ -31,7 +31,7 @@ spm_continuous(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
 
 \item{algorithm}{An optimization algorithm used, can be one of those provided by \code{nloptr}. 
 #'Check the NLopt website for a description of
-the algorithms. Default: NLOPT_LN_COBYLA}
+the algorithms. Default: NLOPT_LN_NELDERMEAD}
 
 \item{lb}{Lower bound of parameters under estimation.}
 
@@ -45,8 +45,8 @@ The program stops when the number of function evaluations exceeds maxeval. Defau
 \item{pinv.tol}{A tolerance value for pseudo-inverse of matrix gamma (see Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
 and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.)}
 
-\item{gomp}{A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
-mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).}
+\item{gomp}{A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 is used:
+mu0 = mu0*exp(theta*t).}
 
 \item{ftol_rel}{Stops when an optimization step (or an estimate of the optimum) changes the objective function. 
 Default value 1e-6.}
@@ -55,6 +55,14 @@ Default value 1e-6.}
 A set of estimated parameters a, f1, Q, f, b, mu0, theta and
 additional variable \code{limit} which indicates if any parameter 
 achieved lower or upper boundary conditions (FALSE by default).
+
+status Optimization status (see documentation for nloptr package).
+
+LogLik A logarithm likelihood.
+
+objective A value of objective function (given by nloptr).
+
+message A message given by nloptr optimization function (see documentation for nloptr package).
 }
 \description{
 Continuous multi-dimensional optimization
