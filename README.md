@@ -142,7 +142,7 @@ p.td.model
 ### Multiple imputation with spm.impute(...)
 
 The SPM offers longitudinal data imputation with results that are better than from other imputation tools since it preserves data structure, i.e. relation between 
-$\mu$ and $\mu$. Below there are two examples of multiple data imputation with function spm.impute(...).
+Y(t) and mu(Y(t),t). Below there are two examples of multiple data imputation with function spm.impute(...).
 
 ```
 library(stpm)
