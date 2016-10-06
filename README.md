@@ -138,3 +138,80 @@ p.cont.model
 p.td.model <- spm(data, model="time-dependent",formulas=list(at="aa*t+bb", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"), start=list(a=-0.001, bb=0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3))
 p.td.model
 ```
+
+### Multiple imputation with spm.impute(...)
+
+The SPM offers longitudinal data imputation with results that are better than from other imputation tools since it preserves data structure, i.e. relation between 
+$\mu$ and $\mu$. Below there are two examples of multiple data imputation with function spm.impute(...).
+
+```
+library(stpm)
+
+#######################################################
+############## One dimensional case ###################
+#######################################################
+
+# Data preparation #
+data <- simdata_discr(N=1000, dt = 2)
+
+miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/4)) # ~25% missing data
+incomplete.data <- data
+incomplete.data[miss.id,5] <- NA
+incomplete.data[miss.id,6] <- NA
+# End of data preparation #
+
+# Estimate parameters from the complete dataset #
+p <- spm_discrete(data, theta_range = seq(0.075, 0.09, by=0.001))
+p
+
+##### Multiple imputation with SPM #####
+imp.data <- spm.impute(x=incomplete.data, minp=5, theta_range=seq(0.075, 0.09, by=0.001))$imputed
+
+# Estimate SPM parameters from imputed data and compare them to the p:
+pp.test <- spm_discrete(imp.data, theta_range = seq(0.075, 0.09, by=0.001))
+pp.test
+
+
+#########################################################
+################ Two-dimensional case ###################
+#########################################################
+
+# Parameters for data simulation #
+a <- matrix(c(-0.05, 0.01, 0.01, -0.05), nrow=2)
+f1 <- matrix(c(90, 30), nrow=1, byrow=FALSE)
+Q <- matrix(c(1e-7, 1e-8, 1e-8, 1e-7), nrow=2)
+f0 <- matrix(c(80, 25), nrow=1, byrow=FALSE)
+b <- matrix(c(5, 3), nrow=2, byrow=TRUE)
+mu0 <- 1e-04
+theta <- 0.07
+ystart <- matrix(c(80, 25), nrow=2, byrow=TRUE)
+
+# Data preparation #
+data <- simdata_discr(N=1000, a=a, f1=f1, Q=Q, f=f0, b=b, ystart=ystart, mu0 = mu0, theta=theta, dt=2)
+
+incomplete.data <- data
+
+while(length(which(is.na(incomplete.data)))/length(data) <= 0.3) { # ~30% of missing data
+  if(runif(n = 1) > 0.5) {
+    column <- 5
+  } else {
+    column <- 7
+  }
+  row <- sample(x=dim(data)[1], size=1)
+  incomplete.data[row,column] <- NA
+  incomplete.data[row,column+1] <- NA
+}
+
+# End of data preparation #
+
+# Estimate parameters from the complete data:
+p <- spm_discrete(data, theta_range = seq(0.06, 0.08, by=0.001))
+p
+
+##### Multiple imputation with SPM #####
+imp.data <- spm.impute(x=incomplete.data, minp=15, theta_range=seq(0.060, 0.07, by=0.001))$imputed
+
+# Estimate SPM parameters from imputed data and compare them to the p:
+pp.test <- spm_discrete(imp.data, theta_range = seq(0.060, 0.07, by=0.001))
+pp.test
+```
