@@ -44,15 +44,15 @@
 #'@return A set of estimated parameters aH, aL, f1H, f1H, QH, QL, fH, fL, bH, bL, mu0H, mu0L, thetaH, thetaL, p and
 #'additional variable \code{limit} which indicates if any parameter 
 #'achieved lower or upper boundary conditions (FALSE by default).
-#'@examples
+#'@examples \dontrun{
 #'library(stpm)
 #'#Reading the data:
-#'data <- sim_pobs(N=5)
+#'data <- sim_pobs(N=1000)
 #'head(data)
 #'#Parameters estimation:
 #'pars <- spm_pobs(x=data)
 #'pars
-#'
+#'}
 spm_pobs <- function(x=NULL, y=NULL,
                     aH=-0.05, aL=-0.01, 
                     f1H=60, f1L=80, 

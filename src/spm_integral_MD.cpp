@@ -1,4 +1,5 @@
 
+
 /*******************************R-callable function***************************************/
 #include <stdio.h>
 #include <iostream>
@@ -124,7 +125,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
     arma::mat gamma1(dim,dim);
     
     L = 0;
-    double  nsteps = 2;
+    double  nsteps = 100;
     
     for(int i=0; i<N; i++) {
       //Solving differential equations on intervals:
@@ -258,7 +259,7 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
   arma::mat y2(dim,1);
   arma::mat gamma1(dim,dim);
   
-  double  nsteps = 2;
+  double  nsteps = 100;
   
   double tstart  = as<double>(tstart_);
   arma::mat ystart = as<arma::mat>(ystart_);
@@ -277,22 +278,24 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
   for(int i=0; i<N; i++) {
     // Starting point
     //t1 = Rcpp::runif(1, tstart, tend)[0];
-    //t1 = R::runif(tstart, tstart+10);
-    t1 = Rcpp::runif(1, tstart, tstart+10)[0];
+    t1 = R::runif(tstart, tstart+10);
+    //t1 = tstart;//Rcpp::runif(1, tstart, tstart+10)[0];
     
     //t2 = t1 + R::runif(0.0,dt); 
-    //t2 = t1 + dt + R::runif(0.0,1); 
-    t2 = t1 + dt + Rcpp::runif(1, 0.0, 1)[0];
+    t2 = t1 + dt + R::runif(0.0,1); 
+    //t2 = t1 + dt;// + Rcpp::runif(1, 0.0, 1)[0];
     
     for(int ii=0; ii < dim; ii++) {
-      //y1(ii,0) = R::rnorm(ystart(ii,0), sd[ii]);
-      y1(ii,0) = Rcpp::rnorm(1, ystart(ii,0), sd[ii])[0];
+      y1(ii,0) = R::rnorm(ystart(ii,0), sd[ii]);
+      //y1(ii,0) = Rcpp::rnorm(1, ystart(ii,0), sd[ii])[0];
+      
     }
     
     new_person = false;
     n_observ = 0;
     while(new_person == false) {
-      nsteps = 10;
+      
+      nsteps = 100;
       double tdiff = t2-t1;
       
       double h = tdiff/nsteps;
@@ -304,7 +307,7 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
       out[1] = gamma1;
       double ifactor;
       
-      for(int j = 0; j < nsteps; j++) {
+      for(int j = 1; j <= nsteps; j++) {
         //Runge-Kutta method:
         func1(k1ar, t, out, fH, f1H, aH, bH, QH, thetaH);
         yfin[0] = out[0] + h/6.00*k1ar[0];
@@ -312,36 +315,34 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
         ytmp[0] = out[0] + h/2.00*k1ar[0];
         ytmp[1] = out[1] + h/2.00*k1ar[1];
         
-        func1(k2ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
+        func1(k2ar, t+h/2, ytmp, fH, f1H, aH, bH, QH, thetaH);
         yfin[0] = yfin[0] + h/3.00*k2ar[0];
         yfin[1] = yfin[1] + h/3.00*k2ar[1];
         ytmp[0] = out[0] + h/2.00*k2ar[0];
         ytmp[1] = out[1] + h/2.00*k2ar[1];
         
-        func1(k3ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
+        func1(k3ar, t+h/2, ytmp, fH, f1H, aH, bH, QH, thetaH);
         yfin[0] = yfin[0] + h/3.00*k3ar[0];
         yfin[1] = yfin[1] + h/3.00*k3ar[1];
         ytmp[0] = out[0] + h*k3ar[0];
         ytmp[1] = out[1] + h*k3ar[1];
         
-        func1(k4ar, t, ytmp, fH, f1H, aH, bH, QH, thetaH);
+        func1(k4ar, t+h, ytmp, fH, f1H, aH, bH, QH, thetaH);
         out[0] = yfin[0] + h/6.00*k4ar[0];
         out[1] = yfin[1] + h/6.00*k4ar[1];
         
-        t = t + h;
-        
         //Integration:
-        if (j == nsteps-1) {
+        if (j == nsteps) {
           ifactor = 1.00;
         } else {
-          if (((j % 2) == 0) && (j != 0)) {
+          if (((j % 2) == 0)) {
             ifactor = 2.00;
           } else {
             ifactor = 4.00;
           }
-          
         }
         
+        t = t + h;
         
         s = s + ifactor*h/3.00*(-1.00)*mu(t,out[0],out[1], fH, f1H, mu0H, thetaH, QH);
         
@@ -351,7 +352,6 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
       arma::mat gamma2 = out[1];
       
       S = exp(s);
-      //S = exp(s*(t2-t1));
       
       double xi = 0; // case (0 - alive, 1 - dead) indicator
       
@@ -363,7 +363,7 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
         // New y2:
         for(int ii = 0; ii < dim; ii++) {
           y2(ii,0) = R::rnorm(m2(ii,0), sqrt(gamma2(ii,ii))); 
-          //y2(ii,0) = Rcpp::rnorm(1, m2(ii,0), sqrt(gamma2(ii,ii)))[0];
+          //y2(ii,0) = R::rnorm(m2(ii,0), gamma2(ii,ii)); 
         }
         
       } 
@@ -397,8 +397,8 @@ RcppExport SEXP simCont(SEXP n, SEXP ah, SEXP f1h, SEXP qh, SEXP fh, SEXP bh, SE
         y1 = y2;
         t1 = t2;
         //t2 = t1 + R::runif(0.0,dt);
-        //t2 = t1 + dt + R::runif(0.0,1); 
-        t2 = t1 + dt + Rcpp::runif(1, 0.0, 1)[0];
+        t2 = t1 + dt + R::runif(0.0,1); 
+        //t2 = t1 + dt ;//+ Rcpp::runif(1, 0.0, 1)[0];
         if(t2 > tend) {
           new_person = true;
           break;
@@ -490,7 +490,7 @@ RcppExport SEXP complik_gen(SEXP dat, SEXP n, SEXP m,
   arma::mat gamma1(dim,dim);
   
   L = 0.0;
-  double  nsteps = 16;
+  double  nsteps = 100;
   
   int G = 0; // Genetic variable
   
@@ -689,7 +689,7 @@ RcppExport SEXP simGenCont(SEXP n,
   arma::mat y2(dim,1);
   arma::mat gamma1(dim,dim);
   
-  double  nsteps = 8;
+  double  nsteps = 100;
   
   Rcpp::NumericVector tstart = Rcpp::NumericVector(tstart_);
   arma::mat ystart = as<arma::mat>(ystart_);
@@ -1009,7 +1009,7 @@ RcppExport SEXP complikGenNonGenetic(SEXP dat, SEXP n, SEXP m,
   arma::mat gamma1(dim,dim);
   
   L = 0.0;
-  long double  nsteps = 16;
+  long double  nsteps = 100;
   
   for(int i=0; i<N; i++) {
     //Solving differential equations on intervals:

@@ -29,12 +29,10 @@ spm_discrete <- function(dat, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verb
   total_cols <- (1 + k + (k*(k+1))/2) + 2
   result <- matrix(nrow=0, ncol=total_cols,0)
   for(theta in theta_range) {
-    #theta = 0.07
     ethetat <- exp(theta*dat[,3])
     newdat <- dat[,2] # Outcome
     newdat <- cbind(newdat,ethetat) #x0
     cnames <- c("xi", "x0")
-    #cnames <- c("xi")
     
     # A loop for the bt coefficients:
     index_i <- 1

@@ -43,7 +43,7 @@ characterizes a strength of the random disturbances from Wiener process W(t).}
 \item{nobs}{A number of observations (lines) for individual observations.}
 
 \item{gomp}{A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
-mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).}
+mu0 = mu0*exp(theta*t).}
 }
 \value{
 A table with simulated data.

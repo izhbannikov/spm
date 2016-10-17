@@ -20,7 +20,7 @@
 #' @param tend A number, defines final time (105 by default).
 #' @param sd0 a standard deviation for modelling the next covariate value.
 #' @param gomp A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
-#' mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).
+#' mu0 = mu0*exp(theta*t).
 #' @param nobs A number of observations (lines) for individual observations.
 #' @return A table with simulated data.
 #' @examples

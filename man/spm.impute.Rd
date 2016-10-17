@@ -4,24 +4,21 @@
 \alias{spm.impute}
 \title{Multiple Data Imputation with SPM}
 \usage{
-spm.impute(x, minp = 5, theta_range = seq(0.01, 0.15, by = 0.001))
+spm.impute(dataset, minp = 5, theta_range = seq(0.01, 0.2, by = 0.001))
 }
 \arguments{
-\item{x}{A path to the longitudinal dataset with missing observations}
+\item{dataset}{A longitudinal dataset with missing observations}
 
 \item{minp}{Number of imputations. Default: 5}
 
 \item{theta_range}{A range of parameter theta used for optimization, default: seq(0.01, 0.15, by=0.001).}
 }
 \value{
-A list(imputed, imputations, spm.par)
+A list(imputed, imputations)
 
 imputed An imputed dataset.
 
 imputations Temporary imputed datasets used in multiple imputaitons.
-
-spm.par A set of SPM parameters used to in imputation of each of 
-temporary imputed dataset.
 }
 \description{
 Multiple Data Imputation with SPM
@@ -34,7 +31,7 @@ data <- simdata_discr(N=1000, dt = 2)
 miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/4)) # ~25\% missing data
 incomplete.data <- data
 incomplete.data[miss.id,5] <- NA
-incomplete.data[miss.id,6] <- NA
+incomplete.data[miss.id-1,6] <- NA
 ## End of data preparation ##
 
 # Estimate parameters from the complete dataset #
@@ -42,12 +39,13 @@ p <- spm_discrete(data, theta_range = seq(0.075, 0.09, by=0.001))
 p
 
 ##### Multiple imputation with SPM #####
-imp.data <- spm.impute(x=incomplete.data, minp=5, theta_range=seq(0.075, 0.09, by=0.001))$imputed
-
+imp.data <- spm.impute(dataset=incomplete.data, 
+                      minp=5, 
+                      theta_range=seq(0.075, 0.09, by=0.001))$imputed
+head(imp.data)
 ## Estimate SPM parameters from imputed data and compare them to the p ##
 pp.test <- spm_discrete(imp.data, theta_range = seq(0.075, 0.09, by=0.001))
 pp.test
-
 }
 }
 

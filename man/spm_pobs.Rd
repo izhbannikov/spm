@@ -85,14 +85,15 @@ achieved lower or upper boundary conditions (FALSE by default).
 Continuous-time multi-dimensional optimization for SPM with partially observed covariates (multidimensional GenSPM)
 }
 \examples{
+\dontrun{
 library(stpm)
 #Reading the data:
-data <- sim_pobs(N=5)
+data <- sim_pobs(N=1000)
 head(data)
 #Parameters estimation:
 pars <- spm_pobs(x=data)
 pars
-
+}
 }
 \references{
 Arbeev, K.G. et al (2009). Genetic model for longitudinal studies of aging, health, and longevity
