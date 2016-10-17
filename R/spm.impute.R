@@ -249,6 +249,7 @@ spm.impute <- function(dataset, minp=5, theta_range=seq(0.01, 0.2, by=0.001)) {
       ########## Forward #########
       #### First, let us handle the first row ####
       df <- x[which(x[,1] == k), ]
+      
       if(length(df) == Ncol) {
         Nrec <- 1
       } else {
@@ -274,6 +275,7 @@ spm.impute <- function(dataset, minp=5, theta_range=seq(0.01, 0.2, by=0.001)) {
         next
       }
       
+      # Preprocessing of df #
       row.cur <- df[1, ]; row.next <- df[2, ]
   
       for(j in seq(5,Ncol,by=2)) {
