@@ -214,15 +214,22 @@ prepare_data_cont <- function(longdat,
   ans_final <- ans_final[which(ans_final[,3] != ans_final[,4]),] # t1 must be different from t3
   ans_final <- ans_final[which(ans_final[,3] < ans_final[,4]),] # t1 must be less than t3
   # t1 must be equal t3 on previous step, if status = 0 and id is the same
-  for(i in 2:dim(ans_final)[1]) {
-    if((ans_final[i,3] != ans_final[(i-1),4]) & (ans_final[i,2] == 0) & (ans_final[i,1] == ans_final[(i-1),1])) {
-      ans_final[i,3] <- ans_final[(i-1),4]
+  ndim <- dim(ans_final)[2] - 4
+  for(i in 2:(dim(ans_final)[1]-1)) {
+    if( (ans_final[i,2] == 0) & (ans_final[i,1] == ans_final[(i-1),1]) & (ans_final[i,1] == ans_final[(i+1),1]) ) {
+      for(ii in seq(0,(ndim-1),2)) {
+        ans_final[(i+1),(5+ii)] <- ans_final[i,(6+ii)]
+      }
+    } else if(ans_final[i,2] == 1) {
+      for(ii in seq(0,(ndim-1),2)) {
+        ans_final[i,(6+ii)] <- NA
+      }
     }
   }
   
   colnames(ans_final) <- c("id", "case", "t1", "t2", unlist(lapply(1:length(col.covar.ind), function(n) {c(names(longdat)[col.covar.ind[n]], 
                                                                                                            paste(names(longdat)[col.covar.ind[n]],".next",sep=""))} )) )
-  ans_final
+  data.frame(ans_final)
   
 }
 
