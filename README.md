@@ -165,7 +165,7 @@ p <- spm_discrete(data, theta_range = seq(0.075, 0.09, by=0.001))
 p
 
 ##### Multiple imputation with SPM #####
-imp.data <- spm.impute(x=incomplete.data, minp=5, theta_range=seq(0.075, 0.09, by=0.001))$imputed
+imp.data <- spm.impute(dataset=incomplete.data, minp=5, theta_range=seq(0.075, 0.09, by=0.001))$imputed
 
 # Estimate SPM parameters from imputed data and compare them to the p:
 pp.test <- spm_discrete(imp.data, theta_range = seq(0.075, 0.09, by=0.001))
