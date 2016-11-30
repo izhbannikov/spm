@@ -1,8 +1,6 @@
 #'Data pre-processing for analysis with stochastic process model methodology.
 #'@param x A path to the file with table of follow-up oservations (longitudinal table). 
 #'File formats: csv, sas7bdat
-#'@param y A path to the file with table of vital statistics (mortality) table. 
-#'File formats: csv, sas7bdat
 #'@param col.id A name of column containing subject ID. 
 #'This ID should be the same in both x (longitudinal) and y (vital statistics) tables.
 #'None: if col.id not provided, the first column of the x and 
@@ -28,12 +26,11 @@
 #'second element contains a prepocessed data table for a discrete model (with constant intervals between observations).
 #'@examples \dontrun{ 
 #'library(stpm) 
-#'data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"), 
-#'  				   y=system.file("data","vitstat.csv",package="stpm"))
+#'data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"))
 #'head(data[[1]])
 #'head(data[[2]])
 #'}
-prepare_data <- function(x, y, 
+prepare_data <- function(x,
                          col.id=NULL, 
                          col.status=NULL,
                          col.age=NULL, 
@@ -51,56 +48,57 @@ prepare_data <- function(x, y,
   }
   
   if(file_ext(x) == "csv") {
-    longdat <- read.csv(x)
+    #longdat <- read.csv(x)
+    merged.data <- read.csv(x)
   } else if(file_ext(x) == "sas7bdat") {
-    longdat <- read.sas7bdat(x)
+    #longdat <- read.sas7bdat(x)
+    merged.data <- read.sas7bdat(x)
   } else {
     stop(paste(x, ":", "unknown file format, it must be csv or sas7bdat."))
   }
   
   
-  if(file_ext(y) == "csv") {
-    vitstat <- read.csv(y)
-  } else if(file_ext(y) == "sas7bdat") {
-    vitstat <- read.sas7bdat(y)
-  } else {
-    stop(paste(y, ":", "unknown file format, it must be csv or sas7bdat."))
-  }
-  
+  #if(file_ext(y) == "csv") {
+  #  vitstat <- read.csv(y)
+  #} else if(file_ext(y) == "sas7bdat") {
+  #  vitstat <- read.sas7bdat(y)
+  #} else {
+  #  stop(paste(y, ":", "unknown file format, it must be csv or sas7bdat."))
+  #}
   
   # Parsing input parameters in order to check for errors:
   if( !is.null(col.status) ) {
-    if( !(col.status %in% colnames(vitstat)) ) {
-      stop(paste("Status column",col.status, "not found in vitstat table. Aborting."))
+    if( !(col.status %in% colnames(merged.data)) ) {
+      stop(paste("Status column",col.status, "not found in data table. Aborting."))
     }
   }
   
   if( !is.null(col.id) ) { 
-    if( !(col.id %in% colnames(vitstat)) || !(col.id %in% colnames(longdat)) ) {
-      stop(paste("ID column",col.id, "not found in vitstat and/or longdat tables. Aborting."))
+    if( !(col.id %in% colnames(merged.data)) ) {
+      stop(paste("ID column",col.id, "not found in data table. Aborting."))
     }
   }
   
   if( !is.null(col.age) ) {
-    if( !(col.age %in% colnames(longdat)) ) {
+    if( !(col.age %in% colnames(merged.data)) ) {
       stop(paste("Age column",col.age, "not found in longdat table. Aborting."))
     }
   }
   
   if( !is.null(col.age.event) ) { 
-    if( !(col.age.event %in% colnames(vitstat)) ) {
-      stop(paste("Event column",col.age.event, "not found in vitstat table. Aborting."))
+    if( !(col.age.event %in% colnames(merged.data)) ) {
+      stop(paste("Event column",col.age.event, "not found in data table. Aborting."))
     }
   }
   
   if(!is.null(covariates)) {
     for(c in covariates) {
-      if( !(c %in% colnames(longdat)) ) {
+      if( !(c %in% colnames(merged.data)) ) {
         stop(paste("Covariate",c, "not found. Aborting."))
       }
     }
   } else if(is.null(covariates)) {
-    col.covar.ind <- 4:dim(longdat)[2]
+    col.covar.ind <- 4:dim(merged.data)[2]
   }
   
   if((interval == 0) || (interval < 1)) {
@@ -108,10 +106,8 @@ prepare_data <- function(x, y,
   }
   
   #-----------Done parsing imput parameters---------------------#
-  # First time of data pre-processing:
-  #longdat <- longdat[which(!is.na(longdat[ , col.age.ind])),]
   
-  merged.data <- merge(x = longdat, y = vitstat, by.x = col.id, by.y=col.id)
+  #merged.data <- merge(x = longdat, y = vitstat, by.x = col.id, by.y=col.id)
   
   if(!is.null(col.status)) {
     col.status.ind <- grep(paste("\\b", col.status, "\\b", sep=""), colnames(merged.data))
@@ -134,7 +130,8 @@ prepare_data <- function(x, y,
   if(!is.null(col.age.event)) {
     col.age.event.ind <- grep(paste("\\b", col.age.event, "\\b", sep=""), colnames(merged.data))
   } else {
-    col.age.event.ind <- 3
+    #col.age.event.ind <- 3
+    col.age.event.ind <- col.age.ind
   }
   
   if(!is.null(covariates)) {
@@ -143,7 +140,8 @@ prepare_data <- function(x, y,
         col.covar.ind <- c(col.covar.ind, grep(paste("\\b", c, "\\b", sep=""), colnames(merged.data)))
     }
   } else {
-    col.covar.ind <- 4:dim(longdat)[2]
+    #col.covar.ind <- 4:dim(longdat)[2]
+    col.covar.ind <- 4:dim(merged.data)[2]
   }
   
   merged.data <- merged.data[which(!is.na(merged.data[ , col.age.ind])),]
@@ -158,8 +156,7 @@ prepare_data <- function(x, y,
 }
 
 #'Prepares continuouts-time dataset.
-#'@param longdat a longitudinal study dataset.
-#'@param vitstat vital (mortality) statistics.
+#'@param merged.data a longitudinal study dataset.
 #'@param col.status.ind index of "status" column.
 #'@param col.id.ind subject id column index.
 #'@param col.age.ind index of the age column.
@@ -247,15 +244,14 @@ prepare_data_cont <- function(merged.data,
     }
   }
   
-  colnames(ans_final) <- c("id", "case", "t1", "t2", unlist(lapply(1:length(col.covar.ind), function(n) {c(names(longdat)[col.covar.ind[n]], 
-                                                                                                           paste(names(longdat)[col.covar.ind[n]],".next",sep=""))} )) )
+  colnames(ans_final) <- c("id", "case", "t1", "t2", unlist(lapply(1:length(col.covar.ind), function(n) {c(names(merged.data)[col.covar.ind[n]], 
+                                                                                                           paste(names(merged.data)[col.covar.ind[n]],".next",sep=""))} )) )
   data.frame(ans_final)
   
 }
 
 #'Prepares discrete-time dataset.
-#'@param longdat a longitudinal study dataset.
-#'@param vitstat vital (mortality) statistics.
+#'@param merged.data a longitudinal study dataset.
 #'@param interval interval between observations.
 #'@param col.status.ind index of "status" column.
 #'@param col.id.ind subject id column index.
@@ -373,7 +369,7 @@ prepare_data_discr <- function(merged.data, interval, col.status.ind, col.id.ind
   }
   
   ans <- cbind(tt,par)
-  colnames(ans) <- c("id", "case", "t1", "t2", names(longdat)[col.covar.ind])
+  colnames(ans) <- c("id", "case", "t1", "t2", names(merged.data)[col.covar.ind])
   
   ans <- data.frame(ans[rowSums( matrix(is.na(ans[,5:dim(ans)[2]]), ncol=length(col.covar.ind),byrow=T)) !=length(col.covar.ind),])
   
@@ -442,8 +438,8 @@ prepare_data_discr <- function(merged.data, interval, col.status.ind, col.id.ind
   
   colnames(dat) <- c("id", "case", "t1", "t2", 
                      unlist(lapply(1:length(col.covar.ind), 
-                                   function(n) {c(names(longdat)[col.covar.ind[n]], 
-                                                paste(names(longdat)[col.covar.ind[n]],".next",sep=""))})))
+                                   function(n) {c(names(merged.data)[col.covar.ind[n]], 
+                                                paste(names(merged.data)[col.covar.ind[n]],".next",sep=""))})))
   rownames(dat) <- 1:dim(dat)[1]
   dat
 }
