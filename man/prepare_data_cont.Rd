@@ -4,13 +4,11 @@
 \alias{prepare_data_cont}
 \title{Prepares continuouts-time dataset.}
 \usage{
-prepare_data_cont(longdat, vitstat, col.status.ind, col.id.ind, col.age.ind,
+prepare_data_cont(merged.data, col.status.ind, col.id.ind, col.age.ind,
   col.age.event.ind, col.covar.ind, verbose, impute)
 }
 \arguments{
-\item{longdat}{a longitudinal study dataset.}
-
-\item{vitstat}{vital (mortality) statistics.}
+\item{merged.data}{a longitudinal study dataset.}
 
 \item{col.status.ind}{index of "status" column.}
 

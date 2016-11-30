@@ -4,15 +4,12 @@
 \alias{prepare_data}
 \title{Data pre-processing for analysis with stochastic process model methodology.}
 \usage{
-prepare_data(x, y, col.id = NULL, col.status = NULL, col.age = NULL,
+prepare_data(x, col.id = NULL, col.status = NULL, col.age = NULL,
   col.age.event = NULL, covariates = NULL, interval = 1, impute = TRUE,
   verbose = FALSE)
 }
 \arguments{
 \item{x}{A path to the file with table of follow-up oservations (longitudinal table). 
-File formats: csv, sas7bdat}
-
-\item{y}{A path to the file with table of vital statistics (mortality) table. 
 File formats: csv, sas7bdat}
 
 \item{col.id}{A name of column containing subject ID. 
@@ -54,8 +51,7 @@ Data pre-processing for analysis with stochastic process model methodology.
 \examples{
 \dontrun{ 
 library(stpm) 
-data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"), 
- 				   y=system.file("data","vitstat.csv",package="stpm"))
+data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"))
 head(data[[1]])
 head(data[[2]])
 }

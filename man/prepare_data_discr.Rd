@@ -4,13 +4,11 @@
 \alias{prepare_data_discr}
 \title{Prepares discrete-time dataset.}
 \usage{
-prepare_data_discr(longdat, vitstat, interval, col.status.ind, col.id.ind,
+prepare_data_discr(merged.data, interval, col.status.ind, col.id.ind,
   col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute)
 }
 \arguments{
-\item{longdat}{a longitudinal study dataset.}
-
-\item{vitstat}{vital (mortality) statistics.}
+\item{merged.data}{a longitudinal study dataset.}
 
 \item{interval}{interval between observations.}
 
