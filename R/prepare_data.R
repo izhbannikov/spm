@@ -144,7 +144,7 @@ prepare_data <- function(x,
     col.covar.ind <- 4:dim(merged.data)[2]
   }
   
-  merged.data <- merged.data[which(!is.na(merged.data[ , col.age.ind])),]
+  #merged.data <- merged.data[which(!is.na(merged.data[ , col.age.ind])),]
   
   # Prepare data for continuous optimisation:
   data_cont <- prepare_data_cont(merged.data, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute)
