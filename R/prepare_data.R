@@ -180,8 +180,10 @@ prepare_data_cont <- function(merged.data,
   for(iii in 1:length(splitted)) {
     nrows <- length(splitted[[iii]][ , col.id.ind])
     id <- splitted[[iii]][ , col.id.ind]
-    case <- rep(0, nrows)
-    case[nrows] <- tail(splitted[[iii]][, col.status.ind],n=1) # Last value of vector
+    #case <- rep(0, nrows)
+    #case[nrows] <- tail(splitted[[iii]][, col.status.ind],n=1) # Last value of vector
+    case <- splitted[[iii]][, col.status.ind]
+    case[1:(nrows-1)] <- rep(0, nrows-1)
     t1 <- splitted[[iii]][ , col.age.ind]
     t2 <- c(splitted[[iii]][ , col.age.ind][-1], tail(splitted[[iii]][ , col.age.event.ind],n=1))
     
@@ -441,5 +443,5 @@ prepare_data_discr <- function(merged.data, interval, col.status.ind, col.id.ind
                                    function(n) {c(names(merged.data)[col.covar.ind[n]], 
                                                 paste(names(merged.data)[col.covar.ind[n]],".next",sep=""))})))
   rownames(dat) <- 1:dim(dat)[1]
-  dat
+  return(data.frame(dat))
 }
