@@ -144,7 +144,7 @@ prepare_data <- function(x,
     col.covar.ind <- 4:dim(merged.data)[2]
   }
   
-  #merged.data <- merged.data[which(!is.na(merged.data[ , col.age.ind])),]
+  merged.data <- merged.data[which(!is.na(merged.data[ , col.age.ind])),]
   
   # Prepare data for continuous optimisation:
   data_cont <- prepare_data_cont(merged.data, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute)
@@ -183,7 +183,7 @@ prepare_data_cont <- function(merged.data,
     #case <- rep(0, nrows)
     #case[nrows] <- tail(splitted[[iii]][, col.status.ind],n=1) # Last value of vector
     case <- splitted[[iii]][, col.status.ind]
-    case[1:(nrows-1)] <- rep(0, nrows-1)
+    #case[1:(nrows-1)] <- rep(0, (nrows-1))
     t1 <- splitted[[iii]][ , col.age.ind]
     t2 <- c(splitted[[iii]][ , col.age.ind][-1], tail(splitted[[iii]][ , col.age.event.ind],n=1))
     
@@ -196,11 +196,12 @@ prepare_data_cont <- function(merged.data,
       
     }
     prep.dat <- rbind(prep.dat, tmp.frame)
+    
   }
   
   
   #prep.dat <- prep.dat[rowSums( matrix(is.na(prep.dat[,5:dim(prep.dat)[2]]), ncol=2*length(covariates),byrow=T)) !=2*length(covariates),]
-  prep.dat <- prep.dat[which(is.na(prep.dat[,4])==FALSE),]
+  prep.dat <- prep.dat[which(!is.na(prep.dat[,4])),]
   
   if(verbose) {
     head(prep.dat)  
@@ -230,8 +231,8 @@ prepare_data_cont <- function(merged.data,
   }
   
   # Finalizing:
-  ans_final <- ans_final[which(ans_final[,3] != ans_final[,4]),] # t1 must be different from t3
-  ans_final <- ans_final[which(ans_final[,3] < ans_final[,4]),] # t1 must be less than t3
+  
+  ans_final <- ans_final[which(ans_final[,3] <= ans_final[,4]),] # t1 must be less than t3
   # t1 must be equal t3 on previous step, if status = 0 and id is the same
   ndim <- dim(ans_final)[2] - 4
   for(i in 2:(dim(ans_final)[1]-1)) {
