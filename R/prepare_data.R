@@ -147,7 +147,7 @@ prepare_data <- function(x,
   merged.data <- merged.data[which(!is.na(merged.data[ , col.age.ind])),]
   
   # Prepare data for continuous optimisation:
-  data_cont <- prepare_data_cont(merged.data, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute)
+  data_cont <- prepare_data_cont(merged.data, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute, interval)
   
   # Prepare data for fast discrete optimization:
   data_discr <- prepare_data_discr(merged.data, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute)
@@ -164,6 +164,7 @@ prepare_data <- function(x,
 #'@param col.covar.ind a set of column indexes which represent covariates.
 #'@param verbose turns on/off verbosing output.
 #'@param impute Multiple imputation ndicator. If TRUE then missing observations will be imputed with multiple imputation.
+#'@param dt interval between observations.
 prepare_data_cont <- function(merged.data, 
                               col.status.ind, 
                               col.id.ind, 
@@ -171,19 +172,17 @@ prepare_data_cont <- function(merged.data,
                               col.age.event.ind, 
                               col.covar.ind, 
                               verbose,
-                              impute) {
+                              impute,
+                              dt) {
   
   # Split records by ID:
-  prep.dat <- matrix(ncol=(4+2*length(col.covar.ind)),nrow=0)
+  prep.dat <- data.frame(matrix(ncol=(4+2*length(col.covar.ind)),nrow=0))
   splitted <- split(merged.data, merged.data[ , col.id.ind])
   
   for(iii in 1:length(splitted)) {
     nrows <- length(splitted[[iii]][ , col.id.ind])
     id <- splitted[[iii]][ , col.id.ind]
-    #case <- rep(0, nrows)
-    #case[nrows] <- tail(splitted[[iii]][, col.status.ind],n=1) # Last value of vector
     case <- splitted[[iii]][, col.status.ind]
-    #case[1:(nrows-1)] <- rep(0, (nrows-1))
     t1 <- splitted[[iii]][ , col.age.ind]
     t2 <- c(splitted[[iii]][ , col.age.ind][-1], tail(splitted[[iii]][ , col.age.event.ind],n=1))
     
@@ -241,10 +240,17 @@ prepare_data_cont <- function(merged.data,
         ans_final[(i+1),(5+ii)] <- ans_final[i,(6+ii)]
       }
     } else if(ans_final$case[i] == 1) {
+      
       for(ii in seq(0,(ndim-1),2)) {
         ans_final[i,(6+ii)] <- NA
       }
+    } else if( ans_final$id[i] != ans_final$id[(i+1)] ) {
+      if(ans_final$t1[i] >= ans_final$t2[i]) {
+        ans_final$t2[i] <- ans_final$t1[i] + dt/2
+      }
     }
+    
+    
   }
   
   colnames(ans_final) <- c("id", "case", "t1", "t2", unlist(lapply(1:length(col.covar.ind), function(n) {c(names(merged.data)[col.covar.ind[n]], 
@@ -416,27 +422,21 @@ prepare_data_discr <- function(merged.data, interval, col.status.ind, col.id.ind
     for(j in 1:(dim(dat)[1]-1)) {
       if(dat[j,1] != dat[(j+1), 1]) {
         dat[j, (5+k+1)] <- NA
+        
+        if(dat[j,3] >= dat[j,4]) {
+          dat[j,4] <- dat[j,3] + dt/2
+        }
+        
       } else {
         dat[j, (5+k+1)] <- dat[(j+1), (5+k)]
       }
+      
+      if(dat[j,2] > 1) {
+        dat[j,2] <- 1
+      }
+      
     }
     k <- k+2
-  }
-  
-  
-  
-  # Database should be in appropriate format:
-  pid <- dat[1,1]
-  for(i in 1:(dim(dat)[1]-1)) {
-    if(dat[i,1] != pid) {
-      for(ii in seq(0,(ndim-1),2)) {
-        dat[(i+1),(5+ii)] = dat[i,(6+ii)]
-      }
-      pid = dat[i,1]
-    }
-    if(dat[i,2] > 1) {
-      dat[i,2] <- 1
-    }
   }
   
   colnames(dat) <- c("id", "case", "t1", "t2", 
