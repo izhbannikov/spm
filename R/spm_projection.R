@@ -58,7 +58,7 @@ spm_projection <- function(x,
                            dt=1, 
                            sd0=1, 
                            nobs=NULL, 
-                           gomp=FALSE) {
+                           gomp=TRUE) {
   
   avail.models <- c("discrete", "continuous", "time-dependent")
   if(!(model %in% avail.models)) {
@@ -118,7 +118,7 @@ spm_projection <- function(x,
     colnames(vt) = c("id", "time", "age","case", "start")
     
     #Survival probabilities:
-    srv.prob <- survfit( Surv(age, case) ~ 1, data = vt, conf.type="none")
+    srv.prob <- survfit( Surv(start, age, case) ~ 1, data = vt, conf.type="none")
     stat[["srv.prob"]] <- srv.prob
     
     res <- list(data=res.time_dep, stat=stat)
@@ -168,7 +168,7 @@ spm_projection <- function(x,
     colnames(vt) = c("id", "time", "age","case", "start")
     
     #Survival probabilities:
-    srv.prob <- survfit( Surv(age, case) ~ 1, data = vt, conf.type="none")
+    srv.prob <- survfit( Surv(start, age, case) ~ 1, data = vt, conf.type="none")
     stat[["srv.prob"]] <- srv.prob
     
     res <- list(data=res.discr, stat=stat)
@@ -219,10 +219,9 @@ spm_projection <- function(x,
                                                 dg[1, 3])} # start
     ))
     
-    #colnames(vt) = c("id", "time", "case", "start", "end")
     colnames(vt) = c("id", "time", "age","case", "start")
     
-    srv.prob <- survfit( Surv(age, case) ~ 1, data = vt, conf.type="none")
+    srv.prob <- survfit( Surv(start, age, case) ~ 1, data = vt, conf.type="none")
     stat[["srv.prob"]] <- srv.prob
     
     res <- list(data=res.cont, stat=stat)
