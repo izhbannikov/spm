@@ -33,6 +33,7 @@
 #' mu0 = mu0*exp(theta*t).
 #' @param nobs A number of observations (lines) for individual observations.
 #' @return A table with simulated data.
+#' @export
 #' @examples
 #' library(stpm)
 #' dat <- sim_pobs(N=50)

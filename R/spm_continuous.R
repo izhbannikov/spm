@@ -11,19 +11,19 @@
 #'@param theta A starting value of the parameter theta (axe displacement of Gompertz function).
 #'@param verbose An indicator of verbosing output.
 #'@param stopifbound Estimation stops if at least one parameter achieves lower or upper boundaries.
-#'@param algorithm An optimization algorithm used, can be one of those provided by \code{nloptr}. 
 #'#'Check the NLopt website for a description of
 #'the algorithms. Default: NLOPT_LN_NELDERMEAD
 #'@param lb Lower bound of parameters under estimation.
 #'@param ub Upper bound of parameters under estimation.
-#'@param maxeval Maximum number of iterations of the algorithm for \code{nloptr} optimization. 
 #'The program stops when the number of function evaluations exceeds maxeval. Default: 500.
 #'@param pinv.tol A tolerance value for pseudo-inverse of matrix gamma (see Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
 #'and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.)
 #'@param gomp A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 is used:
 #' mu0 = mu0*exp(theta*t).
-#'@param ftol_rel Stops when an optimization step (or an estimate of the optimum) changes the objective function. 
-#'Default value 1e-6.
+#'@param opts A list of options for \code{nloptr}.
+#'Default value: \code{opt=list(algorithm="NLOPT_LN_NELDERMEAD", 
+#'maxeval=100, ftol_rel=1e-8)}.
+#'Please see \code{nloptr} documentation for more information.
 #'@return A set of estimated parameters a, f1, Q, f, b, mu0, theta and
 #'additional variable \code{limit} which indicates if any parameter 
 #'achieved lower or upper boundary conditions (FALSE by default).
@@ -31,7 +31,9 @@
 #'@return LogLik A logarithm likelihood.
 #'@return objective A value of objective function (given by nloptr).
 #'@return message A message given by nloptr optimization function (see documentation for nloptr package).
-#'@details \code{spm_continuous} runs much slower that discrete but more precise and can handle time intervals with different lengths.
+#'@details \code{spm_continuous} runs much slower that discrete but more precise and can handle time 
+#'intervals with different lengths.
+#'@export
 #'@examples
 #'library(stpm)
 #'#Reading the data:
@@ -51,13 +53,12 @@ spm_continuous <- function(dat,
                            mu0=2e-5,
                            theta=0.08,
                            stopifbound=FALSE, 
-                           algorithm="NLOPT_LN_NELDERMEAD",
                            lb=NULL, ub=NULL,
-                           maxeval=500,
                            verbose=FALSE,
                            pinv.tol=0.01,
                            gomp=FALSE,
-                           ftol_rel=1e-6) {
+                           opts=list(algorithm="NLOPT_LN_NELDERMEAD", 
+                                          maxeval=100, ftol_rel=1e-8)) {
   
   
   
@@ -151,29 +152,29 @@ spm_continuous <- function(dat,
   
   
   
-  avail_algorithms <- c("NLOPT_GN_DIRECT", "NLOPT_GN_DIRECT_L",
-                        "NLOPT_GN_DIRECT_L_RAND", "NLOPT_GN_DIRECT_NOSCAL",
-                        "NLOPT_GN_DIRECT_L_NOSCAL",
-                        "NLOPT_GN_DIRECT_L_RAND_NOSCAL",
-                        "NLOPT_GN_ORIG_DIRECT", "NLOPT_GN_ORIG_DIRECT_L",
-                        "NLOPT_GD_STOGO", "NLOPT_GD_STOGO_RAND",
-                        "NLOPT_LD_SLSQP", "NLOPT_LD_LBFGS_NOCEDAL",
-                        "NLOPT_LD_LBFGS", "NLOPT_LN_PRAXIS", "NLOPT_LD_VAR1",
-                        "NLOPT_LD_VAR2", "NLOPT_LD_TNEWTON",
-                        "NLOPT_LD_TNEWTON_RESTART",
-                        "NLOPT_LD_TNEWTON_PRECOND",
-                        "NLOPT_LD_TNEWTON_PRECOND_RESTART",
-                        "NLOPT_GN_CRS2_LM", "NLOPT_GN_MLSL", "NLOPT_GD_MLSL",
-                        "NLOPT_GN_MLSL_LDS", "NLOPT_GD_MLSL_LDS",
-                        "NLOPT_LD_MMA", "NLOPT_LN_COBYLA", "NLOPT_LN_NEWUOA",
-                        "NLOPT_LN_NEWUOA_BOUND", "NLOPT_LN_NELDERMEAD",
-                        "NLOPT_LN_SBPLX", "NLOPT_LN_AUGLAG", "NLOPT_LD_AUGLAG",
-                        "NLOPT_LN_AUGLAG_EQ", "NLOPT_LD_AUGLAG_EQ",
-                        "NLOPT_LN_BOBYQA", "NLOPT_GN_ISRES")
-  
-  if(!(algorithm %in% avail_algorithms)) {
-    stop(cat("Provided algorithm", algorithm, "not in the list of available optimization methods."))
-  }
+  #avail_algorithms <- c("NLOPT_GN_DIRECT", "NLOPT_GN_DIRECT_L",
+  #                      "NLOPT_GN_DIRECT_L_RAND", "NLOPT_GN_DIRECT_NOSCAL",
+  #                      "NLOPT_GN_DIRECT_L_NOSCAL",
+  #                      "NLOPT_GN_DIRECT_L_RAND_NOSCAL",
+  #                      "NLOPT_GN_ORIG_DIRECT", "NLOPT_GN_ORIG_DIRECT_L",
+  #                      "NLOPT_GD_STOGO", "NLOPT_GD_STOGO_RAND",
+  #                      "NLOPT_LD_SLSQP", "NLOPT_LD_LBFGS_NOCEDAL",
+  #                      "NLOPT_LD_LBFGS", "NLOPT_LN_PRAXIS", "NLOPT_LD_VAR1",
+  #                      "NLOPT_LD_VAR2", "NLOPT_LD_TNEWTON",
+  #                      "NLOPT_LD_TNEWTON_RESTART",
+  #                      "NLOPT_LD_TNEWTON_PRECOND",
+  #                      "NLOPT_LD_TNEWTON_PRECOND_RESTART",
+  #                      "NLOPT_GN_CRS2_LM", "NLOPT_GN_MLSL", "NLOPT_GD_MLSL",
+  #                      "NLOPT_GN_MLSL_LDS", "NLOPT_GD_MLSL_LDS",
+  #                      "NLOPT_LD_MMA", "NLOPT_LN_COBYLA", "NLOPT_LN_NEWUOA",
+  #                      "NLOPT_LN_NEWUOA_BOUND", "NLOPT_LN_NELDERMEAD",
+  #                      "NLOPT_LN_SBPLX", "NLOPT_LN_AUGLAG", "NLOPT_LD_AUGLAG",
+  #                      "NLOPT_LN_AUGLAG_EQ", "NLOPT_LD_AUGLAG_EQ",
+  #                      "NLOPT_LN_BOBYQA", "NLOPT_GN_ISRES")
+  #
+  #if(!(algorithm %in% avail_algorithms)) {
+  #  stop(cat("Provided algorithm", algorithm, "not in the list of available optimization methods."))
+  #}
   
   dat <- as.matrix(dat[, 2:dim(dat)[2]])
   
@@ -312,7 +313,7 @@ spm_continuous <- function(dat,
   
   ans <- nloptr(x0 = parameters, 
   		 eval_f = maxlik, 
-  		 opts = list("algorithm"=algorithm, "ftol_rel"=ftol_rel, "maxeval"=maxeval),
+  		 opts = opts,
        lb = bounds$lower_bound, ub = bounds$upper_bound)
   
   final_results <- get("results",envir=baseenv())

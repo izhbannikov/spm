@@ -10,24 +10,23 @@
 #'(1) a data table for continuous-time model and (2) a data table for discrete-time model.
 #'@param model A model type. Choices are: "discrete", "continuous" or "time-dependent".
 #'@param formulas A list of parameter formulas used in the "time-dependent" model.
+#'Default: \code{formulas=list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")}.
 #'@param start A starting values of coefficients in the "time-dependent" model.
 #'@param tol A tolerance threshold for matrix inversion (NULL by default).
 #'@param stopifbound A flag (default=FALSE) if it is set then the optimization stops 
 #'when any of the parametrs achives lower or upper boundary.
-#'@param algorithm An optimization algorithm used in \code{nloptr} package.
-#'Default: \code{NLOPTR_NL_NELDERMEAD}.
 #'@param lb Lower boundary, default \code{NULL}.
 #'@param ub Upper boundary, default \code{NULL}.
-#'@param maxeval Maximum number of evaluations of optimization algorithm. 
-#'Default 100.
 #'@param pinv.tol A tolerance threshold for matrix pseudo-inverse. Default: 0.01.
 #'@param theta.range A user-defined range of the parameter \code{theta} used in 
 #'discrete-time optimization and estimating of starting point for continuous-time optimization.
 #'@param verbose A verbosing output indicator (FALSE by default).
 #'@param gomp A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
 #' mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).
-#'@param ftol_rel Stops when an optimization step (or an estimate of the optimum) changes the objective function. 
-#'Default value 1e-6.
+#'@param opts A list of options for \code{nloptr}.
+#'Default value: \code{opt=list(algorithm="NLOPT_LN_NELDERMEAD", 
+#'maxeval=100, ftol_rel=1e-8)}.
+#'Please see \code{nloptr} documentation for more information.
 #'@return For "discrete" and "continuous" model types: 
 #'(1) a list of model parameter estimates for the discrete model type described in 
 #'"Life tables with covariates: Dynamic Model for Nonlinear Analysis of Longitudinal Data", 
@@ -37,6 +36,7 @@
 #'Yashin et al, 2007, Math Biosci.<DOI:10.1016/j.mbs.2006.11.006>.
 #'
 #'For the "time-dependent" model (model parameters depend on time): a set of model parameter estimates.
+#'@export
 #'@examples \dontrun{ 
 #'library(stpm)
 #'data.continuous <- simdata_cont(N=1000)
@@ -51,12 +51,16 @@
 #'start=list(a=-0.001, bb=0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3))
 #'p.td.model
 #'}
-spm <- function(x, model="discrete", formulas = NULL, start=NULL, tol=NULL, 
-                stopifbound=FALSE, algorithm="NLOPT_LN_NELDERMEAD", 
-                lb=NULL, ub=NULL, maxeval=100,
+spm <- function(x, model="discrete", 
+                formulas = list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"), 
+                start=NULL, tol=NULL, 
+                stopifbound=FALSE, 
+                lb=NULL, ub=NULL,
                 pinv.tol = 0.01,
                 theta.range=seq(0.01, 0.2, by=0.001),
-                verbose=FALSE, gomp=FALSE, ftol_rel=1e-6) {
+                verbose=FALSE, gomp=FALSE,
+                opts=list(algorithm="NLOPT_LN_NELDERMEAD", 
+                          maxeval=100, ftol_rel=1e-8)) {
   
   # List of available models:
   models <- c("discrete", "continuous", "time-dependent")
@@ -118,13 +122,11 @@ spm <- function(x, model="discrete", formulas = NULL, start=NULL, tol=NULL,
                     mu0=pars$Ya2007$mu0, 
                     theta=pars$Ya2007$theta, 
                     stopifbound = stopifbound,
-                    algorithm = algorithm, 
                     lb = lb, ub = ub,
-                    maxeval = maxeval, 
                     pinv.tol = pinv.tol,
                     verbose = verbose, 
                     gomp=gomp, 
-                    ftol_rel=ftol_rel)
+                    opts=opts)
       
       Q.c <- res.t$Q
       R.c <- res.t$a + diag(k)
@@ -174,13 +176,10 @@ spm <- function(x, model="discrete", formulas = NULL, start=NULL, tol=NULL,
     res <- spm_time_dep(x[[1]], 
                         frm=formulas,
                         start=start,
-                        algorithm=algorithm,
                         lb=lb, ub=ub,
                         verbose=verbose, 
-                        maxeval=maxeval,
-                        ftol_rel=ftol_rel)
+                        opts = opts)
     
-    #res <- get("results",envir=.GlobalEnv)
   }
   class(res) <- "spm"
   invisible(res)

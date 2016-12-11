@@ -214,6 +214,7 @@ getNextY.cont <- function(y1, t1, t2, a, f1, Q, f, b, mu0, theta, u, R) {
 #'@return A list(imputed, imputations)
 #'@return imputed An imputed dataset.
 #'@return imputations Temporary imputed datasets used in multiple imputaitons.
+#'@export
 #'@examples \dontrun{
 #'library(stpm) 
 #'##Data preparation ##

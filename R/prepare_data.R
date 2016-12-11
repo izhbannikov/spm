@@ -24,6 +24,7 @@
 #'@param verbose A verbosing output indicator. Default=FALSE.
 #'@return A list of two elements: first element contains a preprocessed data for continuous model, with arbitrary intervals between observations  and 
 #'second element contains a prepocessed data table for a discrete model (with constant intervals between observations).
+#'@export
 #'@examples \dontrun{ 
 #'library(stpm) 
 #'data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"))

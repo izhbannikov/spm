@@ -4,10 +4,12 @@
 \alias{spm}
 \title{A central function that estimates Stochastic Process Model parameters a from given dataset.}
 \usage{
-spm(x, model = "discrete", formulas = NULL, start = NULL, tol = NULL,
-  stopifbound = FALSE, algorithm = "NLOPT_LN_NELDERMEAD", lb = NULL,
-  ub = NULL, maxeval = 100, pinv.tol = 0.01, theta.range = seq(0.01,
-  0.2, by = 0.001), verbose = FALSE, gomp = FALSE, ftol_rel = 1e-06)
+spm(x, model = "discrete", formulas = list(at = "a", f1t = "f1", Qt = "Q",
+  ft = "f", bt = "b", mu0t = "mu0"), start = NULL, tol = NULL,
+  stopifbound = FALSE, lb = NULL, ub = NULL, pinv.tol = 0.01,
+  theta.range = seq(0.01, 0.2, by = 0.001), verbose = FALSE, gomp = FALSE,
+  opts = list(algorithm = "NLOPT_LN_NELDERMEAD", maxeval = 100, ftol_rel =
+  1e-08))
 }
 \arguments{
 \item{x}{A dataset: is the output from prepare_data(...) function and consists of two separate data tables:
@@ -15,7 +17,8 @@ spm(x, model = "discrete", formulas = NULL, start = NULL, tol = NULL,
 
 \item{model}{A model type. Choices are: "discrete", "continuous" or "time-dependent".}
 
-\item{formulas}{A list of parameter formulas used in the "time-dependent" model.}
+\item{formulas}{A list of parameter formulas used in the "time-dependent" model.
+Default: \code{formulas=list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")}.}
 
 \item{start}{A starting values of coefficients in the "time-dependent" model.}
 
@@ -24,15 +27,9 @@ spm(x, model = "discrete", formulas = NULL, start = NULL, tol = NULL,
 \item{stopifbound}{A flag (default=FALSE) if it is set then the optimization stops 
 when any of the parametrs achives lower or upper boundary.}
 
-\item{algorithm}{An optimization algorithm used in \code{nloptr} package.
-Default: \code{NLOPTR_NL_NELDERMEAD}.}
-
 \item{lb}{Lower boundary, default \code{NULL}.}
 
 \item{ub}{Upper boundary, default \code{NULL}.}
-
-\item{maxeval}{Maximum number of evaluations of optimization algorithm. 
-Default 100.}
 
 \item{pinv.tol}{A tolerance threshold for matrix pseudo-inverse. Default: 0.01.}
 
@@ -44,8 +41,10 @@ discrete-time optimization and estimating of starting point for continuous-time 
 \item{gomp}{A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
 mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t).}
 
-\item{ftol_rel}{Stops when an optimization step (or an estimate of the optimum) changes the objective function. 
-Default value 1e-6.}
+\item{opts}{A list of options for \code{nloptr}.
+Default value: \code{opt=list(algorithm="NLOPT_LN_NELDERMEAD", 
+maxeval=100, ftol_rel=1e-8)}.
+Please see \code{nloptr} documentation for more information.}
 }
 \value{
 For "discrete" and "continuous" model types: 

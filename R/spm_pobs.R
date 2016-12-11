@@ -40,10 +40,12 @@
 #'mode = "combined" denoted joint analysis of both observed and unobserved datasets.
 #'@param gomp A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 is used:
 #' mu0 = mu0*exp(theta*t).
-#'@param ftol_rel Relative tolerance threshold for likelihood function (defalult: 1e-6), see http://ab-initio.mit.edu/wiki/index.php/NLopt_Reference
+#'@param ftol_rel Relative tolerance threshold for likelihood function (defalult: 1e-6), 
+#'see http://ab-initio.mit.edu/wiki/index.php/NLopt_Reference
 #'@return A set of estimated parameters aH, aL, f1H, f1H, QH, QL, fH, fL, bH, bL, mu0H, mu0L, thetaH, thetaL, p and
 #'additional variable \code{limit} which indicates if any parameter 
 #'achieved lower or upper boundary conditions (FALSE by default).
+#'@export
 #'@examples \dontrun{
 #'library(stpm)
 #'#Reading the data:

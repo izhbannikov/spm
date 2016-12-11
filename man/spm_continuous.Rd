@@ -5,10 +5,10 @@
 \title{Continuous multi-dimensional optimization}
 \usage{
 spm_continuous(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
-  mu0 = 2e-05, theta = 0.08, stopifbound = FALSE,
-  algorithm = "NLOPT_LN_NELDERMEAD", lb = NULL, ub = NULL,
-  maxeval = 500, verbose = FALSE, pinv.tol = 0.01, gomp = FALSE,
-  ftol_rel = 1e-06)
+  mu0 = 2e-05, theta = 0.08, stopifbound = FALSE, lb = NULL,
+  ub = NULL, verbose = FALSE, pinv.tol = 0.01, gomp = FALSE,
+  opts = list(algorithm = "NLOPT_LN_NELDERMEAD", maxeval = 100, ftol_rel =
+  1e-08))
 }
 \arguments{
 \item{dat}{A data table.}
@@ -27,17 +27,13 @@ spm_continuous(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
 
 \item{theta}{A starting value of the parameter theta (axe displacement of Gompertz function).}
 
-\item{stopifbound}{Estimation stops if at least one parameter achieves lower or upper boundaries.}
-
-\item{algorithm}{An optimization algorithm used, can be one of those provided by \code{nloptr}. 
+\item{stopifbound}{Estimation stops if at least one parameter achieves lower or upper boundaries.
 #'Check the NLopt website for a description of
 the algorithms. Default: NLOPT_LN_NELDERMEAD}
 
 \item{lb}{Lower bound of parameters under estimation.}
 
-\item{ub}{Upper bound of parameters under estimation.}
-
-\item{maxeval}{Maximum number of iterations of the algorithm for \code{nloptr} optimization. 
+\item{ub}{Upper bound of parameters under estimation.
 The program stops when the number of function evaluations exceeds maxeval. Default: 500.}
 
 \item{verbose}{An indicator of verbosing output.}
@@ -48,8 +44,10 @@ and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006
 \item{gomp}{A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 is used:
 mu0 = mu0*exp(theta*t).}
 
-\item{ftol_rel}{Stops when an optimization step (or an estimate of the optimum) changes the objective function. 
-Default value 1e-6.}
+\item{opts}{A list of options for \code{nloptr}.
+Default value: \code{opt=list(algorithm="NLOPT_LN_NELDERMEAD", 
+maxeval=100, ftol_rel=1e-8)}.
+Please see \code{nloptr} documentation for more information.}
 }
 \value{
 A set of estimated parameters a, f1, Q, f, b, mu0, theta and
@@ -68,7 +66,8 @@ message A message given by nloptr optimization function (see documentation for n
 Continuous multi-dimensional optimization
 }
 \details{
-\code{spm_continuous} runs much slower that discrete but more precise and can handle time intervals with different lengths.
+\code{spm_continuous} runs much slower that discrete but more precise and can handle time 
+intervals with different lengths.
 }
 \examples{
 library(stpm)

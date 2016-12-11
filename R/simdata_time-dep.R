@@ -12,6 +12,7 @@
 #' @return A table with simulated data.
 #'@references Yashin, A. et al (2007), Health decline, aging and mortality: how are they related? 
 #'Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
+#'@export
 #' @examples
 #' library(stpm)
 #' dat <- simdata_time_dep(N=100)

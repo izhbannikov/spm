@@ -27,6 +27,7 @@
 #'(1) A simulated data set.
 #'(2) A summary statistics which includes (i) age-specific means of state variables and
 #'(ii) Survival probabilities.
+#'@export
 #'@examples \dontrun{ 
 #'library(stpm)
 #'# Setting up the model
@@ -118,7 +119,7 @@ spm_projection <- function(x,
     colnames(vt) = c("id", "time", "age","case", "start")
     
     #Survival probabilities:
-    srv.prob <- survfit( Surv(start, age, case) ~ 1, data = vt, conf.type="none")
+    srv.prob <- survfit( Surv(start, age, case) ~ 1, data = vt, conf.type = "log-log")
     stat[["srv.prob"]] <- srv.prob
     
     res <- list(data=res.time_dep, stat=stat)
@@ -168,7 +169,7 @@ spm_projection <- function(x,
     colnames(vt) = c("id", "time", "age","case", "start")
     
     #Survival probabilities:
-    srv.prob <- survfit( Surv(start, age, case) ~ 1, data = vt, conf.type="none")
+    srv.prob <- survfit( Surv(start, age, case) ~ 1, data = vt, conf.type = "log-log")
     stat[["srv.prob"]] <- srv.prob
     
     res <- list(data=res.discr, stat=stat)
@@ -221,7 +222,7 @@ spm_projection <- function(x,
     
     colnames(vt) = c("id", "time", "age","case", "start")
     
-    srv.prob <- survfit( Surv(start, age, case) ~ 1, data = vt, conf.type="none")
+    srv.prob <- survfit( Surv(start, age, case) ~ 1, data = vt, conf.type = "log-log")
     stat[["srv.prob"]] <- srv.prob
     
     res <- list(data=res.cont, stat=stat)

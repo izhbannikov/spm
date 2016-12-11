@@ -11,25 +11,34 @@ trim.trailing <- function (x) sub("\\s+$", "", x)
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
 
-#'spm_time_dep : a function that estimates parameters from the model with time-dependent coefficients.
+#'spm_time_dep : a function for the model with 
+#'time-dependent model parameters.
 #'@param x Input data table.
-#'@param start A list of starting parameters, default: list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),
-#'@param frm A list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")
-#'@param stopifbound Estimation stops if at least one parameter achieves lower or upper boundaries.
-#'@param algorithm An optimization algorithm used, can be one of those: NLOPT_LN_NEWUOA,NLOPT_LN_NEWUOA_BOUND or NLOPT_LN_NELDERMEAD. Default: NLOPT_LN_NELDERMEAD
+#'@param start A list of starting parameters, default: 
+#'\code{start=list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5)}.
+#'@param frm A list of formulas that define age (time) - dependency. 
+#'Default: \code{frm=list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", 
+#'mu0t="mu0")}.
+#'@param stopifbound Estimation stops if at least one parameter 
+#'achieves lower or upper boundaries. Default: \code{FALSE}.
 #'@param lb Lower bound of parameters under estimation.
 #'@param ub Upper bound of parameters under estimation.
 #'@param verbose Turns on verbosing output.
-#'@param maxeval A maximum number of iterations of optimization algorithm, default 100.
-#'@param ftol_rel Stops when an optimization step (or an estimate of the optimum) changes the objective function. 
-#'Default value 1e-6.
-#'@return A set of estimated coefficients of a, f1, Q, f, b, mu0.
+#'@param opts A list of options for \code{nloptr}.
+#'Default value: \code{opt=list(algorithm="NLOPT_LN_NELDERMEAD", 
+#'maxeval=100, ftol_rel=1e-8)}.
+#'Please see \code{nloptr} documentation for more information.
+#'@return A set of estimates of \code{a}, \code{f1}, \code{Q}, 
+#'\code{f}, \code{b}, \code{mu0}.
 #'@return status Optimization status (see documentation for nloptr package).
 #'@return LogLik A logarithm likelihood.
 #'@return objective A value of objective function (given by nloptr).
-#'@return message A message given by nloptr optimization function (see documentation for nloptr package).
-#'@references Yashin, A. et al (2007), Health decline, aging and mortality: how are they related? 
+#'@return message A message given by \code{nloptr} optimization function 
+#'(see documentation for nloptr package).
+#'@references Yashin, A. et al (2007), Health decline, 
+#'aging and mortality: how are they related? 
 #'Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
+#'@export
 #'@examples
 #'library(stpm)
 #'#Data preparation:
@@ -41,21 +50,23 @@ trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 #'
 spm_time_dep <- function(x, 
                          start=list(a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3),
-                         frm=list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"), 
+                         frm=list(at="a", f1t="f1", Qt="Q", ft="f", 
+                                  bt="b", mu0t="mu0"), 
                          stopifbound=FALSE, 
                          lb=NULL, ub=NULL,
-                         verbose=FALSE, opts=list(algorithm="NLOPT_LN_NELDERMEAD", maxeval=100, ftol_rel=1e-8)) {
+                         verbose=FALSE, opts=list(algorithm="NLOPT_LN_NELDERMEAD", 
+                                                  maxeval=100, ftol_rel=1e-8)) {
   
-  avail_algorithms <- c("NLOPT_GN_DIRECT", "NLOPT_GN_DIRECT_L",
-                        "NLOPT_GN_DIRECT_L_RAND", "NLOPT_GN_DIRECT_NOSCAL",
-                        "NLOPT_GN_DIRECT_L_NOSCAL",
-                        "NLOPT_GN_DIRECT_L_RAND_NOSCAL",
-                        "NLOPT_GN_ORIG_DIRECT", "NLOPT_GN_ORIG_DIRECT_L",
-                        "NLOPT_GN_CRS2_LM", 
-                        "NLOPT_LN_COBYLA", "NLOPT_LN_NEWUOA",
-                        "NLOPT_LN_NEWUOA_BOUND", "NLOPT_LN_NELDERMEAD",
-                        "NLOPT_LN_SBPLX",
-                        "NLOPT_LN_BOBYQA", "NLOPT_GN_ISRES")
+  #avail_algorithms <- c("NLOPT_GN_DIRECT", "NLOPT_GN_DIRECT_L",
+  #                      "NLOPT_GN_DIRECT_L_RAND", "NLOPT_GN_DIRECT_NOSCAL",
+  #                      "NLOPT_GN_DIRECT_L_NOSCAL",
+  #                      "NLOPT_GN_DIRECT_L_RAND_NOSCAL",
+  #                      "NLOPT_GN_ORIG_DIRECT", "NLOPT_GN_ORIG_DIRECT_L",
+  #                      "NLOPT_GN_CRS2_LM", 
+  #                      "NLOPT_LN_COBYLA", "NLOPT_LN_NEWUOA",
+  #                      "NLOPT_LN_NEWUOA_BOUND", "NLOPT_LN_NELDERMEAD",
+  #                      "NLOPT_LN_SBPLX",
+  #                      "NLOPT_LN_BOBYQA", "NLOPT_GN_ISRES")
   
   #--------------Begin of optimize function-------------------#
   optimize <- function(data, starting_params,  formulas, verbose, 

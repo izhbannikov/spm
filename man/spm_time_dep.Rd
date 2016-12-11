@@ -2,24 +2,27 @@
 % Please edit documentation in R/spm_time-dependent.R
 \name{spm_time_dep}
 \alias{spm_time_dep}
-\title{spm_time_dep : a function that estimates parameters from the model with time-dependent coefficients.}
+\title{spm_time_dep : a function for the model with 
+time-dependent model parameters.}
 \usage{
 spm_time_dep(x, start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0
   = 0.001), frm = list(at = "a", f1t = "f1", Qt = "Q", ft = "f", bt = "b",
-  mu0t = "mu0"), stopifbound = FALSE, algorithm = "NLOPT_LN_NELDERMEAD",
-  lb = NULL, ub = NULL, verbose = FALSE, maxeval = 100,
-  ftol_rel = 1e-06)
+  mu0t = "mu0"), stopifbound = FALSE, lb = NULL, ub = NULL,
+  verbose = FALSE, opts = list(algorithm = "NLOPT_LN_NELDERMEAD", maxeval =
+  100, ftol_rel = 1e-08))
 }
 \arguments{
 \item{x}{Input data table.}
 
-\item{start}{A list of starting parameters, default: list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5),}
+\item{start}{A list of starting parameters, default: 
+\code{start=list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5)}.}
 
-\item{frm}{A list of formulas that define age (time) - dependency. Default: list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0")}
+\item{frm}{A list of formulas that define age (time) - dependency. 
+Default: \code{frm=list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", 
+mu0t="mu0")}.}
 
-\item{stopifbound}{Estimation stops if at least one parameter achieves lower or upper boundaries.}
-
-\item{algorithm}{An optimization algorithm used, can be one of those: NLOPT_LN_NEWUOA,NLOPT_LN_NEWUOA_BOUND or NLOPT_LN_NELDERMEAD. Default: NLOPT_LN_NELDERMEAD}
+\item{stopifbound}{Estimation stops if at least one parameter 
+achieves lower or upper boundaries. Default: \code{FALSE}.}
 
 \item{lb}{Lower bound of parameters under estimation.}
 
@@ -27,13 +30,14 @@ spm_time_dep(x, start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0
 
 \item{verbose}{Turns on verbosing output.}
 
-\item{maxeval}{A maximum number of iterations of optimization algorithm, default 100.}
-
-\item{ftol_rel}{Stops when an optimization step (or an estimate of the optimum) changes the objective function. 
-Default value 1e-6.}
+\item{opts}{A list of options for \code{nloptr}.
+Default value: \code{opt=list(algorithm="NLOPT_LN_NELDERMEAD", 
+maxeval=100, ftol_rel=1e-8)}.
+Please see \code{nloptr} documentation for more information.}
 }
 \value{
-A set of estimated coefficients of a, f1, Q, f, b, mu0.
+A set of estimates of \code{a}, \code{f1}, \code{Q}, 
+\code{f}, \code{b}, \code{mu0}.
 
 status Optimization status (see documentation for nloptr package).
 
@@ -41,10 +45,12 @@ LogLik A logarithm likelihood.
 
 objective A value of objective function (given by nloptr).
 
-message A message given by nloptr optimization function (see documentation for nloptr package).
+message A message given by \code{nloptr} optimization function 
+(see documentation for nloptr package).
 }
 \description{
-spm_time_dep : a function that estimates parameters from the model with time-dependent coefficients.
+spm_time_dep : a function for the model with 
+time-dependent model parameters.
 }
 \examples{
 library(stpm)
@@ -57,7 +63,8 @@ opt.par
 
 }
 \references{
-Yashin, A. et al (2007), Health decline, aging and mortality: how are they related? 
+Yashin, A. et al (2007), Health decline, 
+aging and mortality: how are they related? 
 Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
 }
 

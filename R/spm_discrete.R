@@ -6,6 +6,7 @@
 #'@param theta_range A range of \code{theta} parameter (axe displacement of Gompertz function), default: from 0.001 to 0.09 with step of 0.001.
 #'@param tol A tolerance threshold for matrix inversion (NULL by default).
 #'@param verbose An indicator of verbosing output.
+#'@export
 #'@return A list of two elements ("Ak205", "Ya2007"): (1) estimated parameters u, R, b, Sigma, Q, mu0, theta and
 #'(2) estimated parameters a, f1, Q, f, b, mu0, theta. Note: b and mu0 from first list are different 
 #'from b and mu0 from the second list.

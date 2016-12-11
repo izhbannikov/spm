@@ -19,6 +19,7 @@
 #' @param dt A time step (1 by default).
 #' @param nobs A number, defines a number of observations (lines) for an individual, NULL by default.
 #' @return A table with simulated data.
+#' @export
 #' @examples
 #' library(stpm)
 #' data <- simdata_discr(N=100)
