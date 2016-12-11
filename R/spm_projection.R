@@ -47,9 +47,9 @@
 #'data.proj.continuous <- spm_projection(model.par, N=5000, ystart=c(80, 27), model="continuous")
 #'plot(data.proj.continuous$stat$srv.prob)
 #'# Time-dependent model
-#'model.par <- list(at="-0.05", f1t="80", Qt="2e-5", ft="80", bt="5", mu0t="1e-3*exp(0.08*t)")
+#'model.par <- list(at = "-0.05", f1t = "80", Qt = "2e-8", ft= "80", bt = "5", mu0t = "1e-5*exp(0.11*t)")
 #'data.proj.time_dependent <- spm_projection(model.par, N=500, ystart=80, model="time-dependent")
-#'plot(data.proj.time_dependent$stat$srv.prob)
+#'plot(data.proj.time_dependent$stat$srv.prob, xlim = c(30,105))
 #'}
 spm_projection <- function(x, 
                            N=100, 
@@ -75,12 +75,10 @@ spm_projection <- function(x,
   if(model == "time-dependent") {
     # Data simulation for time-dependent model
     
-    formulas.work <- list(at="-0.05", f1t="80", Qt="2e-8", ft="80", bt="5", mu0t="2e-5")
+    formulas.work <- list(at = "-0.05", f1t = "80", Qt = "2e-8", ft= "80", bt = "5", mu0t = "1e-5*exp(0.11*t)")
     
     if (!is.null(x)) {
-      for(item in x) {
-        formulas.work[[item]] <- x[[item]]
-      }
+      formulas.work <- x
     }
     
     #Simulate (project) data:
