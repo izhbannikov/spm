@@ -42,23 +42,23 @@ model.par$f1 <- matrix(c(90, 35), nrow=1, ncol=2)
 model.par$Q <- matrix(c(1e-8, 1e-9, 1e-9, 1e-8), nrow=2, ncol=2, byrow=TRUE)
 model.par$f <- matrix(c(80, 27), nrow=1, ncol=2)
 model.par$b <- matrix(c(6, 2), nrow=2, ncol=2)
-model.par$mu0 <- 1e-6
-model.par$theta <- 0.09
+model.par$mu0 <- 1e-5
+model.par$theta <- 0.11
 # Projection
 # Discrete-time model
-data.proj.discrete <- spm_projection(model.par, N=5000, ystart=c(80, 27), tstart=c(30, 60))
-plot(data.proj.discrete$stat$srv.prob)
+data.proj.discrete <- spm_projection(model.par, N=100, ystart=c(80, 27), tstart=c(30, 60))
+plot(data.proj.discrete$stat$srv.prob, xlim = c(30, 115))
 # Continuous-time model
-data.proj.continuous <- spm_projection(model.par, N=5000, ystart=c(80, 27), model="continuous", gomp=TRUE)
-plot(data.proj.continuous$stat$srv.prob)
+data.proj.continuous <- spm_projection(model.par, N=100, ystart=c(80, 27), model="continuous", gomp=TRUE)
+plot(data.proj.continuous$stat$srv.prob, xlim = c(30, 115))
 ```
 
 ### Time-dependent model
 ```
 library(stpm)
-model.par <- list(at="-0.05", f1t="80", Qt="2e-3", ft="80", bt="15", mu0t="1e-5*exp(0.08*t)")
-data.proj.time_dependent <- spm_projection(model.par, N=500, ystart=80, model="time-dependent", sd=4)
-plot(data.proj.time_dependent$stat$srv.prob)
+model.par <- list(at = "-0.05", f1t = "80", Qt = "2e-8", ft= "80", bt = "5", mu0t = "1e-5*exp(0.11*t)")
+data.proj.time_dependent <- spm_projection(model.par, N=100, ystart=80, model="time-dependent")
+plot(data.proj.time_dependent$stat$srv.prob, xlim = c(30,105))
 ```
 
 ### Test prepare_data()

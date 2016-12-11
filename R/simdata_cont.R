@@ -43,7 +43,7 @@ simdata_cont <- function(N=10,
                           dt=1, 
                           sd0=1,
                           nobs=NULL, 
-                          gomp=FALSE) {
+                          gomp=TRUE) {
   
   k <- length(ystart)
   
