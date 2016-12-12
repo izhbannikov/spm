@@ -5,7 +5,6 @@
 #' @import nloptr
 #' @import survival
 #' @import tools
-#' @import utils
 #' @importFrom utils head read.csv tail
 #' @useDynLib stpm
 NULL
