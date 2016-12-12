@@ -64,7 +64,7 @@ plot(data.proj.time_dependent$stat$srv.prob, xlim = c(30,105))
 ### Test prepare_data()
 ```
 library(stpm)
-data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"), y=system.file("data","vitstat.csv",package="stpm"))
+data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"))
 head(data[[1]])
 head(data[[2]])
 ```
