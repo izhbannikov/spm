@@ -1,12 +1,16 @@
 #'A data projection with previously estimated or user-defined parameters. 
 #'Projections are constructed for a cohort with fixed or 
 #'normally distributed initial covariates. 
-#'@references Yashin, A. et al (2007), Stochastic model for analysis of longitudinal data on aging 
+#'@references Yashin, A. et al (2007), 
+#'Stochastic model for analysis of longitudinal data on aging 
 #'and mortality. Mathematical Biosciences, 208(2), 538-551.
-#'@references Akushevich I., Kulminski A. and Manton K. (2005). Life tables with covariates: Dynamic model 
-#'for Nonlinear Analysis of Longitudinal Data. Mathematical Popu-lation Studies, 12(2), pp.: 51-80.
+#'@references Akushevich I., Kulminski A. and Manton K. (2005). 
+#'Life tables with covariates: Dynamic model 
+#'for Nonlinear Analysis of Longitudinal Data. 
+#'Mathematical Popu-lation Studies, 12(2), pp.: 51-80.
 #'<DOI: 10.1080/08898480590932296>.
-#'@references Yashin, A. et al (2007), Health decline, aging and mortality: how are they related? 
+#'@references Yashin, A. et al (2007), Health decline, 
+#'aging and mortality: how are they related? 
 #'Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
 #'@param x A list of parameters from output of the \code{spm(...)} function.
 #'@param N A number of individuals to simulate, N=100 by default.
@@ -44,11 +48,14 @@
 #'data.proj.discrete <- spm_projection(model.par, N=5000, ystart=c(80, 27))
 #'plot(data.proj.discrete$stat$srv.prob)
 #'# Continuous-time model
-#'data.proj.continuous <- spm_projection(model.par, N=5000, ystart=c(80, 27), model="continuous")
+#'data.proj.continuous <- spm_projection(model.par, N=5000, 
+#'ystart=c(80, 27), model="continuous")
 #'plot(data.proj.continuous$stat$srv.prob)
 #'# Time-dependent model
-#'model.par <- list(at = "-0.05", f1t = "80", Qt = "2e-8", ft= "80", bt = "5", mu0t = "1e-5*exp(0.11*t)")
-#'data.proj.time_dependent <- spm_projection(model.par, N=500, ystart=80, model="time-dependent")
+#'model.par <- list(at = "-0.05", f1t = "80", Qt = "2e-8", 
+#'ft= "80", bt = "5", mu0t = "1e-5*exp(0.11*t)")
+#'data.proj.time_dependent <- spm_projection(model.par, N=500, 
+#'ystart=80, model="time-dependent")
 #'plot(data.proj.time_dependent$stat$srv.prob, xlim = c(30,105))
 #'}
 spm_projection <- function(x, 
@@ -75,7 +82,8 @@ spm_projection <- function(x,
   if(model == "time-dependent") {
     # Data simulation for time-dependent model
     
-    formulas.work <- list(at = "-0.05", f1t = "80", Qt = "2e-8", ft= "80", bt = "5", mu0t = "1e-5*exp(0.11*t)")
+    formulas.work <- list(at = "-0.05", f1t = "80", Qt = "2e-8", 
+                          ft= "80", bt = "5", mu0t = "1e-5*exp(0.11*t)")
     
     if (!is.null(x)) {
       formulas.work <- x

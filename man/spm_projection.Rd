@@ -63,23 +63,30 @@ model.par$theta <- 0.09
 data.proj.discrete <- spm_projection(model.par, N=5000, ystart=c(80, 27))
 plot(data.proj.discrete$stat$srv.prob)
 # Continuous-time model
-data.proj.continuous <- spm_projection(model.par, N=5000, ystart=c(80, 27), model="continuous")
+data.proj.continuous <- spm_projection(model.par, N=5000, 
+ystart=c(80, 27), model="continuous")
 plot(data.proj.continuous$stat$srv.prob)
 # Time-dependent model
-model.par <- list(at = "-0.05", f1t = "80", Qt = "2e-8", ft= "80", bt = "5", mu0t = "1e-5*exp(0.11*t)")
-data.proj.time_dependent <- spm_projection(model.par, N=500, ystart=80, model="time-dependent")
+model.par <- list(at = "-0.05", f1t = "80", Qt = "2e-8", 
+ft= "80", bt = "5", mu0t = "1e-5*exp(0.11*t)")
+data.proj.time_dependent <- spm_projection(model.par, N=500, 
+ystart=80, model="time-dependent")
 plot(data.proj.time_dependent$stat$srv.prob, xlim = c(30,105))
 }
 }
 \references{
-Yashin, A. et al (2007), Stochastic model for analysis of longitudinal data on aging 
+Yashin, A. et al (2007), 
+Stochastic model for analysis of longitudinal data on aging 
 and mortality. Mathematical Biosciences, 208(2), 538-551.
 
-Akushevich I., Kulminski A. and Manton K. (2005). Life tables with covariates: Dynamic model 
-for Nonlinear Analysis of Longitudinal Data. Mathematical Popu-lation Studies, 12(2), pp.: 51-80.
+Akushevich I., Kulminski A. and Manton K. (2005). 
+Life tables with covariates: Dynamic model 
+for Nonlinear Analysis of Longitudinal Data. 
+Mathematical Popu-lation Studies, 12(2), pp.: 51-80.
 <DOI: 10.1080/08898480590932296>.
 
-Yashin, A. et al (2007), Health decline, aging and mortality: how are they related? 
+Yashin, A. et al (2007), Health decline, 
+aging and mortality: how are they related? 
 Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
 }
 

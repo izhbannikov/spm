@@ -6,7 +6,7 @@
 \usage{
 simdata_cont(N = 10, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
   mu0 = 1e-05, theta = 0.08, ystart = 80, tstart = 30, tend = 105,
-  dt = 1, sd0 = 1, nobs = NULL, gomp = FALSE)
+  dt = 1, sd0 = 1, nobs = NULL, gomp = TRUE)
 }
 \arguments{
 \item{N}{Number of individuals.}
