@@ -1,4 +1,6 @@
-New for version 1.5.0
+New for version 1.6.0
 ======================
-* Functions spm(...), spm_time_dep(...), spm_continuous(...) now take parameter "opts" which represents a list of additional parameters for nloptr. By default opts=list(algorithm = "NLOPT_LN_NELDERMEAD", maxeval = 100, ftol_rel = 1e-08)
+* Version released
+* Added functions spm_con_1d(...) and spm_con_1d_g(...) offering fast one-dimensional optimisation of parameters.
 * Bug fixes
+* Documentation updated

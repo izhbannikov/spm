@@ -55,7 +55,7 @@ time-dependent model parameters.
 \examples{
 library(stpm)
 #Data preparation:
-n <- 10
+n <- 5
 data <- simdata_time_dep(N=n)
 # Estimation:
 opt.par <- spm_time_dep(data)
