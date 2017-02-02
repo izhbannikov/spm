@@ -3,7 +3,7 @@ Type: Package
 Title: Stochastic Process Model for Analysis of Longitudinal and Time-to-Event Outcomes
 Version: 1.5.0
 Date: 2016-12-11
-Author: I. Y. Zhbannikov, Liang He, K. G. Arbeev, A. I. Yashin.
+Author: I. Y. Zhbannikov, Liang He, K. G. Arbeev, E. Stallard, I. Akushevich, A. I. Yashin.
 Maintainer: Ilya Y. Zhbannikov <ilya.zhbannikov@duke.edu>
 Description: Utilities to estimate parameters of the models with survival functions 
              induced by stochastic covariates. Miscellaneous functions for data preparation 
