@@ -4,18 +4,18 @@
 \alias{getPrevY.discr}
 \title{An internal function to compute previous value of
 physiological variable Y based on 
-discrete-time model (Akushevich et. al., 2005)}
+discrete-time model}
 \usage{
 getPrevY.discr(y2, u, R, Sigma)
 }
 \arguments{
 \item{y2}{y2}
 
-\item{u}{u (see Akushevich et. al, 2005)}
+\item{u}{u}
 
-\item{R}{R (see Akushevich et. al, 2005)}
+\item{R}{R}
 
-\item{Sigma}{Sigma (see Akushevich et. al, 2005)}
+\item{Sigma}{Sigma}
 }
 \value{
 y1 Previous value of y
@@ -23,6 +23,6 @@ y1 Previous value of y
 \description{
 An internal function to compute previous value of
 physiological variable Y based on 
-discrete-time model (Akushevich et. al., 2005)
+discrete-time model
 }
 

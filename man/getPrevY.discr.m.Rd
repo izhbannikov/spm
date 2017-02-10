@@ -2,23 +2,21 @@
 % Please edit documentation in R/spm.impute.R
 \name{getPrevY.discr.m}
 \alias{getPrevY.discr.m}
-\title{An internal function to compute previous m based on discrete-time model
-(Akushevich et. al., 2005)}
+\title{An internal function to compute previous m based on discrete-time model}
 \usage{
 getPrevY.discr.m(y2, u, R)
 }
 \arguments{
 \item{y2}{y2}
 
-\item{u}{u (see Akushevich et. al, 2005)}
+\item{u}{u}
 
-\item{R}{R (see Akushevich et. al, 2005)}
+\item{R}{R}
 }
 \value{
 m Next value of m (see Yashin et. al, 2007)
 }
 \description{
 An internal function to compute previous m based on discrete-time model
-(Akushevich et. al., 2005)
 }
 

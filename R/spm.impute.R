@@ -83,10 +83,9 @@ getNextY.discr <- function(y1, u, R, Sigma) {
 }
 
 #' An internal function to compute next m based on dicrete-time model 
-#' (Akushevich et. al., 2005)
 #' @param y1 y1
-#' @param u u (see Akushevich et. al, 2005)
-#' @param R R (see Akushevich et. al, 2005)
+#' @param u u
+#' @param R R
 #' @return m Next value of m (see Yashin et. al, 2007)
 getNextY.discr.m <- function(y1, u, R) {
   m <- u + R %*% y1
@@ -94,10 +93,9 @@ getNextY.discr.m <- function(y1, u, R) {
 }
 
 #' An internal function to compute previous m based on discrete-time model
-#' (Akushevich et. al., 2005)
 #' @param y2 y2
-#' @param u u (see Akushevich et. al, 2005)
-#' @param R R (see Akushevich et. al, 2005)
+#' @param u u
+#' @param R R
 #' @return m Next value of m (see Yashin et. al, 2007)
 getPrevY.discr.m <- function(y2, u, R) {
   m <- solve(R) %*% (y2 - u)
@@ -106,11 +104,11 @@ getPrevY.discr.m <- function(y2, u, R) {
 
 #' An internal function to compute previous value of
 #' physiological variable Y based on 
-#' discrete-time model (Akushevich et. al., 2005)
+#' discrete-time model
 #' @param y2 y2
-#' @param u u (see Akushevich et. al, 2005)
-#' @param R R (see Akushevich et. al, 2005)
-#' @param Sigma Sigma (see Akushevich et. al, 2005)
+#' @param u u
+#' @param R R
+#' @param Sigma Sigma
 #' @return y1 Previous value of y
 getPrevY.discr <- function(y2, u, R, Sigma) {
   eps<-matrix(nrow=dim(R)[1], ncol=1)
