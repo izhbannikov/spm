@@ -75,9 +75,8 @@ This function implements a continuous genetic SPM model by assuming all the para
 \examples{
 { 
 library(stpm) 
-dat <- simdata_cont(N=500)
-colnames(dat) <- c("id", "xi", "t1", "t2", "y", "y.next")
-res <- spm_con_1d(as.data.frame(dat), a=-0.05, b=2, q=1e-8, f=80, f1=90, mu0=1e-3, theta=0.08)
+load('ex_spmcon1dg.rda')
+res <- spm_con_1d_g(ex_data$spm_data, ex_data$gene_data, a = -0.02, b=0.2, q=0.01, f=3, f1=3, mu0=0.01, theta=1e-05, upper=c(-0.01,3,0.1,10,10,0.1,1e-05), lower=c(-1,0.01,0.00001,1,1,0.001,1e-05), effect=c('q'))
 }
 }
 \references{
