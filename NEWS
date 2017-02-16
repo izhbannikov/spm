@@ -1,6 +1,0 @@
-New for version 1.6.0
-======================
-* Version released
-* Added functions spm_con_1d(...) and spm_con_1d_g(...) offering fast one-dimensional optimisation of parameters.
-* Bug fixes
-* Documentation updated
