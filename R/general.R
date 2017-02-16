@@ -4,8 +4,7 @@
 #' @import nloptr
 #' @import survival
 #' @import tools
+#' @import mice
 #' @importFrom utils head read.csv tail
-#' @importFrom mice mice complete
-#' @importFrom mice mice.impute.pmm
 #' @useDynLib stpm
 NULL
