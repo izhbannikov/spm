@@ -31,4 +31,3 @@ list(m, gamma) Next values of m and gamma (see Yashin et. al, 2007)
 An internal function to compute m and gamma based on 
 continuous-time model (Yashin et. al., 2007)
 }
-

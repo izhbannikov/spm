@@ -19,4 +19,3 @@ sigma_square (see Akushevich et. al, 2005)
 \description{
 An internal function to compute sigma square analytically
 }
-

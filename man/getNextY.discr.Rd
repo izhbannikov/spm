@@ -23,4 +23,3 @@ y.next Next value of y
 An internal function to compute the next value of physiological variable Y
 based on discrete-time model (Akushevich et. al., 2005)
 }
-

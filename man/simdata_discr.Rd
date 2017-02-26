@@ -55,4 +55,3 @@ Akushevich I., Kulminski A. and Manton K. (2005), Life tables with covariates: D
 for Nonlinear Analysis of Longitudinal Data. Mathematical Population Studies, 12(2), pp.: 51-80.
 <DOI:10.1080/08898480590932296>.
 }
-

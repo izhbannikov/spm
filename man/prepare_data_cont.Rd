@@ -29,4 +29,3 @@ prepare_data_cont(merged.data, col.status.ind, col.id.ind, col.age.ind,
 \description{
 Prepares continuouts-time dataset.
 }
-

@@ -19,4 +19,3 @@ m Next value of m (see Yashin et. al, 2007)
 \description{
 An internal function to compute next m based on dicrete-time model
 }
-

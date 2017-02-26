@@ -30,4 +30,3 @@ Filling the last cell}
 \description{
 Prepares discrete-time dataset.
 }
-

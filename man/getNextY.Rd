@@ -25,4 +25,3 @@ y.next Next value of y
 \description{
 An internal function to compute next value of physiological variable Y
 }
-

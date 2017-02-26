@@ -12,4 +12,3 @@ trim.leading(x)
 \description{
 Returns string w/o leading whitespace
 }
-

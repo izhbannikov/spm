@@ -102,4 +102,3 @@ Arbeev, K.G. et al (2009). Genetic model for longitudinal studies of aging, heal
 Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
 and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.
 }
-

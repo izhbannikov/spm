@@ -25,4 +25,3 @@ An internal function to compute previous value of
 physiological variable Y based on 
 discrete-time model
 }
-

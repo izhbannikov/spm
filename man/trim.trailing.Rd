@@ -12,4 +12,3 @@ trim.trailing(x)
 \description{
 Returns string w/o trailing whitespace
 }
-

@@ -11,4 +11,3 @@ Vital (mortality) statistics.
 Ilya Y Zhbannikov \email{ilya.zhbannikov@duke.edu}
 }
 \keyword{data}
-

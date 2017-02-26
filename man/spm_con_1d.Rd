@@ -63,4 +63,3 @@ res <- spm_con_1d(as.data.frame(dat), a=-0.05, b=2, q=1e-8, f=80, f1=90, mu0=1e-
 \references{
 He, L., Zhbannikov, I., Arbeev, K. G., Yashin, A. I., and Kulminski, A.M., 2017. Genetic stochastic process model for detecting pleiotropic and interaction effects with longitudinal data.
 }
-

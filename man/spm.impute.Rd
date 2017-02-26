@@ -48,4 +48,3 @@ pp.test <- spm_discrete(imp.data, theta_range = seq(0.075, 0.09, by=0.001))
 pp.test
 }
 }
-

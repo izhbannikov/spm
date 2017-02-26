@@ -23,4 +23,3 @@ m m (see Yashin et. al, 2007)
 \description{
 An internal function to compute m from
 }
-

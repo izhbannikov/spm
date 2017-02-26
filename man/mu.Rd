@@ -25,4 +25,3 @@ mu Next value of mu
 \description{
 An internal function to compute mu
 }
-

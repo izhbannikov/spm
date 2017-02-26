@@ -4,6 +4,7 @@
 \name{stpm}
 \alias{stpm}
 \alias{stpm-package}
+\alias{stpm-package}
 \title{Stochastic Process Model for Analysis of Longitudinal and Time-to-Event Outcomes}
 \description{
 Utilities to estimate parameters of the models with survival functions induced by 
@@ -32,9 +33,6 @@ p.td.model <- spm(data, model="time-dependent")
 p.td.model
 }
 }
-\author{
-I. Y. Zhbannikov, Liang He, K. G. Arbeev, A. I. Yashin.
-}
 \references{
 Yashin, A. et al (2007), Stochastic model for analysis of longitudinal data on aging 
 and mortality. Mathematical Biosciences, 208(2), 538-551.
@@ -46,6 +44,9 @@ for Nonlinear Analysis of Longitudinal Data. Mathematical Popu-lation Studies, 1
 Yashin, A. et al (2007), Health decline, aging and mortality: how are they related? 
 Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
 }
+\author{
+I. Y. Zhbannikov, Liang He, K. G. Arbeev, A. I. Yashin.
+}
 \keyword{Stochastic}
 \keyword{allostatic}
 \keyword{hazard}
@@ -56,4 +57,3 @@ Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
 \keyword{quadratic}
 \keyword{studies,}
 \keyword{time-to-event}
-

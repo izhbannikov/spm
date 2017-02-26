@@ -11,4 +11,3 @@ This is the longitudinal dataset.
 Ilya Y Zhbannikov \email{ilya.zhbannikov@duke.edu}
 }
 \keyword{data}
-

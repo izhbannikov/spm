@@ -39,4 +39,3 @@ y.next Next value of Y
 An internal function to compute next Y based on 
 continous-time model (Yashin et. al., 2007)
 }
-
