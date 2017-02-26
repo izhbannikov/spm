@@ -37,7 +37,7 @@ Data represents a typical longitudinal data in form of two datasets: longitudina
 ```{r,results='hide',warning=FALSE,echo=FALSE,message=FALSE}
 library(stpm)
 # Reading longitude data:
-longdat <- read.csv(system.file("data","longdat.csv",package="stpm"))
+longdat <- read.csv(system.file("extdata","longdat.csv",package="stpm"))
 ```
 
 Below there is an example of clinical data that can be used in ```stpm``` and we will discuss the fields later.

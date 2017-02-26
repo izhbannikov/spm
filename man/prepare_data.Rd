@@ -51,7 +51,7 @@ Data pre-processing for analysis with stochastic process model methodology.
 \examples{
 \dontrun{ 
 library(stpm) 
-data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"))
+data <- prepare_data(x=system.file("extdata","longdat.csv",package="stpm"))
 head(data[[1]])
 head(data[[2]])
 }
