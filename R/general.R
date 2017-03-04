@@ -6,5 +6,5 @@
 #' @import tools
 #' @import mice
 #' @importFrom utils head read.csv tail
-#' @useDynLib stpm
+#' @useDynLib stpm, .registration = TRUE
 NULL
