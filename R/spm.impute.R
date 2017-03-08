@@ -249,7 +249,7 @@ spm.impute <- function(dataset, minp=5, theta_range=seq(0.01, 0.2, by=0.001)) {
       #### First, let us handle the first row ####
       df <- x[which(x[,1] == k), ]
       
-      if(length(df) == Ncol) {
+      if(length(df[,1]) == 1) {
         Nrec <- 1
       } else {
         Nrec <- length(df[,1])
@@ -276,8 +276,8 @@ spm.impute <- function(dataset, minp=5, theta_range=seq(0.01, 0.2, by=0.001)) {
       }
       
       
-      
-      row.cur <- df[1, ]; row.next <- df[2, ]
+      row.cur <- df[1, ]
+      row.next <- df[2, ]
   
       for(j in seq(5,Ncol,by=2)) {
         if(is.na(row.cur[j])) {
@@ -304,7 +304,9 @@ spm.impute <- function(dataset, minp=5, theta_range=seq(0.01, 0.2, by=0.001)) {
       if(Nrec > 2) {
         #### Preprocessing of df ####
         for(i in 2:(Nrec-1)) {
-          row.cur <- df[i,]; row.prev <- df[i-1,]; row.next <- df[i+1,]
+          row.cur <- df[i,]
+          row.prev <- df[i-1,]
+          row.next <- df[i+1,]
           
           for(j in seq(5, Ncol,by=2)) {
             if(is.na(row.cur[j])) {
@@ -330,7 +332,9 @@ spm.impute <- function(dataset, minp=5, theta_range=seq(0.01, 0.2, by=0.001)) {
         #### Main imputation loop ####
         
         for(i in 2:(Nrec-1)) {
-          row.cur <- df[i, ]; row.next <- df[i+1, ]
+          row.cur <- df[i, ]
+          row.next <- df[i+1, ]
+          #print(row.cur)
           y1 <- row.cur[seq(5,Ncol,by=2)]
           if(any(is.na(row.cur[seq(6, Ncol,by=2)]))) {
             y.next <- getNextY.discr.m(t(as.matrix(y1)), pp$Ak2005$u, pp$Ak2005$R)
