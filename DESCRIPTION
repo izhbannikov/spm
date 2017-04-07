@@ -1,8 +1,8 @@
 Package: stpm
 Type: Package
 Title: Stochastic Process Model for Analysis of Longitudinal and Time-to-Event Outcomes
-Version: 1.6.5
-Date: 2017-03-08
+Version: 1.6.6
+Date: 2017-04-07
 Author: I. Y. Zhbannikov, Liang He, K. G. Arbeev, A. I. Yashin.
 Maintainer: Ilya Y. Zhbannikov <ilya.zhbannikov@duke.edu>
 Description: Utilities to estimate parameters of the models with survival functions 

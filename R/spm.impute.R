@@ -242,7 +242,7 @@ spm.impute <- function(dataset, minp=5, theta_range=seq(0.01, 0.2, by=0.001)) {
   pp <- spm_discrete(dataset, theta_range = theta_range)
   ids <- unique(dataset[,1])
   
-  for(m in minp) {
+  for(m in 1:minp) {
     x <- dataset
     Ncol <- dim(x)[2]
     for(k in ids) {
@@ -256,10 +256,22 @@ spm.impute <- function(dataset, minp=5, theta_range=seq(0.01, 0.2, by=0.001)) {
         Nrec <- length(df[,1])
       }
       
+       
       if(Nrec == 1) {
         row.cur <- df
         for(j in seq(5,Ncol,by=2)) {
-          if(is.na(row.cur[j])) {
+          if(is.na(row.cur[j]) & !is.na(row.cur[j+1])) {
+            kkk <- ((j-5) %/% 2)+1
+            
+            #y.start <- rnorm(1, mean = mean(x[,j], na.rm = T), sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
+            #row.cur[j] <- y.start
+            
+            y2 <- df[1,j+1]
+            y1 <- getPrevY.discr.m(t(as.matrix(y2)), pp$Ak2005$u[kkk], pp$Ak2005$R[kkk,kkk])
+            df[1,j] <- y1
+            row.cur[j] <- y1
+            
+          } else if(is.na(row.cur[j]) & is.na(row.cur[j+1])){
             y.start <- rnorm(1, mean = mean(x[,j], na.rm = T), sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
             row.cur[j] <- y.start
           }
@@ -276,6 +288,8 @@ spm.impute <- function(dataset, minp=5, theta_range=seq(0.01, 0.2, by=0.001)) {
         next
       }
       
+      
+      
       # Check the first row #
       row.cur <- df[1, ]
       row.next <- df[2, ]
@@ -288,54 +302,38 @@ spm.impute <- function(dataset, minp=5, theta_range=seq(0.01, 0.2, by=0.001)) {
           ##y.start <- rnorm(1, mean = meanY, sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
           #y.start <- medianY #rnorm(1, mean = meanY, sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
           
-          for(ii in 1:dim(df)[1]) {
+          for(ii in 1:Nrec) {
             if(!is.na(df[ii,j]))
               break
           }
           
-          for(iii in (ii-1):1) {
-            y2 <- df[iii,j+1]
-            y1 <- getPrevY.discr.m(t(as.matrix(y2)), pp$Ak2005$u[kkk], pp$Ak2005$R[kkk,kkk])
-            df[iii,j] <- y1
-            if(iii != 1) {
-              df[iii-1,j+1] <- y1
-            }
+          if(ii != Nrec) {
+              for(iii in (ii-1):1) {
+                  y2 <- df[iii,j+1]
+                  y1 <- getPrevY.discr.m(t(as.matrix(y2)), pp$Ak2005$u[kkk], pp$Ak2005$R[kkk,kkk])
+                  df[iii,j] <- y1
+                  if(iii != 1) {
+                      df[iii-1,j+1] <- y1
+                  }
+              }
+          } else {
+              meanY <- mean(x[, j], na.rm = TRUE)
+              y.start <- rnorm(1, mean = meanY, sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
+              df[1,j] <- y.start
           }
-          
-          row.cur[j] <- y1
         }
       }
       
-      # If no measurements for individual:
-      for(j in seq(5,Ncol,by=2)) {
-        if(is.na(row.cur[j])) {
-          meanY <- mean(x[, j], na.rm = TRUE)
-          y.start <- rnorm(1, mean = meanY, sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
-          row.cur[j] <- y.start
-        }
-      }
       
-      if(any(is.na(row.cur[seq(6, Ncol,by=2)]))) {
-        y1 <- row.cur[seq(5,Ncol,by=2)]
-        y.next <- getNextY.discr.m(t(as.matrix(y1)), pp$Ak2005$u, pp$Ak2005$R)
-        #y.next <- getNextY.discr(t(as.matrix(y1)), pp$Ak2005$u, pp$Ak2005$R, pp$Ak2005$Sigma)
-        for(j in seq(6,Ncol,by=2)) {
-          if(is.na(row.cur[j])) {
-            row.cur[j] <- y.next[(j - 6) %/% 2 + 1]
-          }
-          if(is.na(row.next[j-1])) { row.next[j-1] <- row.cur[j] }
-        }
-      }
-  
       # Check the rest #
-      df[1, ] <- row.cur
-      df[2, ] <- row.next
+      #df[1, ] <- row.cur
+      #df[2, ] <- row.next
       
       #### Preprocessing of df ####
-      for(i in 2:(Nrec-1)) {
+      for(i in 2:Nrec) {
           row.cur <- df[i,]
           row.prev <- df[i-1,]
-          row.next <- df[i+1,]
+          if(i != Nrec & Nrec >2) {row.next <- df[i+1,]}
           
           for(j in seq(5, Ncol,by=2)) {
             if(is.na(row.cur[j])) {
@@ -347,22 +345,30 @@ spm.impute <- function(dataset, minp=5, theta_range=seq(0.01, 0.2, by=0.001)) {
           
           for(j in seq(6, Ncol,by=2)) {
             if(is.na(row.cur[j])) {
-              row.cur[j] <- row.next[j-1]
+              if(i != Nrec & Nrec >2) {row.cur[j] <- row.next[j-1]}
             } else {
-              row.next[j-1] <- row.cur[j]
+              if(i != Nrec & Nrec >2) {row.next[j-1] <- row.cur[j]}
             }
           }
           
           df[i-1, ] <- row.prev
           df[i, ] <- row.cur
-          df[i+1, ] <- row.next
+          if(i != Nrec & Nrec >2) {df[i+1, ] <- row.next}
       }
+      
+      #if(dim(x[which(x[,1] == k), ])[1] != dim(df)[1]) {
+      #  print("!!")
+      #  print(x[which(x[,1] == k), ])
+      #  print(df)
+      #  print("???")
+      #}
+      
         
       #### Main imputation loop ####
         
-      for(i in 2:(Nrec-1)) {
+      for(i in 2:Nrec) {
           row.cur <- df[i, ]
-          row.next <- df[i+1, ]
+          if(i != Nrec & Nrec >2) {row.next <- df[i+1, ]}
           #print(row.cur)
           y1 <- row.cur[seq(5,Ncol,by=2)]
           if(any(is.na(row.cur[seq(6, Ncol,by=2)]))) {
@@ -373,13 +379,17 @@ spm.impute <- function(dataset, minp=5, theta_range=seq(0.01, 0.2, by=0.001)) {
             #y.next <- getNextY.cont2(as.matrix(y1), row.cur[3], row.cur[4], pp$Ya2007$b, pp$Ya2007$a, pp$Ya2007$f1)
             for(j in seq(6,Ncol,by=2)) {
               if(is.na(row.cur[j])) { row.cur[j] <- y.next[(j - 6 ) %/% 2 + 1] }
-              if(is.na(row.next[j-1])) { row.next[j-1] <- row.cur[j] }
+              if(i != Nrec & Nrec >2) {if(is.na(row.next[j-1])) { row.next[j-1] <- row.cur[j] }}
             }
           }
     
           df[i, ] <- row.cur
-          df[i+1, ] <- row.next
+          if(i != Nrec & Nrec >2) {df[i+1, ] <- row.next}
+          
+          
       }
+      
+      
   
       ### Last record in a dataset ###
       row.cur <- df[Nrec, ]
@@ -393,10 +403,28 @@ spm.impute <- function(dataset, minp=5, theta_range=seq(0.01, 0.2, by=0.001)) {
             }
           }
       }
-  
+      
+      
       df[Nrec, ] <- row.cur
       
-      x[which(x[,1] == k), ] <- df
+      tryCatch({
+        x[which(x[,1] == k), ] <- df
+      },error=function(e) {
+        print(e)
+        print("x:")
+        print(x[which(x[,1] == k), ])
+        print("df:")
+        print(df)
+      }, warning=function(w){
+        print(w)
+        print("x:")
+        print(x[which(x[,1] == k), ])
+        print("df:")
+        print(df)
+        x[which(x[,1] == k), ] <- df
+      })
+      
+      
   
     }
     #################################################################################
