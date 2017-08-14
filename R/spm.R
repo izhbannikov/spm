@@ -159,7 +159,7 @@ spm <- function(x, model="discrete",
   if(model == "time-dependent") {
     
     if(k > 1) {
-      stop("Number of variables > 1. Model with time-dependent parameters can be used only with one variable!")
+        stop("Number of variables > 1. Model with time-dependent parameters can be used only with one variable!")
     }
     
     #if(length(formulas) != 6) {
@@ -170,7 +170,7 @@ spm <- function(x, model="discrete",
     #pars <- spm_discrete(dat=x[[2]],verbose = verbose, tol = tol, theta_range=theta.range)
     # Parameter optimization for time-dependent model
     if(is.null(start)) {
-      stop("Specify starting values.")
+        warning("Default starting values will be used.")
     }
     
     res <- spm_time_dep(x[[1]], 

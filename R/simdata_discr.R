@@ -76,6 +76,6 @@ simdata_discr <- function(N=100,
   }
   colnames(simulated) <- c("id", "xi", "t1", "t2", data_names)
   
-  invisible(simulated)
+  invisible(data.frame(simulated))
 }
 

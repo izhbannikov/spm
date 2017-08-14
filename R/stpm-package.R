@@ -21,8 +21,7 @@
 #'@examples \dontrun{ 
 #'library(stpm)
 #'#Prepare data for optimization
-#'data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"), 
-#'					   y=system.file("data","vitstat.csv",package="stpm"))
+#'data <- prepare_data(x=system.file("extdata","longdat.csv",package="stpm"), covariates="BMI")
 #'#Parameters estimation (default model: discrete-time):
 #'p.discr.model <- spm(data)
 #'p.discr.model
@@ -30,9 +29,7 @@
 #'p.cont.model <- spm(data, model="continuous")
 #'p.cont.model
 #'#Model with time-dependent coefficients:
-#'data <- prepare_data(x=system.file("data","longdat.csv",package="stpm"), 
-#'					   y=system.file("data","vitstat.csv",package="stpm"), 
-#'					   covariates="BMI")
+#'data <- prepare_data(x=system.file("extdata","longdat.csv",package="stpm"), covariates="BMI")
 #'p.td.model <- spm(data, model="time-dependent")
 #'p.td.model
 #'}

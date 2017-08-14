@@ -133,5 +133,5 @@ simdata_gamma_frailty <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", f
   # One last step:
   data <- data[2:dim(data)[1],]
   colnames(data) <- c("id","xi","t1","t2", "y", "y.next")
-  invisible(data)
+  invisible(data.frame(data))
 }

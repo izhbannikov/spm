@@ -244,6 +244,10 @@ spm.impute <- function(dataset, minp=5, theta_range=seq(0.01, 0.2, by=0.001)) {
   
   for(m in 1:minp) {
     x <- dataset
+    if(class(x) != "data.frame")
+    {
+        stop("Class of dataset must be a 'data.frame'.")
+    }
     Ncol <- dim(x)[2]
     for(k in ids) {
       ########## Forward #########

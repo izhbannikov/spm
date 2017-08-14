@@ -78,6 +78,6 @@ simdata_cont <- function(N=10,
   }
   colnames(simulated) <- c("id", "xi", "t1", "t2", data_names)
   
-  invisible(simulated)
+  invisible(data.frame(simulated))
 }
 

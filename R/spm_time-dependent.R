@@ -68,6 +68,10 @@ spm_time_dep <- function(x,
   #                      "NLOPT_LN_SBPLX",
   #                      "NLOPT_LN_BOBYQA", "NLOPT_GN_ISRES")
   
+  if(is.null(start)) {
+      start <- list(a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3)
+  }
+  
   #--------------Begin of optimize function-------------------#
   optimize <- function(data, starting_params,  formulas, verbose, 
                        lb, ub, 
