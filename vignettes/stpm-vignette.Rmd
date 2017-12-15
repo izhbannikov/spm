@@ -430,6 +430,70 @@ pars
 
 Here mode 'observed' is used for simlation of data with genetic component $Z$ and 'unobserved' - without genetic component.
 
+## Genetic SPM 'GSPM'
+
+This type of SPM also uses genetic component by analogy from the previous chapters but uses explicit gradient function which speeds up computations significantly. See [9] for details. Below we provide examples of usage:
+
+```{r, eval=T}
+library(stpm) 
+data(ex_spmcon1dg)
+head(ex_data$spm_data)
+head(ex_data$gene_data)
+res <- spm_con_1d_g(spm_data=ex_data$spm_data, 
+                    gene_data=ex_data$gene_data, 
+                    a = -0.02, b=0.2, q=0.01, f=3, f1=3, mu0=0.01, theta=1e-05, 
+                    upper=c(-0.01,3,0.1,10,10,0.1,1e-05), lower=c(-1,0.01,0.00001,1,1,0.001,1e-05), 
+                    effect=c('q'))
+res
+```
+
+Here:
+```spm_data``` - A dataset for the SPM model. See the STPM package for more details about the format.
+
+```gene_data``` - A two column dataset containing the genotypes for the individuals in spm_data. The first column ```id``` is the ID of the individuals in dataset ```spm_data```, and the second column ```geno``` is the genotype. 
+
+```a``` - The initial value for the paramter \eqn{a}. The initial value will be predicted if not specified.
+
+```b``` - The initial value for the paramter \eqn{b}. The initial value will be predicted if not specified. 
+
+```q``` - The initial value for the paramter \eqn{q}. The initial value will be predicted if not specified.
+
+```f``` -  The initial value for the paramter \eqn{f}. The initial value will be predicted if not specified.
+
+```f1``` - The initial value for the paramter \eqn{f_1}. The initial value will be predicted if not specified.
+
+```mu0``` - The initial value for the paramter \eqn{\mu_0} in the baseline hazard. The initial value will be predicted if not specified.
+
+```theta``` - The initial value for the paramter \eqn{\theta} in the baseline hazard. The initial value will be predicted if not specified.
+
+```lower``` - A vector of the lower bound of the parameters.
+
+```upper``` - A vector of the upper bound of the parameters.
+
+```effect``` - A character vector of the parameters that are linked to genotypes. The vector can contain any combination of \code{a}, \code{b}, \code{q}, \code{f}, \code{mu0}.
+
+```control``` - A list of the control parameters for the optimization paramters.
+
+```global``` - A logical variable indicating whether the MLSL (TRUE) or the L-BFGS (FALSE) algorithm is used for the optimization.
+
+```verbose``` - A logical variable indicating whether initial information is printed.
+
+```ahessian``` - A logical variable indicating whether the approximate (FALSE) or analytical (TRUE) Hessian is returned.
+
+```est``` - The estimates of the parameters.
+
+```hessian``` - The Hessian matrix of the estimates.
+
+```lik``` - The minus log-likelihood.
+
+```con``` - A number indicating the convergence. See the 'nloptr' package for more details.
+
+```message``` - Extra message about the convergence. See the 'nloptr' package for more details.
+
+```beta``` - The coefficients of the genetic effect on the parameters to be linked to genotypes.
+
+
+
 ## References
 
 [1] Woodbury M.A., Manton K.G., Random-Walk of Human Mortality and Aging. Theoretical Population Biology, 1977 11:37-48.
@@ -447,3 +511,5 @@ Here mode 'observed' is used for simlation of data with genetic component $Z$ an
 [7] Arbeev K.G, Akushevich I., Kulminski A.M., Ukraintseva S.V., Yashin A.I., Joint Analyses of Longitudinal and Time-to-Event Data in Research on Aging: Implications for Predicting Health and Survival, Front Public Health. 2014 Nov 6;2:228. doi: 10.3389/fpubh.2014.00228
 
 [8] Arbeev K., Arbeeva L., Akushevich I., Kulminski A., Ukraintseva S., Yashin A., Latent Class and Genetic Stochastic Process Models: Implications for Analyses of Longitudinal Data on Aging, Health, and Longevity, JSM-2015, Seattle, WA.
+
+[9] He, L., Zhbannikov, I., Arbeev, K. G., Yashin, A. I., and Kulminski, A.M., 2017. Genetic stochastic process model for detecting pleiotropic and interaction effects with longitudinal data. Genetic Epidemiology, DOI: 10.1002/gepi.22058

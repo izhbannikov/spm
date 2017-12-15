@@ -7,8 +7,8 @@
 #'@param tol A tolerance threshold for matrix inversion (NULL by default).
 #'@param verbose An indicator of verbosing output.
 #'@export
-#'@return A list of two elements ("Ak205", "Ya2007"): (1) estimated parameters u, R, b, Sigma, Q, mu0, theta and
-#'(2) estimated parameters a, f1, Q, f, b, mu0, theta. Note: b and mu0 from first list are different 
+#'@return A list of two elements ("dmodel", "cmodel"): (1) estimated parameters u, R, b, Sigma, Q, mu0, theta for discrete-time model and
+#'(2) estimated parameters a, f1, Q, f, b, mu0, theta for continuous-time model. Note: b and mu0 from first list are different 
 #'from b and mu0 from the second list.
 #'@details This function is way more faster that continuous \code{spm_continuous_MD(...)} (but less precise) and used mainly in 
 #'estimation a starting point for the \code{spm_continuous_MD(...)}.
@@ -162,7 +162,7 @@ spm_discrete <- function(dat, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verb
   thetaH <- theta
   pars2 <- list(a=aH, f1=f1H, Q=QH, f=fH, b=bH, mu0=mu0H, theta=thetaH)
   
-  pars <- list(Ak2005=pars1, Ya2007=pars2)
+  pars <- list(dmodel=pars1, cmodel=pars2)
   class(pars) <- "spm.discrete"
   invisible(pars)
 }

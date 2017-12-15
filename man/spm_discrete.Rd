@@ -17,8 +17,8 @@ spm_discrete(dat, theta_range = seq(0.02, 0.2, by = 0.001), tol = NULL,
 \item{verbose}{An indicator of verbosing output.}
 }
 \value{
-A list of two elements ("Ak205", "Ya2007"): (1) estimated parameters u, R, b, Sigma, Q, mu0, theta and
-(2) estimated parameters a, f1, Q, f, b, mu0, theta. Note: b and mu0 from first list are different 
+A list of two elements ("dmodel", "cmodel"): (1) estimated parameters u, R, b, Sigma, Q, mu0, theta for discrete-time model and
+(2) estimated parameters a, f1, Q, f, b, mu0, theta for continuous-time model. Note: b and mu0 from first list are different 
 from b and mu0 from the second list.
 }
 \description{

@@ -27,7 +27,7 @@
 #'Default value: \code{opt=list(algorithm="NLOPT_LN_NELDERMEAD", 
 #'maxeval=100, ftol_rel=1e-8)}.
 #'Please see \code{nloptr} documentation for more information.
-#'@return For "discrete" and "continuous" model types: 
+#'@return For "discrete" (dmodel) and "continuous" (cmodel) model types: 
 #'(1) a list of model parameter estimates for the discrete model type described in 
 #'"Life tables with covariates: Dynamic Model for Nonlinear Analysis of Longitudinal Data", 
 #'Akushevich et al, 2005.<DOI:10.1080/08898480590932296>,  and  
@@ -76,20 +76,20 @@ spm <- function(x, model="discrete",
   if(model == "discrete") {
     # Estimation of starting point with discrete optimization:
     pars <- spm_discrete(dat=x[[2]],verbose = verbose, tol = tol, theta_range=theta.range)
-    res <- list(Ak2005=list(u=pars$Ak2005$u, 
-                            R=pars$Ak2005$R, 
-                            b=pars$Ak2005$b, 
-                            Q=pars$Ak2005$Q, 
-                            Sigma=pars$Ak2005$Sigma,
-                            mu0=pars$Ak2005$mu0,
-                            theta=pars$Ak2005$theta), 
-                Ya2007=list(a=pars$Ya2007$a, 
-                            f1=pars$Ya2007$f1,
-                            Q=pars$Ya2007$Q,
-                            f=pars$Ya2007$f, 
-                            b=pars$Ya2007$b, 
-                            mu0=pars$Ya2007$mu0, 
-                            theta=pars$Ya2007$theta))
+    res <- list(dmodel=list(u=pars$dmodel$u, 
+                            R=pars$dmodel$R, 
+                            b=pars$dmodel$b, 
+                            Q=pars$dmodel$Q, 
+                            Sigma=pars$dmodel$Sigma,
+                            mu0=pars$dmodel$mu0,
+                            theta=pars$dmodel$theta), 
+                cmodel=list(a=pars$cmodel$a, 
+                            f1=pars$cmodel$f1,
+                            Q=pars$cmodel$Q,
+                            f=pars$cmodel$f, 
+                            b=pars$cmodel$b, 
+                            mu0=pars$cmodel$mu0, 
+                            theta=pars$cmodel$theta))
     
   }
   
@@ -103,24 +103,24 @@ spm <- function(x, model="discrete",
       print(pars)
     }
     
-    if(det(pars$Ya2007$Q) < 0) {
+    if(det(pars$cmodel$Q) < 0) {
       cat("Error: determinant of Q < 0\n")
       cat("Q:\n")
-      print(pars$Ya2007$Q)
+      print(pars$cmodel$Q)
       cat("Det(Q):\n")
-      print(det(pars$Ya2007$Q))
+      print(det(pars$cmodel$Q))
       
       res <- NA
     
     } else {
       res.t <- spm_continuous(as.matrix(data), 
-                    a=pars$Ya2007$a, 
-                    f1=pars$Ya2007$f1, 
-                    Q=pars$Ya2007$Q, 
-                    f=pars$Ya2007$f, 
-                    b=pars$Ya2007$b, 
-                    mu0=pars$Ya2007$mu0, 
-                    theta=pars$Ya2007$theta, 
+                    a=pars$cmodel$a, 
+                    f1=pars$cmodel$f1, 
+                    Q=pars$cmodel$Q, 
+                    f=pars$cmodel$f, 
+                    b=pars$cmodel$b, 
+                    mu0=pars$cmodel$mu0, 
+                    theta=pars$cmodel$theta, 
                     stopifbound = stopifbound,
                     lb = lb, ub = ub,
                     pinv.tol = pinv.tol,
@@ -136,14 +136,14 @@ spm <- function(x, model="discrete",
       mu0.c <- res.t$mu0 + t(res.t$f) %*% res.t$Q %*% res.t$f
       theta.c <- res.t$theta
       
-      res <- list(Ak2005=list(u=u.c, 
+      res <- list(dmodel=list(u=u.c, 
                               R=R.c, 
                               b=b.c, 
                               Q=Q.c, 
                               Sigma=Sigma.c,
                               mu0=mu0.c,
                               theta=theta.c), 
-                  Ya2007=list(a=res.t$a, 
+                  cmodel=list(a=res.t$a, 
                               f1=res.t$f1,
                               Q=res.t$Q,
                               f=res.t$f, 

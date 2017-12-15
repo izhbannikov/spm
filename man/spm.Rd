@@ -47,7 +47,7 @@ maxeval=100, ftol_rel=1e-8)}.
 Please see \code{nloptr} documentation for more information.}
 }
 \value{
-For "discrete" and "continuous" model types: 
+For "discrete" (dmodel) and "continuous" (cmodel) model types: 
 (1) a list of model parameter estimates for the discrete model type described in 
 "Life tables with covariates: Dynamic Model for Nonlinear Analysis of Longitudinal Data", 
 Akushevich et al, 2005.<DOI:10.1080/08898480590932296>,  and  
