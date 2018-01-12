@@ -1,14 +1,15 @@
-#'Continuous multi-dimensional optimization with linear terms in mu only 
+#'Continuous multi-dimensional optimization with quadratic and linear terms
 #'@references Yashin, A.I. et al (2007). Stochastic model for analysis of longitudinal data on aging 
 #'and mortality. Mathematical Biosciences, 208(2), 538-551.<DOI:10.1016/j.mbs.2006.11.006>.
 #'@param dat A data table.
 #'@param a A starting value of the rate of adaptive response to any deviation of Y from f1(t).
 #'@param f1 A starting value of the average age trajectories of the variables which process is forced to follow. 
-#'@param Q Starting values of the linear hazard term.
+#'@param Q Starting values of the quadratic hazard term.
 #'@param f A starting value of the "optimal" value of variable which corresponds to the minimum of hazard rate at a respective time.
 #'@param b A starting value of a diffusion coefficient representing a strength of the random disturbance from Wiener Process.
 #'@param mu0 A starting value of the baseline hazard.
 #'@param theta A starting value of the parameter theta (axe displacement of Gompertz function).
+#'@param Q1 Q for linear term
 #'@param verbose An indicator of verbosing output.
 #'@param stopifbound Estimation stops if at least one parameter achieves lower or upper boundaries.
 #'#'Check the NLopt website for a description of
@@ -40,11 +41,11 @@
 #'data <- simdata_cont(N=2)
 #'head(data)
 #'#Parameters estimation:
-#'pars <- spm_cont_lin(dat=data,a=-0.05, f1=80, 
-#'						           Q=2e-8, f=80, b=5, mu0=2e-5)
+#'pars <- spm_cont_quad_lin(dat=data,a=-0.05, f1=80, 
+#'						           Q=2e-8, f=80, b=5, mu0=2e-5, Q1=1e-08)
 #'pars
 #'
-spm_cont_lin <- function(dat, 
+spm_cont_quad_lin <- function(dat, 
                            a=-0.05, 
                            f1=80, 
                            Q=2e-8,
@@ -52,6 +53,7 @@ spm_cont_lin <- function(dat,
                            b=5,
                            mu0=2e-5,
                            theta=0.08,
+                           Q1=1e-08,
                            stopifbound=FALSE, 
                            lb=NULL, ub=NULL,
                            verbose=FALSE,
@@ -92,6 +94,9 @@ spm_cont_lin <- function(dat,
         # theta
         start=end+1; end=start
         lower_bound <- c( lower_bound, params[start:end] - 0.1*params[start:end])
+        # Q1
+        start=end+1; end=start+k^2-1
+        lower_bound <- c(lower_bound, unlist(lapply(start:end, function(n){ ifelse(params[n] > 0, 0, params[n]+0.1*params[n]) })))
         
     
         return(lower_bound)
@@ -128,6 +133,9 @@ spm_cont_lin <- function(dat,
         # theta
         start=end+1; end=start
         upper_bound <- c( upper_bound, params[start:end] + 0.1*params[start:end])
+        # Q1
+        start=end+1; end=start+k^2-1
+        upper_bound <- c(upper_bound, unlist(lapply(start:end, function(n) {ifelse(params[n] > 0, params[n] + 0.1*params[n], params[n]-0.1*params[n] )})))
         
         upper_bound
     }
@@ -186,9 +194,9 @@ spm_cont_lin <- function(dat,
   
     if(mu0 < 0) {mu0 <- 0}
   
-    parameters <- c(t(a), f1, t(Q), f, b, mu0, theta)
+    parameters <- c(t(a), f1, t(Q), f, b, mu0, theta, t(Q1))
     # Current results:
-    results_tmp <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
+    results_tmp <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL, Q1=NULL)
     iteration <- 0
   
     bounds <- list()
@@ -230,6 +238,9 @@ spm_cont_lin <- function(dat,
         start=end+1; end=start
         theta <- par[start:end]
         results_tmp$theta <<- theta
+        start=end+1; end=start+k^2-1
+        Q1 <- matrix(par[start:end],ncol=k, nrow=k, byrow=TRUE)
+        results_tmp$Q1 <<- Q1
         # End reading parameters
     
         if(stopifbound) {
@@ -245,7 +256,7 @@ spm_cont_lin <- function(dat,
     
         if(stopflag == FALSE) {
             dims <- dim(dat)
-            res <- .Call("complikMD_linear", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k, pinv.tol, gomp)
+            res <- .Call("complikMD_quadratic_linear", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, Q1, k, pinv.tol, gomp)
             assign("results", results_tmp, envir=baseenv())
             iteration <<- iteration + 1
             L.prev <<- res
@@ -291,6 +302,6 @@ spm_cont_lin <- function(dat,
   
     final_results$limit <- limit
     #assign("results", final_results, envir=baseenv())
-    class(final_results) <- "spm.cont.lin"
+    class(final_results) <- "spm.cont.quad.lin"
     invisible(final_results)
 }
