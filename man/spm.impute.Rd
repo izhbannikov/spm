@@ -4,14 +4,16 @@
 \alias{spm.impute}
 \title{Multiple Data Imputation with SPM}
 \usage{
-spm.impute(dataset, minp = 5, theta_range = seq(0.01, 0.2, by = 0.001))
+spm.impute(dat, col.id = NULL, col.status = NULL, col.age = NULL,
+  col.age.event = NULL, covariates = NULL, minp = 5,
+  theta_range = seq(0.01, 0.2, by = 0.001), format = "short")
 }
 \arguments{
-\item{dataset}{A longitudinal dataset with missing observations}
-
 \item{minp}{Number of imputations. Default: 5}
 
 \item{theta_range}{A range of parameter theta used for optimization, default: seq(0.01, 0.15, by=0.001).}
+
+\item{dataset}{A longitudinal dataset with missing observations}
 }
 \value{
 A list(imputed, imputations)

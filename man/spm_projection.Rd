@@ -7,7 +7,8 @@ Projections are constructed for a cohort with fixed or
 normally distributed initial covariates.}
 \usage{
 spm_projection(x, N = 100, ystart = 80, model = "discrete", tstart = 30,
-  tend = 105, dt = 1, sd0 = 1, nobs = NULL, gomp = TRUE)
+  tend = 105, dt = 1, sd0 = 1, nobs = NULL, gomp = TRUE,
+  format = "short")
 }
 \arguments{
 \item{x}{A list of parameters from output of the \code{spm(...)} function.}

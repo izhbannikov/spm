@@ -37,7 +37,8 @@ simdata_discr <- function(N=100,
                           tstart=30, 
                           tend=105, 
                           dt=1,
-                          nobs=NULL) {
+                          nobs=NULL,
+                          format="long") {
   
   k <- length(ystart)
   
@@ -75,7 +76,13 @@ simdata_discr <- function(N=100,
     data_names <- c(data_names, paste("y",n, sep=''), paste("y",n, ".next", sep=''))
   }
   colnames(simulated) <- c("id", "xi", "t1", "t2", data_names)
+  simulated <- data.frame(simulated)
   
-  invisible(data.frame(simulated))
+  if(format == "short")
+  {
+      simulated <- make.short.format(simulated)
+  }
+  
+  invisible(return(simulated))
 }
 

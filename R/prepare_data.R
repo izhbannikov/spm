@@ -1,3 +1,10 @@
+
+get.column.index <- function(x, col.name)
+{
+    col.ind <- grep(paste("\\b", col.name, "\\b", sep=""), colnames(x))
+    return(col.ind)
+}
+
 #'Data pre-processing for analysis with stochastic process model methodology.
 #'@param x A path to the file with table of follow-up oservations (longitudinal table). 
 #'File formats: csv, sas7bdat
@@ -32,128 +39,102 @@
 #'head(data[[2]])
 #'}
 prepare_data <- function(x,
-                         col.id=NULL, 
-                         col.status=NULL,
-                         col.age=NULL, 
-                         col.age.event=NULL, 
-                         covariates=NULL, 
+                         col.id=NA, 
+                         col.status=NA,
+                         col.age=NA, 
+                         col.age.event=NA, 
+                         covariates=NA, 
                          interval=1, 
                          impute=TRUE,
                          verbose=FALSE) {
   
-  
-  if(interval < 1) {
-    stop("Interval must be more or equal to 1.")
-  } else if(interval != round(interval)) {
-    stop("Interval must be integer.")
-  }
-  
-  if(file_ext(x) == "csv") {
-    #longdat <- read.csv(x)
-    merged.data <- read.csv(x)
-  } else if(file_ext(x) == "sas7bdat") {
-    #longdat <- read.sas7bdat(x)
-    merged.data <- read.sas7bdat(x)
-  } else {
-    stop(paste(x, ":", "unknown file format, it must be csv or sas7bdat."))
-  }
-  
-  
-  #if(file_ext(y) == "csv") {
-  #  vitstat <- read.csv(y)
-  #} else if(file_ext(y) == "sas7bdat") {
-  #  vitstat <- read.sas7bdat(y)
-  #} else {
-  #  stop(paste(y, ":", "unknown file format, it must be csv or sas7bdat."))
-  #}
-  
-  # Parsing input parameters in order to check for errors:
-  if( !is.null(col.status) ) {
-    if( !(col.status %in% colnames(merged.data)) ) {
-      stop(paste("Status column",col.status, "not found in data table. Aborting."))
-    }
-  }
-  
-  if( !is.null(col.id) ) { 
-    if( !(col.id %in% colnames(merged.data)) ) {
-      stop(paste("ID column",col.id, "not found in data table. Aborting."))
-    }
-  }
-  
-  if( !is.null(col.age) ) {
-    if( !(col.age %in% colnames(merged.data)) ) {
-      stop(paste("Age column",col.age, "not found in longdat table. Aborting."))
-    }
-  }
-  
-  if( !is.null(col.age.event) ) { 
-    if( !(col.age.event %in% colnames(merged.data)) ) {
-      stop(paste("Event column",col.age.event, "not found in data table. Aborting."))
-    }
-  }
-  
-  if(!is.null(covariates)) {
-    for(c in covariates) {
-      if( !(c %in% colnames(merged.data)) ) {
-        stop(paste("Covariate",c, "not found. Aborting."))
-      }
-    }
-  } else if(is.null(covariates)) {
-    col.covar.ind <- 4:dim(merged.data)[2]
-  }
-  
-  if((interval == 0) || (interval < 1)) {
-    interval <- 1
-  }
-  
-  #-----------Done parsing imput parameters---------------------#
-  
-  #merged.data <- merge(x = longdat, y = vitstat, by.x = col.id, by.y=col.id)
-  
-  if(!is.null(col.status)) {
-    col.status.ind <- grep(paste("\\b", col.status, "\\b", sep=""), colnames(merged.data))
-  } else {
-    col.status.ind <- 2
-  }
-  
-  if(!is.null(col.id)) {
-    col.id.ind <- grep(paste("\\b", col.id, "\\b", sep=""), colnames(merged.data))
-  } else {
+    ### Constant variables ###
     col.id.ind <- 1
-  }
-  
-  if(!is.null(col.age)) {
-    col.age.ind <- grep(paste("\\b", col.age, "\\b", sep=""), colnames(merged.data))
-  } else {
+    col.status.ind <- 2
     col.age.ind <- 3
-  }
-  
-  if(!is.null(col.age.event)) {
-    col.age.event.ind <- grep(paste("\\b", col.age.event, "\\b", sep=""), colnames(merged.data))
-  } else {
-    #col.age.event.ind <- 3
-    col.age.event.ind <- col.age.ind
-  }
-  
-  if(!is.null(covariates)) {
     col.covar.ind <- c()
-    for(c in covariates) {
-        col.covar.ind <- c(col.covar.ind, grep(paste("\\b", c, "\\b", sep=""), colnames(merged.data)))
+  
+    if(interval < 1) 
+    {
+        warning("Interval must be more or equal to 1.")
+    } 
+    else if(interval != round(interval)) 
+    {
+        stop("Interval must be integer.")
     }
-  } else {
-    #col.covar.ind <- 4:dim(longdat)[2]
-    col.covar.ind <- 4:dim(merged.data)[2]
-  }
   
-  merged.data <- merged.data[which(!is.na(merged.data[ , col.age.ind])),]
+    if(class(x) == "character")
+    {
+        if(file_ext(x) == "csv") 
+        {
+            merged.data <- read.csv(x)
+        } else if(file_ext(x) == "sas7bdat") 
+        {
+            merged.data <- read.sas7bdat(x)
+        } else {
+            stop(paste(x, ":", "unknown file format, it must be csv or sas7bdat."))
+        }
+    } 
+    else if(class(x) == "data.frame")
+    {
+        merged.data <- x
+    } else
+    {
+        stop("Unknown format of input x.")
+    }
   
-  # Prepare data for continuous optimisation:
-  data_cont <- prepare_data_cont(merged.data, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute, interval)
+    # Parsing input parameters in order to check for errors:
+    if( get.column.index(merged.data, col.id) == 0 ) {
+        warning(paste("ID column",col.id, "not found in data table!"))
+    } else {
+        col.id.ind <- get.column.index(merged.data, col.id)
+    }
+    
+    if( get.column.index(merged.data, col.status) == 0 ) {
+        warning(paste("Status column",col.status, "not found in data table!"))
+    } else {
+        col.status.ind <- get.column.index(merged.data, col.status)
+    }
   
-  # Prepare data for fast discrete optimization:
-  data_discr <- prepare_data_discr(merged.data, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute)
+    if( get.column.index(merged.data, col.age) == 0 ) {
+        warning(paste("Age column",col.age, "not found in longdat table!"))
+    } else {
+        col.age.ind <- get.column.index(merged.data, col.age)
+    }
+    
+    if( is.null(get.column.index(merged.data, col.age.event)) ) {
+            warning(paste("Event column", col.age.event, "not found in data table!"))
+            col.age.event <- col.age
+            col.age.event.ind <- col.age.ind
+    } else {
+        col.age.event.ind <- get.column.index(merged.data, col.age.event)
+    }
   
-  list(model.continuous=data_cont, model.discrete=data_discr)
+    for(c in covariates) {
+        if( get.column.index(merged.data, c) == 0 ) {
+            stop(paste("Covariate",c, "not found."))
+        } else {
+            col.covar.ind <- c(col.covar.ind, get.column.index(merged.data, c))
+        }
+    } 
+  
+    if(interval < 1)
+    {
+        interval <- 1
+    }
+  
+    #-----------Done parsing imput parameters---------------------#
+    
+    # Remove records in which id = NA
+    merged.data <- merged.data[which(!is.na(merged.data[ , col.age.ind])),]
+  
+    # Prepare data for continuous optimisation:
+    data_cont <- prepare_data_cont(merged.data, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute, interval)
+  
+    # Prepare data for fast discrete optimization:
+    data_discr <- prepare_data_discr(merged.data, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute)
+  
+    list(model.continuous=data_cont, model.discrete=data_discr)
 }
 
 #'Prepares continuouts-time dataset.
@@ -175,89 +156,84 @@ prepare_data_cont <- function(merged.data,
                               verbose,
                               impute,
                               dt) {
+    #merged.data = miss.data
+    #col.status.ind = 2 
+    #col.id.ind = 1
+    #col.age.ind = 3
+    #col.age.event.ind = 3 
+    #col.covar.ind = 4
+    #dt <- 1
+    # Split records by ID:
+    splitted <- split(merged.data, merged.data[ , col.id.ind])
   
-  # Split records by ID:
-  prep.dat <- data.frame(matrix(ncol=(4+2*length(col.covar.ind)),nrow=0))
-  splitted <- split(merged.data, merged.data[ , col.id.ind])
-  
-  for(iii in 1:length(splitted)) {
-    nrows <- length(splitted[[iii]][ , col.id.ind])
-    id <- splitted[[iii]][ , col.id.ind]
-    case <- splitted[[iii]][, col.status.ind]
-    t1 <- splitted[[iii]][ , col.age.ind]
-    t2 <- c(splitted[[iii]][ , col.age.ind][-1], tail(splitted[[iii]][ , col.age.event.ind],n=1))
+    for(iii in 1:length(splitted)) {
+        nrows <- length(splitted[[iii]][ , col.id.ind])
+        id <- splitted[[iii]][ -1, col.id.ind]
+        case <- splitted[[iii]][-1, col.status.ind]
+        t1 <- splitted[[iii]][ 1:(nrows-1), col.age.ind]
+        #t2 <- c(splitted[[iii]][ , col.age.ind][-1], tail(splitted[[iii]][ , col.age.event.ind],n=1))
+        t2 <- splitted[[iii]][ , col.age.ind][-1]
     
-    tmp.frame <- cbind(id, case, t1, t2)
-    # Adding covariates:
-    for(ind in col.covar.ind) {
-      tmp.frame <- cbind(tmp.frame, 
-                         splitted[[iii]][, ind], 
-                         c(splitted[[iii]][, ind][-1], NA))
+        tmp.frame <- cbind(id, case, t1, t2)
+        # Adding covariates:
+        for(ind in col.covar.ind) {
+            tmp.frame <- cbind(tmp.frame, 
+                               splitted[[iii]][1:(nrows-1), ind], 
+                               splitted[[iii]][-1, ind])
       
+        }
+        splitted[[iii]] <- tmp.frame
     }
-    prep.dat <- rbind(prep.dat, tmp.frame)
     
-  }
+    prep.dat <- do.call("rbind", splitted)
+    rownames(prep.dat) <- c()
+    #prep.dat <- prep.dat[rowSums( matrix(is.na(prep.dat[,5:dim(prep.dat)[2]]), ncol=2*length(covariates),byrow=T)) !=2*length(covariates),]
+    prep.dat <- prep.dat[which(!is.na(prep.dat[,4])),]
   
+    if(verbose) {
+        head(prep.dat)  
+    }
   
-  #prep.dat <- prep.dat[rowSums( matrix(is.na(prep.dat[,5:dim(prep.dat)[2]]), ncol=2*length(covariates),byrow=T)) !=2*length(covariates),]
-  prep.dat <- prep.dat[which(!is.na(prep.dat[,4])),]
+    ans_final <- prep.dat
   
-  if(verbose) {
-    head(prep.dat)  
-  }
+    if(impute) {
+        if(verbose)
+            cat("Filing missing values with multiple imputations:\n")
+    
+        tmp_ans <- mice(prep.dat[,5:dim(prep.dat)[2]], printFlag=ifelse(verbose, TRUE, FALSE),m = 2, maxit=2)
+        ans1 <- complete(tmp_ans)
+        ans_final <- cbind(prep.dat[,1:4], ans1)
+    }
   
-  ans_final <- prep.dat
-  
-  if(impute) {
     if(verbose)
-      cat("Filing missing values with multiple imputations:\n")
+        cat("Making final table...\n")
+  
     
-    tmp_ans <- mice(prep.dat[,5:dim(prep.dat)[2]], printFlag=ifelse(verbose, TRUE, FALSE),m = 2, maxit=2)
-    ans1 <- complete(tmp_ans)
-    ans_final <- cbind(prep.dat[,1:4], ans1)
-  }
   
-  if(verbose)
-    cat("Making final table...\n")
-  
-  ans_final <- ans_final[which(!is.na(ans_final$case)), ]
-  
-  # Database should be in appropriate format:
-  for(i in 1:(dim(ans_final)[1])) {
-    if(ans_final[i,2] > 1) {
-      ans_final[i,2] <- 1
+    # Finalizing:
+    colnames(ans_final) <- c("id", "case", "t1", "t2", unlist(lapply(1:length(col.covar.ind), function(n) {c(names(merged.data)[col.covar.ind[n]], paste(names(merged.data)[col.covar.ind[n]],".next",sep=""))} )) )
+    #print(ans_final)
+    ans_final <- data.frame(ans_final[which(ans_final[,3] <= ans_final[,4]),]) # t1 must be less than t3
+    
+    # t1 must be equal t3 on previous step, if status = 0 and id is the same
+    ndim <- dim(ans_final)[2] - 4
+    for(i in 2:(dim(ans_final)[1]-1)) {
+        if( (ans_final$case[i] == 0) & (ans_final$id[i] == ans_final$id[(i-1)]) & (ans_final$id[i] == ans_final$id[(i+1)]) ) {
+            for(ii in seq(0,(ndim-1),2)) {
+                ans_final[(i+1),(5+ii)] <- ans_final[i,(6+ii)]
+            }
+        } else if(ans_final$case[i] == 1) {
+            for(ii in seq(0,(ndim-1),2)) {
+                ans_final[i,(6+ii)] <- NA
+            }
+        } else if( ans_final$id[i] != ans_final$id[(i+1)] ) {
+            if(ans_final$t1[i] >= ans_final$t2[i]) {
+                ans_final$t2[i] <- ans_final$t1[i] + dt/2
+            }
+        }
     }
-  }
   
-  # Finalizing:
-  
-  ans_final <- ans_final[which(ans_final[,3] <= ans_final[,4]),] # t1 must be less than t3
-  # t1 must be equal t3 on previous step, if status = 0 and id is the same
-  ndim <- dim(ans_final)[2] - 4
-  for(i in 2:(dim(ans_final)[1]-1)) {
-    if( (ans_final$case[i] == 0) & (ans_final$id[i] == ans_final$id[(i-1)]) & (ans_final$id[i] == ans_final$id[(i+1)]) ) {
-      for(ii in seq(0,(ndim-1),2)) {
-        ans_final[(i+1),(5+ii)] <- ans_final[i,(6+ii)]
-      }
-    } else if(ans_final$case[i] == 1) {
-      
-      for(ii in seq(0,(ndim-1),2)) {
-        ans_final[i,(6+ii)] <- NA
-      }
-    } else if( ans_final$id[i] != ans_final$id[(i+1)] ) {
-      if(ans_final$t1[i] >= ans_final$t2[i]) {
-        ans_final$t2[i] <- ans_final$t1[i] + dt/2
-      }
-    }
-    
-    
-  }
-  
-  colnames(ans_final) <- c("id", "case", "t1", "t2", unlist(lapply(1:length(col.covar.ind), function(n) {c(names(merged.data)[col.covar.ind[n]], 
-                                                                                                           paste(names(merged.data)[col.covar.ind[n]],".next",sep=""))} )) )
-  data.frame(ans_final)
-  
+    return(data.frame(ans_final))
 }
 
 #'Prepares discrete-time dataset.
@@ -302,6 +278,13 @@ prepare_data_discr <- function(merged.data, interval, col.status.ind, col.id.ind
   #col.age.ind = col.age.ind
   #col.age.event.ind = col.age.event.ind
   #col.covar.ind = col.covar.ind
+  #merged.data = miss.data
+  #col.status.ind = 2 
+  #col.id.ind = 1
+  #col.age.ind = 3
+  #col.age.event.ind = 3 
+  #col.covar.ind = 4
+  #interval <- 1
   #---END DEBUG---#
   
   #'Filling the last cell

@@ -43,7 +43,8 @@ simdata_cont <- function(N=10,
                           dt=1, 
                           sd0=1,
                           nobs=NULL, 
-                          gomp=TRUE) {
+                          gomp=TRUE,
+                         format="long") {
   
   k <- length(ystart)
   
@@ -77,7 +78,13 @@ simdata_cont <- function(N=10,
     data_names <- c(data_names, paste("y",n, sep=''), paste("y",n, ".next", sep=''))
   }
   colnames(simulated) <- c("id", "xi", "t1", "t2", data_names)
+  simulated <- data.frame(simulated)
   
-  invisible(data.frame(simulated))
+  if(format == "short")
+  {
+    simulated <- make.short.format(simulated)
+  }
+  
+  invisible(return(simulated))
 }
 

@@ -237,426 +237,274 @@ getNextY.cont <- function(y1, t1, t2, a, f1, Q, f, b, mu0, theta, u, R) {
 #'pp.test <- spm_discrete(imp.data, theta_range = seq(0.075, 0.09, by=0.001))
 #'pp.test
 #'}
-spm.impute <- function(dataset, minp=5, theta_range=seq(0.01, 0.2, by=0.001)) {
-  datasets <- list() # Keeps imputed datasets
-  pp <- spm_discrete(dataset, theta_range = theta_range)
-  ids <- unique(dataset[,1])
-  
-  for(m in 1:minp) {
-    x <- dataset
-    if(class(x) != "data.frame")
+spm.impute <- function(dat, 
+                       col.id=1, 
+                       col.status=2,
+                       col.age=3, 
+                       col.age.event=3, 
+                       covariates=4,
+                       minp=5, 
+                       theta_range=seq(0.01, 0.2, by=0.001), 
+                       format="short") 
+{
+    
+    # Check input parameters for correctness
+    if(class(dat) != "data.frame")
     {
         stop("Class of dataset must be a 'data.frame'.")
     }
-    Ncol <- dim(x)[2]
-    for(k in ids) {
-      ########## Forward #########
-      
-      df <- x[which(x[,1] == k), ]
-      
-      if(length(df[,1]) == 1) {
-        Nrec <- 1
-      } else {
-        Nrec <- length(df[,1])
-      }
-      
-       
-      if(Nrec == 1) {
-        row.cur <- df
-        for(j in seq(5,Ncol,by=2)) {
-          if(is.na(row.cur[j]) & !is.na(row.cur[j+1])) {
-            kkk <- ((j-5) %/% 2)+1
-            
-            #y.start <- rnorm(1, mean = mean(x[,j], na.rm = T), sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
-            #row.cur[j] <- y.start
-            
-            y2 <- df[1,j+1]
-            y1 <- getPrevY.discr.m(t(as.matrix(y2)), pp$Ak2005$u[kkk], pp$Ak2005$R[kkk,kkk])
-            df[1,j] <- y1
-            row.cur[j] <- y1
-            
-          } else if(is.na(row.cur[j]) & is.na(row.cur[j+1])){
-            y.start <- rnorm(1, mean = mean(x[,j], na.rm = T), sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
-            row.cur[j] <- y.start
-          }
-        }
-        if(any(is.na(row.cur[seq(6, Ncol,by=2)])) & row.cur[2] == 0) {
-          y1 <- row.cur[seq(5,Ncol,by=2)]
-          y.next <- getNextY.discr.m(t(as.matrix(y1)), pp$Ak2005$u, pp$Ak2005$R)
-          #y.next <- getNextY.discr(t(as.matrix(y1)), pp$Ak2005$u, pp$Ak2005$R, pp$Ak2005$Sigma)
-          row.cur[which(is.na(row.cur))] <- y.next[(which(is.na(row.cur)) - 6 ) %/% 2 + 1]
-        }
-        
-        df <- row.cur
-        x[which(x[,1] == k), ] <- df
-        next
-      }
-      
-      
-      
-      # Check the first row #
-      row.cur <- df[1, ]
-      row.next <- df[2, ]
   
-      for(j in seq(5,Ncol,by=2)) {
-        if(is.na(row.cur[j])) {
-          kkk <- ((j-5) %/% 2)+1
-          ##meanY <- mean(x[, j], na.rm = TRUE)
-          #medianY <- median(x[, j], na.rm = TRUE)
-          ##y.start <- rnorm(1, mean = meanY, sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
-          #y.start <- medianY #rnorm(1, mean = meanY, sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
-          
-          for(ii in 1:Nrec) {
-            if(!is.na(df[ii,j]))
-              break
-          }
-          
-          if(ii != Nrec) {
-              for(iii in (ii-1):1) {
-                  y2 <- df[iii,j+1]
-                  y1 <- getPrevY.discr.m(t(as.matrix(y2)), pp$Ak2005$u[kkk], pp$Ak2005$R[kkk,kkk])
-                  df[iii,j] <- y1
-                  if(iii != 1) {
-                      df[iii-1,j+1] <- y1
-                  }
-              }
-          } else {
-              meanY <- mean(x[, j], na.rm = TRUE)
-              y.start <- rnorm(1, mean = meanY, sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
-              df[1,j] <- y.start
-          }
-        }
-      }
-      
-      
-      # Check the rest #
-      #df[1, ] <- row.cur
-      #df[2, ] <- row.next
-      
-      #### Preprocessing of df ####
-      for(i in 2:Nrec) {
-          row.cur <- df[i,]
-          row.prev <- df[i-1,]
-          if(i != Nrec & Nrec >2) {row.next <- df[i+1,]}
-          
-          for(j in seq(5, Ncol,by=2)) {
-            if(is.na(row.cur[j])) {
-              row.cur[j] <- row.prev[j+1]
-            } else {
-              row.prev[j+1] <- row.cur[j]
-            }
-          }
-          
-          for(j in seq(6, Ncol,by=2)) {
-            if(is.na(row.cur[j])) {
-              if(i != Nrec & Nrec >2) {row.cur[j] <- row.next[j-1]}
-            } else {
-              if(i != Nrec & Nrec >2) {row.next[j-1] <- row.cur[j]}
-            }
-          }
-          
-          df[i-1, ] <- row.prev
-          df[i, ] <- row.cur
-          if(i != Nrec & Nrec >2) {df[i+1, ] <- row.next}
-      }
-      
-      #if(dim(x[which(x[,1] == k), ])[1] != dim(df)[1]) {
-      #  print("!!")
-      #  print(x[which(x[,1] == k), ])
-      #  print(df)
-      #  print("???")
-      #}
-      
-        
-      #### Main imputation loop ####
-        
-      for(i in 2:Nrec) {
-          row.cur <- df[i, ]
-          if(i != Nrec & Nrec >2) {row.next <- df[i+1, ]}
-          #print(row.cur)
-          y1 <- row.cur[seq(5,Ncol,by=2)]
-          if(any(is.na(row.cur[seq(6, Ncol,by=2)]))) {
-            y.next <- getNextY.discr.m(t(as.matrix(y1)), pp$Ak2005$u, pp$Ak2005$R)
-            #y.next <- getNextY.discr(t(as.matrix(y1)), pp$Ak2005$u, pp$Ak2005$R, pp$Ak2005$Sigma)
-            #y.next <- getNextY.cont(y1, row.cur[3], row.cur[4], pp$Ya2007$a, pp$Ya2007$f1, pp$Ya2007$Q, pp$Ya2007$f, pp$Ya2007$b, pp$Ya2007$mu0, pp$Ya2007$theta, pp$Ak2005$u, pp$Ak2005$R)
-            #y.next <- getNextY.cont(t(as.matrix(y1)), t1=row.cur[3], t2=row.cur[4], a=pp$Ya2007$a, f1=pp$Ya2007$f1, Q=pp$Ya2007$Q, f=pp$Ya2007$f, b=pp$Ya2007$b, mu0=pp$Ya2007$mu0, theta=pp$Ya2007$theta, u=pp$Ak2007$u, R=pp$Ak2005$R) 
-            #y.next <- getNextY.cont2(as.matrix(y1), row.cur[3], row.cur[4], pp$Ya2007$b, pp$Ya2007$a, pp$Ya2007$f1)
-            for(j in seq(6,Ncol,by=2)) {
-              if(is.na(row.cur[j])) { row.cur[j] <- y.next[(j - 6 ) %/% 2 + 1] }
-              if(i != Nrec & Nrec >2) {if(is.na(row.next[j-1])) { row.next[j-1] <- row.cur[j] }}
-            }
-          }
+    datasets <- list() # To keep imputed datasets
     
-          df[i, ] <- row.cur
-          if(i != Nrec & Nrec >2) {df[i+1, ] <- row.next}
-          
-          
-      }
-      
-      
-  
-      ### Last record in a dataset ###
-      row.cur <- df[Nrec, ]
-      if(any(is.na(row.cur[seq(6, Ncol,by=2)])) & row.cur[2] == 0) {
-          y1 <- row.cur[seq(5,Ncol,by=2)]
-          y.next <- getNextY.discr.m(t(as.matrix(y1)), pp$Ak2005$u, pp$Ak2005$R)
-          #y.next <- getNextY.discr(t(as.matrix(y1)), pp$Ak2005$u, pp$Ak2005$R, pp$Ak2005$Sigma)
-          for(j in seq(6, Ncol, by=2)) {
-            if(is.na(row.cur[j])) {
-              row.cur[j] <- y.next[(j - 6) %/% 2 + 1]
-            }
-          }
-      }
-      
-      
-      df[Nrec, ] <- row.cur
-      
-      tryCatch({
-        x[which(x[,1] == k), ] <- df
-      },error=function(e) {
-        print(e)
-        print("x:")
-        print(x[which(x[,1] == k), ])
-        print("df:")
-        print(df)
-      }, warning=function(w){
-        print(w)
-        print("x:")
-        print(x[which(x[,1] == k), ])
-        print("df:")
-        print(df)
-        x[which(x[,1] == k), ] <- df
-      })
-      
-      
-  
-    }
-    #################################################################################
-    datasets[[m]] <- x
-  }
-  
-  
-  ### Summarizing imputed datasets together by averaging missing values, i.e. 'completion' ###
-  final.dataset <- dataset
-  for(j in seq(5,dim(final.dataset)[2])) {
-    data.tmp <- matrix(nrow = dim(final.dataset)[1], ncol=0)
-    for(i in 1:minp) {
-      data.tmp <- cbind(data.tmp, datasets[[i]][,j])
-    }
-    data.tmp.2 <- apply(X = data.tmp, FUN = mean, MARGIN = 1, na.rm=T)
-    final.dataset[,j] <- data.tmp.2
-  }
-  
-  res <- list(imputed=final.dataset, imputations=datasets)
-  res
-}
-
-
-########## Data imputation function (obsolete) ############
-#spm.impute2 <- function(x, minp=5, theta_range=seq(0.01, 0.2, by=0.001)) {
-#  
-#  ######### Data imputation begins here ############
-#  datasets <- list() # Keeps imputed datasets
-#  parameters <- list() # Keeps parameters for each imputation
-#
-#  # Data copy:
-#  ### Second pre-processing stage: impute the rest (prediction by simulation) ###
-#  ##### Rough parameter estimations #####
-#  pp <- spm_discrete(x, theta_range = theta_range)
-#  #pp <- spm_discrete(y, theta_range = theta_range)
-#  #pp <- list()
-#  #pp[["Ak2005"]] <- list()
-#  #pp[["Ya2007"]] <- list()
-#  #pp$Ak2005$u <- (-1) * 80 %*% -0.05
-#  #pp$Ak2005$R <- 1 -0.05
-#  #pp$Ak2005$Sigma <- 5
-#  #pp$Ak2005$b <- -2 * 80 * 2e-8
-#  #pp$Ak2005$Q <- 2e-08
-#  #pp$Ya2007$a <- -0.05
-#  #pp$Ya2007$f1 <- 80
-#  #pp$Ya2007$Q <- 2e-08
-#  #pp$Ya2007$f <- 80
-#  #pp$Ya2007$b <- 5
-#  #pp$Ya2007$mu0 <- 1e-05
-#  #pp$Ya2007$theta <- 0.08
-#  
-#  for(inp in 1:minp) {
-#    #incomplete.data.1.tmp <- incomplete.data.1
-#    incomplete.data.1.tmp <- x
-#    #### First, let us handle the first row ####
-#    id.cur <- incomplete.data.1.tmp[1,1]
-#    id.next <- incomplete.data.1.tmp[2,1]
-#    row.cur <- incomplete.data.1.tmp[1, ]
-#    row.next <- incomplete.data.1.tmp[2, ]
-#    t1 <- row.cur[3]; t2 <- row.cur[4]
-#    
-#    for(j in seq(5,length(row.cur),by=2)) {
-#      if(is.na(row.cur[j])) {
-#        meanY <- mean(x[, j], na.rm = TRUE)
-#        y.start <- rnorm(1, mean = meanY, sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
-#        row.cur[j] <- y.start
-#      }
-#    }
-#    if(any(is.na(row.cur[seq(6, length(row.cur),by=2)]))) {
-#        y1 <- row.cur[seq(5,length(row.cur),by=2)]
-#        #y.next <- getNextY.discr.m(y1, pp$Ak2005$u, pp$Ak2005$R)
-#        #y.next <- getNextY(y1, t1, t2, pp$Ya2007$b, pp$Ya2007$a, pp$Ya2007$f1)
-#        y.next <- getNextY.discr(y1, pp$Ak2005$u, pp$Ak2005$R, pp$Ak2005$Sigma)
-#        #y.next <- getNextY.cont(y1, t1, t2, pp$Ya2007$a, pp$Ya2007$f1, pp$Ya2007$Q, pp$Ya2007$f, pp$Ya2007$b, pp$Ya2007$mu0, pp$Ya2007$theta, pp$Ak2005$u, pp$Ak2005$R)
-#        row.cur[which(is.na(row.cur))] <- y.next[(which(is.na(row.cur)) - 6 ) %/% 2 + 1]
-#    }
-#    for(j in seq(6, length(row.cur),by=2)) {
-#     if(is.na(row.next[j-1]) & (id.cur == id.next)) {row.next[j-1] <- row.cur[j]}
-#    }
-#    
-#    incomplete.data.1.tmp[1, ] <- row.cur
-#    incomplete.data.1.tmp[2, ] <- row.next
-#    
-#    for(i in 2:(dim(incomplete.data.1.tmp)[1]-1)) {
-#      ### ID
-#      id.cur <- incomplete.data.1.tmp[i,1]
-#      id.prev <- incomplete.data.1.tmp[i-1,1]
-#      id.next <- incomplete.data.1.tmp[i+1,1]
-#      ### Row
-#      row.cur <- incomplete.data.1.tmp[i, ]
-#      row.prev <- incomplete.data.1.tmp[i-1, ]
-#      row.next <- incomplete.data.1.tmp[i+1, ]
-#      t1 <- row.cur[3]; t2 <- row.cur[4]
-#      y1 <- row.cur[seq(5,length(row.cur),by=2)]
-#      #####
-#      if( (id.cur == id.prev) & (id.cur == id.next)) { # Somewhere in the middle of person
-#        if(any(is.na(row.cur[seq(6, length(row.cur),by=2)]))) {
-#          #y.next <- getNextY(y1, t1, t2, pp$Ya2007$b, pp$Ya2007$a, pp$Ya2007$f1)
-#          #y.next <- getNextY.discr.m(y1, pp$Ak2005$u, pp$Ak2005$R)
-#          y.next <- getNextY.discr(y1, pp$Ak2005$u, pp$Ak2005$R, pp$Ak2005$Sigma)
-#          #y.next <- getNextY.cont(y1, t1, t2, pp$Ya2007$a, pp$Ya2007$f1, pp$Ya2007$Q, pp$Ya2007$f, pp$Ya2007$b, pp$Ya2007$mu0, pp$Ya2007$theta, pp$Ak2005$u, pp$Ak2005$R)
-#          for(j in seq(6,length(row.cur),by=2)) {
-#            if(is.na(row.cur[j])) {
-#              row.cur[j] <- y.next[(j - 6 ) %/% 2 + 1]
-#            }
-#          }
-#        }
-#      }
-#      
-#      #####
-#      if( (id.cur != id.prev) ) {
-#        for(j in seq(5,length(row.cur),by=2)) {
-#          if(is.na(row.cur[j])) {
-#            meanY <- mean(x[, j], na.rm = TRUE)
-#            y.start <- rnorm(1, mean = meanY, sd=pp$Ya2007$b[((j-5) %/% 2)+1])
-#            row.cur[j] <- y.start
-#          }
-#        }
-#
-#        if(any(is.na(row.cur[seq(6, length(row.cur),by=2)])) & row.cur[2] == 0) {
-#          #print(row.cur)
-#          y1 <- row.cur[seq(5,length(row.cur),by=2)]
-#          #y.next <- getNextY.discr.m(y1, pp$Ak2005$u, pp$Ak2005$R)
-#          #y.next <- getNextY(y1, t1, t2, pp$Ya2007$b, pp$Ya2007$a, pp$Ya2007$f1)
-#          y.next <- getNextY.discr(y1, pp$Ak2005$u, pp$Ak2005$R, pp$Ak2005$Sigma)
-#          #y.next <- getNextY.cont(y1, t1, t2, pp$Ya2007$a, pp$Ya2007$f1, pp$Ya2007$Q, pp$Ya2007$f, pp$Ya2007$b, pp$Ya2007$mu0, pp$Ya2007$theta, pp$Ak2005$u, pp$Ak2005$R)
-#          for(j in seq(6,length(row.cur),by=2)) {
-#            if(is.na(row.cur[j])) {
-#              row.cur[j] <- y.next[(j - 6 ) %/% 2 + 1]
-#            }
-#          }
-#        }
-#      }
-#    
-#      for(j in seq(6,length(row.cur),by=2)) {
-#        if(is.na(row.next[j-1]) & (id.cur == id.next)) { row.next[j-1] <- row.cur[j] }
-#      }
-#      
-#      incomplete.data.1.tmp[i, ] <- row.cur
-#      incomplete.data.1.tmp[i+1, ] <- row.next
-#    }
-#    
-#    ### Last record in a dataset ###
-#    Nrec <- dim(incomplete.data.1.tmp)[1]
-#    id.cur <- incomplete.data.1.tmp[Nrec,1]
-#    id.prev <- incomplete.data.1.tmp[Nrec-1,1]
-#    row.cur <- incomplete.data.1.tmp[Nrec, ]
-#    row.prev <- incomplete.data.1.tmp[Nrec-1, ]
-#    t1 <- row.cur[3]; t2 <- row.cur[4]
-#    if(any(is.na(row.cur[seq(6, length(row.cur),by=2)])) & row.cur[2] == 0) {
-#      y1 <- row.cur[seq(5,length(row.cur),by=2)]
-#      #y.next <- getNextY.discr.m(y1, pp$Ak2005$u, pp$Ak2005$R)
-#      #y.next <- getNextY(y1, t1, t2, pp$Ya2007$b, pp$Ya2007$a, pp$Ya2007$f1)
-#      y.next <- getNextY.discr(y1, pp$Ak2005$u, pp$Ak2005$R, pp$Ak2005$Sigma)
-#      #y.next <- getNextY.cont(y1, t1, t2, pp$Ya2007$a, pp$Ya2007$f1, pp$Ya2007$Q, pp$Ya2007$f, pp$Ya2007$b, pp$Ya2007$mu0, pp$Ya2007$theta, pp$Ak2005$u, pp$Ak2005$R)
-#      for(j in seq(6,length(row.cur),by=2)) {
-#        if(is.na(row.next[j-1]) & (id.cur == id.next)) { row.next[j-1] <- row.cur[j] }
-#      }
-#    }
-#    
-#    incomplete.data.1.tmp[Nrec, ] <- row.cur
-#    
-#    ### Saving current imputed copy
-#    datasets[[inp]] <- incomplete.data.1.tmp
-#  }
-#
-#  ### Summarizing imputed datasets together by averaging missing values, i.e. 'completion' ####
-#
-#
-#  final.dataset <- incomplete.data
-#  for(j in seq(5,dim(final.dataset)[2])) {
-#    data.tmp <- matrix(nrow = dim(final.dataset)[1], ncol=0)
-#    for(i in 1:minp) {
-#      data.tmp <- cbind(data.tmp, datasets[[i]][,j])
-#    }
-#    data.tmp.2 <- apply(X = data.tmp, FUN = mean, MARGIN = 1, na.rm=T)
-#    final.dataset[,j] <- data.tmp.2
-#  }
-# 
-#  res <- list(imputed=final.dataset, imputations=datasets)
-#  res
-#}
-
-prepare <- function(dataset, minp=5) {
-  datasets <- list() # Keeps imputed datasets
-  ids <- unique(dataset[,1])
-  
-  x <- dataset
-  Ncol <- dim(x)[2]
-  for(k in ids) {
-    ########## Forward #########
-    #### First, let us handle the first row ####
-    df <- x[which(x[,1] == k), ]
-    
-    Nrec <- length(df[,1])
-    
-    if(Nrec > 2) {
-      #### Preprocessing of df ####
-      for(i in 2:(Nrec-1)) {
-        row.cur <- df[i,]
-        row.prev <- df[i-1,]
-        row.next <- df[i+1,]
-        
-        for(j in seq(5, Ncol,by=2)) {
-          if(is.na(row.cur[j])) {
-            row.cur[j] <- row.prev[j+1]
-          } else {
-            row.prev[j+1] <- row.cur[j]
-          }
-        }
-        
-        for(j in seq(6, Ncol,by=2)) {
-          if(is.na(row.cur[j])) {
-            row.cur[j] <- row.next[j-1]
-          } else {
-            row.next[j-1] <- row.cur[j]
-          }
-        }
-        
-        df[i-1, ] <- row.prev
-        df[i, ] <- row.cur
-        df[i+1, ] <- row.next
-      }
+    if(format == "short")
+    {
+        # Prepare data to be in format id xi t1 t2 y y.next
+        dataset <- prepare_data_cont(dat, 
+                                col.id.ind=col.id, 
+                                col.status.ind=col.status,
+                                col.age.ind=col.age, 
+                                col.age.event.ind=col.age.event, 
+                                col.covar.ind=covariates, 
+                                dt=1, 
+                                verbose=FALSE,
+                                impute=FALSE)
+    } else if(format == "long")
+    {
+        cov.tmp <- c(covariates, covariates)
+        cov.tmp[seq(1,length(cov.tmp), 2)] <- covariates
+        cov.tmp[seq(2,length(cov.tmp), 2)] <- covariates + 1
+        dataset <- dat[, c(col.id, col.status, col.age, col.age.event, cov.tmp)]
+    } else 
+    {
+        stop("Format is incorrectly defined.")
     }
     
-    x[which(x[,1] == k), ] <- df
+    # Estimate parameters from raw data
+    pp <- spm_discrete(dataset, theta_range = theta_range)
+  
+    # Individual IDs
+    ids <- unique(dataset[,1])
+  
+    for(m in 1:minp)
+    {
+        x <- dataset
+        
+        Ncol <- dim(x)[2]
+        for(k in ids) 
+        {
+            ########## Forward #########
+            df <- x[which(x[,1] == k), ]
+      
+            if(length(df[,1]) == 1) 
+            {
+                Nrec <- 1
+            } else 
+            {
+                Nrec <- length(df[,1])
+            }
+      
+            if(Nrec == 1) 
+            {
+                row.cur <- df
+                for(j in seq(5,Ncol,by=2)) 
+                {
+                    if(is.na(row.cur[j]) & !is.na(row.cur[j+1])) 
+                    {
+                        kkk <- ((j-5) %/% 2)+1
+            
+                        #y.start <- rnorm(1, mean = mean(x[,j], na.rm = T), sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
+                        #row.cur[j] <- y.start
+            
+                        y2 <- df[1,j+1]
+                        y1 <- getPrevY.discr.m(t(as.matrix(y2)), pp$dmodel$u[kkk], pp$dmodel$R[kkk,kkk])
+                        df[1,j] <- y1
+                        row.cur[j] <- y1
+                    } else if(is.na(row.cur[j]) & is.na(row.cur[j+1]))
+                    {
+                        y.start <- rnorm(1, mean = mean(x[,j], na.rm = T), sd=pp$dmodel$Sigma[((j-5) %/% 2)+1])
+                        row.cur[j] <- y.start
+                    }
+                }
+                
+                if(any(is.na(row.cur[seq(6, Ncol,by=2)])) & row.cur[2] == 0) 
+                {
+                    y1 <- row.cur[seq(5,Ncol,by=2)]
+                    y.next <- getNextY.discr.m(t(as.matrix(y1)), pp$dmodel$u, pp$dmodel$R)
+                    #y.next <- getNextY.discr(t(as.matrix(y1)), pp$Ak2005$u, pp$Ak2005$R, pp$Ak2005$Sigma)
+                    row.cur[which(is.na(row.cur))] <- y.next[(which(is.na(row.cur)) - 6 ) %/% 2 + 1]
+                }
+        
+                df <- row.cur
+                x[which(x[,1] == k), ] <- df
+                
+                next
+            }
+      
+            # Check the first row #
+            row.cur <- df[1, ]
+            row.next <- df[2, ]
+  
+            for(j in seq(5,Ncol,by=2)) 
+            {
+                if(is.na(row.cur[j])) 
+                {
+                    kkk <- ((j-5) %/% 2)+1
+                    ##meanY <- mean(x[, j], na.rm = TRUE)
+                    #medianY <- median(x[, j], na.rm = TRUE)
+                    ##y.start <- rnorm(1, mean = meanY, sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
+                    #y.start <- medianY #rnorm(1, mean = meanY, sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
+          
+                    for(ii in 1:Nrec) {
+                        if(!is.na(df[ii,j]))
+                            break
+                    }
+                    
+                    if(ii != Nrec) {
+                        for(iii in (ii-1):1) {
+                            y2 <- df[iii,j+1]
+                            y1 <- getPrevY.discr.m(t(as.matrix(y2)), pp$dmodel$u[kkk], pp$dmodel$R[kkk,kkk])
+                            df[iii,j] <- y1
+                            if(iii != 1) {
+                                df[iii-1,j+1] <- y1
+                            }
+                        }
+                    } else {
+                        meanY <- mean(x[, j], na.rm = TRUE)
+                        y.start <- rnorm(1, mean = meanY, sd=pp$dmodel$Sigma[((j-5) %/% 2)+1])
+                        df[1,j] <- y.start
+                    }
+                } 
+              
+                if(is.na(row.cur[j+1])) {
+                    row.cur[j+1] <- getNextY.discr.m(t(as.matrix(row.cur[j])), pp$dmodel$u, pp$dmodel$R)
+                    df[1,j+1] <- row.cur[j+1]
+                }
+            }
+      
+            # Check the rest #
+            #df[1, ] <- row.cur
+            #df[2, ] <- row.next
+      
+            #### Preprocessing of the rest of df ####
+            for(i in 2:Nrec) 
+            {
+                row.cur <- df[i,]
+                row.prev <- df[i-1,]
+                if(i != Nrec & Nrec >2) {row.next <- df[i+1,]}
+          
+                for(j in seq(5, Ncol,by=2)) 
+                {
+                    if(is.na(row.cur[j])) 
+                    {
+                        row.cur[j] <- row.prev[j+1]
+                    } else 
+                    {
+                        row.prev[j+1] <- row.cur[j]
+                    }
+                }
+          
+                for(j in seq(6, Ncol,by=2)) 
+                {
+                    if(is.na(row.cur[j])) 
+                    {
+                        if(i != Nrec & Nrec >2) {row.cur[j] <- row.next[j-1]}
+                    } else 
+                    {
+                        if(i != Nrec & Nrec >2) {row.next[j-1] <- row.cur[j]}
+                    }
+                }
+          
+                df[i-1, ] <- row.prev
+                df[i, ] <- row.cur
+                if(i != Nrec & Nrec >2) {df[i+1, ] <- row.next}
+            }
+      
+            #if(dim(x[which(x[,1] == k), ])[1] != dim(df)[1]) {
+            #  print("!!")
+            #  print(x[which(x[,1] == k), ])
+            #  print(df)
+            #  print("???")
+            #}
+      
+        
+            #### Main imputation loop ####
+        
+            for(i in 2:Nrec) 
+            {
+                row.cur <- df[i, ]
+                if(i != Nrec & Nrec >2) {row.next <- df[i+1, ]}
+                #print(row.cur)
+                y1 <- row.cur[seq(5,Ncol,by=2)]
+                if(any(is.na(row.cur[seq(6, Ncol,by=2)]))) 
+                {
+                    y.next <- getNextY.discr.m(t(as.matrix(y1)), pp$dmodel$u, pp$dmodel$R)
+                    #y.next <- getNextY.discr(t(as.matrix(y1)), pp$Ak2005$u, pp$Ak2005$R, pp$Ak2005$Sigma)
+                    #y.next <- getNextY.cont(y1, row.cur[3], row.cur[4], pp$Ya2007$a, pp$Ya2007$f1, pp$Ya2007$Q, pp$Ya2007$f, pp$Ya2007$b, pp$Ya2007$mu0, pp$Ya2007$theta, pp$Ak2005$u, pp$Ak2005$R)
+                    #y.next <- getNextY.cont(t(as.matrix(y1)), t1=row.cur[3], t2=row.cur[4], a=pp$Ya2007$a, f1=pp$Ya2007$f1, Q=pp$Ya2007$Q, f=pp$Ya2007$f, b=pp$Ya2007$b, mu0=pp$Ya2007$mu0, theta=pp$Ya2007$theta, u=pp$Ak2007$u, R=pp$Ak2005$R) 
+                    #y.next <- getNextY.cont2(as.matrix(y1), row.cur[3], row.cur[4], pp$Ya2007$b, pp$Ya2007$a, pp$Ya2007$f1)
+                    for(j in seq(6,Ncol,by=2)) 
+                    {
+                        if(is.na(row.cur[j])) { row.cur[j] <- y.next[(j - 6 ) %/% 2 + 1] }
+                        if(i != Nrec & Nrec >2) {if(is.na(row.next[j-1])) { row.next[j-1] <- row.cur[j] }}
+                    }
+                }
     
-  }
-  #################################################################################
-  x
+                df[i, ] <- row.cur
+                if(i != Nrec & Nrec >2) {df[i+1, ] <- row.next}
+            }
+      
+            ### Last record in a dataset ###
+            row.cur <- df[Nrec, ]
+            if(any(is.na(row.cur[seq(6, Ncol,by=2)])) & row.cur[2] == 0) 
+            {
+                y1 <- row.cur[seq(5,Ncol,by=2)]
+                y.next <- getNextY.discr.m(t(as.matrix(y1)), pp$dmodel$u, pp$dmodel$R)
+                #y.next <- getNextY.discr(t(as.matrix(y1)), pp$Ak2005$u, pp$Ak2005$R, pp$Ak2005$Sigma)
+                for(j in seq(6, Ncol, by=2)) 
+                {
+                    if(is.na(row.cur[j])) 
+                    {
+                        row.cur[j] <- y.next[(j - 6) %/% 2 + 1]
+                    }
+                }
+            }
+      
+            df[Nrec, ] <- row.cur
+      
+            tryCatch({
+                x[which(x[,1] == k), ] <- df
+            },error=function(e) {
+                print(e)
+                print("x:")
+                print(x[which(x[,1] == k), ])
+                print("df:")
+                print(df)
+            }, warning=function(w){
+                print(w)
+                print("x:")
+                print(x[which(x[,1] == k), ])
+                print("df:")
+                print(df)
+                x[which(x[,1] == k), ] <- df
+            })
+        }
+        #################################################################################
+        datasets[[m]] <- x
+    }
+  
+    ### Summarizing imputed datasets together by averaging missing values, i.e. 'completion' ###
+    final.dataset <- dataset
+    for(j in seq(5,dim(final.dataset)[2])) 
+    {
+        data.tmp <- matrix(nrow = dim(final.dataset)[1], ncol=0)
+        for(i in 1:minp) 
+        {
+            data.tmp <- cbind(data.tmp, datasets[[i]][,j])
+        }
+        data.tmp.2 <- apply(X = data.tmp, FUN = mean, MARGIN = 1, na.rm=T)
+        final.dataset[,j] <- data.tmp.2
+    }
+  
+    res <- list(imputed=final.dataset, imputations=datasets)
+    res
 }

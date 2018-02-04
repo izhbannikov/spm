@@ -66,7 +66,8 @@ spm_projection <- function(x,
                            dt=1, 
                            sd0=1, 
                            nobs=NULL, 
-                           gomp=TRUE) {
+                           gomp=TRUE, 
+                           format="short") {
   
   avail.models <- c("discrete", "continuous", "time-dependent")
   if(!(model %in% avail.models)) {
@@ -78,6 +79,9 @@ spm_projection <- function(x,
   }
   
   res <- list()
+  res.sim <- list()
+  # Statistics
+  stat <- list()
   
   if(model == "time-dependent") {
     # Data simulation for time-dependent model
@@ -90,27 +94,26 @@ spm_projection <- function(x,
     }
     
     #Simulate (project) data:
-    res.time_dep <- simdata_time_dep(N=N,f=formulas.work,
+    res.sim <- simdata_time_dep(N=N,f=formulas.work,
                                     step=dt, 
                                     tstart=tstart, 
                                     tend=tend, 
                                     ystart=ystart, 
-                                    sd0=sd0, nobs=nobs)
-    #Compute summary statistics:
-    # Statistics
-    stat <- list()
-    # Age-specific means:
+                                    sd0=sd0, nobs=nobs,
+                                format=format)
+    #Computing summary statistics
+    ## Age-specific means:
     bins<-10
-    cutpoints<-quantile(res.time_dep[,3],(0:bins)/bins)
-    binned <-cut(res.time_dep[,3],cutpoints,include.lowest=TRUE)
-    for(i in seq(5,length(colnames(res.time_dep)),by=2)) {
-      mean.cov <- tapply(res.time_dep[,5], binned, mean)
-      stat[["mean.by.age"]][[colnames(res.time_dep)[i]]] <- mean.cov
+    cutpoints<-quantile(res.sim[,3],(0:bins)/bins)
+    binned <-cut(res.sim[,3],cutpoints,include.lowest=TRUE)
+    for(i in seq(5,length(colnames(res.sim)),by=2)) {
+      mean.cov <- tapply(res.sim[,5], binned, mean)
+      stat[["mean.by.age"]][[colnames(res.sim)[i]]] <- mean.cov
     }
     
-    #Survival probabilities:
+    ##Survival probabilities:
     vt <- data.frame(matrix(nrow=N, ncol=5))
-    df <- data.frame(res.time_dep)
+    df <- data.frame(res.sim)
     ddg <- split(df, f=df$id)
     
     invisible(sapply(1:N, 
@@ -124,11 +127,9 @@ spm_projection <- function(x,
     
     colnames(vt) = c("id", "time", "age","case", "start")
     
-    #Survival probabilities:
+    ##Survival probabilities:
     srv.prob <- survfit( Surv(start, age, case) ~ 1, data = vt, conf.type = "log-log")
     stat[["srv.prob"]] <- srv.prob
-    
-    res <- list(data=res.time_dep, stat=stat)
     
   } else if(model == "discrete") {
     
@@ -136,7 +137,7 @@ spm_projection <- function(x,
       stop("Number of dimensions does not match with the number of values provided in ystart.")
     }
     
-    res.discr <- simdata_discr(N=N, 
+    res.sim <- simdata_discr(N=N, 
                                a=x$a, 
                                f1=x$f1, 
                                Q=x$Q, 
@@ -146,21 +147,21 @@ spm_projection <- function(x,
                                theta=x$theta, 
                                ystart=ystart, 
                                tstart=tstart, tend=tend, 
-                               dt=dt)
+                               dt=dt,
+                             format=format)
     
-    # Statistics
-    stat <- list()
+   
     # Age-specific means:
     bins<-10
-    cutpoints<-quantile(res.discr[,3],(0:bins)/bins)
-    binned <-cut(res.discr[,3],cutpoints,include.lowest=TRUE)
-    for(i in seq(5,length(colnames(res.discr)),by=2)) {
-      mean.cov <- tapply(res.discr[,5], binned, mean)
-      stat[["mean.by.age"]][[colnames(res.discr)[i]]] <- mean.cov
+    cutpoints<-quantile(res.sim[,3],(0:bins)/bins)
+    binned <-cut(res.sim[,3],cutpoints,include.lowest=TRUE)
+    for(i in seq(5,length(colnames(res.sim)),by=2)) {
+      mean.cov <- tapply(res.sim[,5], binned, mean)
+      stat[["mean.by.age"]][[colnames(res.sim)[i]]] <- mean.cov
     }
     
     vt <- data.frame(matrix(nrow=N, ncol=5))
-    df <- data.frame(res.discr)
+    df <- data.frame(res.sim)
     ddg <- split(df, f=df$id)
     
     invisible(sapply(1:N, 
@@ -178,7 +179,6 @@ spm_projection <- function(x,
     srv.prob <- survfit( Surv(start, age, case) ~ 1, data = vt, conf.type = "log-log")
     stat[["srv.prob"]] <- srv.prob
     
-    res <- list(data=res.discr, stat=stat)
     
   } else if(model == "continuous") {
     
@@ -187,7 +187,7 @@ spm_projection <- function(x,
     }
     
     # Data simulation for discrete and continuous models
-    res.cont <- simdata_cont(N=N, 
+    res.sim <- simdata_cont(N=N, 
                              a=x$a, 
                              f1=x$f1, 
                              Q=x$Q, 
@@ -198,23 +198,22 @@ spm_projection <- function(x,
                              dt=dt, 
                              ystart=ystart,
                              tstart=tstart, tend=tend, 
-                             sd0=sd0, nobs=nobs, gomp=gomp)
+                             sd0=sd0, nobs=nobs, gomp=gomp,
+                            format=format)
     
     
-    # Statistics
-    stat <- list()
     # Age-specific means:
     bins<-10
-    cutpoints<-quantile(res.cont[,3],(0:bins)/bins)
-    binned <-cut(res.cont[,3],cutpoints,include.lowest=TRUE)
-    for(i in seq(5,length(colnames(res.cont)),by=2)) {
-      mean.cov <- tapply(res.cont[,5], binned, mean)
-      stat[["mean.by.age"]][[colnames(res.cont)[i]]] <- mean.cov
+    cutpoints<-quantile(res.sim[,3],(0:bins)/bins)
+    binned <-cut(res.sim[,3],cutpoints,include.lowest=TRUE)
+    for(i in seq(5,length(colnames(res.sim)),by=2)) {
+      mean.cov <- tapply(res.sim[,5], binned, mean)
+      stat[["mean.by.age"]][[colnames(res.sim)[i]]] <- mean.cov
     }
     
     ####### Survival probabilities ########
     vt <- data.frame(matrix(nrow=N, ncol=5))
-    df <- data.frame(res.cont)
+    df <- data.frame(res.sim)
     ddg <- split(df, f=df$id)
     
     invisible(sapply(1:N, 
@@ -231,8 +230,10 @@ spm_projection <- function(x,
     srv.prob <- survfit( Surv(start, age, case) ~ 1, data = vt, conf.type = "log-log")
     stat[["srv.prob"]] <- srv.prob
     
-    res <- list(data=res.cont, stat=stat)
   }
+  
+  res <- list(data=res.sim, stat=stat)
+  
   class(res) <- "spm.projection"
   invisible(res)
 }

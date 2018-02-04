@@ -19,7 +19,7 @@
 #' head(dat)
 #'
 simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80", bt="5", mu0t="1e-3"),
-                         step=1, tstart=30, tend=105, ystart=80, sd0=1, nobs=NULL) {
+                         step=1, tstart=30, tend=105, ystart=80, sd0=1, nobs=NULL, format="long") {
   formulas <- f  
   at <- NULL
   f1t <- NULL
@@ -118,5 +118,12 @@ simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80
   # One last step:
   data <- data[2:dim(data)[1],]
   colnames(data) <- c("id","xi","t1","t2", "y", "y.next")
-  invisible(data.frame(data))
+  simulated <- data.frame(data)
+  
+  if(format == "short")
+  {
+    simulated <- make.short.format(simulated)
+  }
+  
+  invisible(return(simulated))
 }
