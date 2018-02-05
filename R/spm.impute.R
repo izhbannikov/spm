@@ -249,33 +249,48 @@ spm.impute <- function(dat,
 {
     
     # Check input parameters for correctness
-    if(class(dat) != "data.frame")
-    {
+    if(class(dat) != "data.frame") {
         stop("Class of dataset must be a 'data.frame'.")
     }
   
-    datasets <- list() # To keep imputed datasets
+    datasets <- list() # To hold imputed datasets
     
-    if(format == "short")
-    {
+    col.id.ind <- ifelse(class(col.id)=="character", get.column.index(dat, col.id), col.id)
+    if(col.id.ind == 0) stop(paste("Column",col.id, "not found in data table!"))
+    
+    col.status.ind <- ifelse(class(col.status)=="character", get.column.index(dat, col.status), col.status)
+    if(col.status.ind == 0) stop(paste("Column",col.status, "not found in data table!"))
+    
+    col.age.ind <- ifelse(class(col.age)=="character", get.column.index(dat, col.age), col.age)
+    if(col.age.ind == 0) stop(paste("Column",col.age, "not found in data table!"))
+    
+    col.age.event.ind <- ifelse(class(col.age.event)=="character", get.column.index(dat, col.age.event), col.age.event)
+    if(col.age.event.ind == 0) stop(paste("Column", col.age.event, "not found in data table!"))
+    
+    col.covar.ind <- c()
+    for(c in covariates) {
+        c.ind <- ifelse(class(c)=="character", get.column.index(dat, c), c)
+        if(c.ind == 0) stop(paste("Column", c, "not found in data table!"))
+        col.covar.ind <- c(col.covar.ind, c.ind)
+    } 
+    
+    if(format == "short") {
         # Prepare data to be in format id xi t1 t2 y y.next
         dataset <- prepare_data_cont(dat, 
-                                col.id.ind=col.id, 
-                                col.status.ind=col.status,
-                                col.age.ind=col.age, 
-                                col.age.event.ind=col.age.event, 
+                                col.id.ind=col.id.ind, 
+                                col.status.ind=col.status.ind,
+                                col.age.ind=col.age.ind, 
+                                col.age.event.ind=col.age.event.ind, 
                                 col.covar.ind=covariates, 
                                 dt=1, 
                                 verbose=FALSE,
                                 impute=FALSE)
-    } else if(format == "long")
-    {
-        cov.tmp <- c(covariates, covariates)
-        cov.tmp[seq(1,length(cov.tmp), 2)] <- covariates
-        cov.tmp[seq(2,length(cov.tmp), 2)] <- covariates + 1
+    } else if(format == "long") {
+        cov.tmp <- c(col.covar.ind, col.covar.ind)
+        cov.tmp[seq(1,length(cov.tmp), 2)] <- col.covar.ind
+        cov.tmp[seq(2,length(cov.tmp), 2)] <- col.covar.ind + 1
         dataset <- dat[, c(col.id, col.status, col.age, col.age.event, cov.tmp)]
-    } else 
-    {
+    } else {
         stop("Format is incorrectly defined.")
     }
     
@@ -503,6 +518,12 @@ spm.impute <- function(dat,
         }
         data.tmp.2 <- apply(X = data.tmp, FUN = mean, MARGIN = 1, na.rm=T)
         final.dataset[,j] <- data.tmp.2
+    }
+    
+    if(format == "short") {
+        # Prepare data to be in format id xi t y
+        final.dataset <- make.short.format(final.dataset, col.id=1, col.status=2, col.t1=3, col.t2=4, col.cov=5)
+        colnames(final.dataset) <- colnames(dat)
     }
   
     res <- list(imputed=final.dataset, imputations=datasets)
