@@ -337,6 +337,7 @@ spm.impute <- function(x,
             
                         y2 <- df[1,j+1]
                         y1 <- getPrevY.discr.m(t(as.matrix(y2)), pp$dmodel$u[kkk], pp$dmodel$R[kkk,kkk])
+                        #y1 <- getPrevY.discr.m(as.matrix(y2), pp$dmodel$u[kkk], pp$dmodel$R[kkk,kkk])
                         df[1,j] <- y1
                         row.cur[j] <- y1
                     } else if(is.na(row.cur[j]) & is.na(row.cur[j+1]))
@@ -366,9 +367,12 @@ spm.impute <- function(x,
   
             for(j in seq(5,Ncol,by=2)) 
             {
+                kkk <- ((j-5) %/% 2)+1
+              
                 if(is.na(row.cur[j])) 
                 {
-                    kkk <- ((j-5) %/% 2)+1
+                    
+                    
                     ##meanY <- mean(x[, j], na.rm = TRUE)
                     #medianY <- median(x[, j], na.rm = TRUE)
                     ##y.start <- rnorm(1, mean = meanY, sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
@@ -396,7 +400,8 @@ spm.impute <- function(x,
                 } 
               
                 if(is.na(row.cur[j+1])) {
-                    row.cur[j+1] <- getNextY.discr.m(t(as.matrix(row.cur[j])), pp$dmodel$u, pp$dmodel$R)
+                    
+                    row.cur[j+1] <- getNextY.discr.m(t(as.matrix(row.cur[j])), pp$dmodel$u[kkk], pp$dmodel$R[kkk,kkk])
                     df[1,j+1] <- row.cur[j+1]
                 }
             }
@@ -516,8 +521,8 @@ spm.impute <- function(x,
     
     if(format == "short") {
         # Prepare data to be in format id xi t y
-        colnames(final.dataset) <- colnames(x)
         final.dataset <- make.short.format(final.dataset, col.id=1, col.status=2, col.t1=3, col.t2=4, col.cov=5)
+        colnames(final.dataset) <- colnames(x)
     }
   
     res <- list(imputed=final.dataset, imputations=datasets)

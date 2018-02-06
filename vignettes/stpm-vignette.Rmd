@@ -492,7 +492,72 @@ Here:
 
 ```beta``` - The coefficients of the genetic effect on the parameters to be linked to genotypes.
 
+## Multiple imputation with spm.impute(...)
 
+The SPM offers longitudinal data imputation with results that are better than from other imputation tools since it preserves data structure, i.e. relation between 
+Y(t) and mu(Y(t),t). Below there are two examples of multiple data imputation with function spm.impute(...).
+
+```{r, eval=T}
+library(stpm)
+
+#######################################################
+############## One dimensional case ###################
+#######################################################
+
+# Data preparation #
+data <- simdata_discr(N=1000, dt = 2, format="short")
+
+miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/4)) # ~25% missing data
+incomplete.data <- data
+incomplete.data[miss.id,4] <- NA
+# End of data preparation #
+
+##### Multiple imputation with SPM #####
+imp.data <- spm.impute(x=incomplete.data, id=1, case="xi", t1=3, covariates="y1", minp=1, theta_range=seq(0.075, 0.09, by=0.001))$imputed
+
+##### Look at the incomplete data with missings #####
+head(incomplete.data)
+
+##### Look at the imputed data #####
+head(imp.data)
+
+
+#########################################################
+################ Two-dimensional case ###################
+#########################################################
+
+# Parameters for data simulation #
+a <- matrix(c(-0.05, 0.01, 0.01, -0.05), nrow=2)
+f1 <- matrix(c(90, 30), nrow=1, byrow=FALSE)
+Q <- matrix(c(1e-7, 1e-8, 1e-8, 1e-7), nrow=2)
+f0 <- matrix(c(80, 25), nrow=1, byrow=FALSE)
+b <- matrix(c(5, 3), nrow=2, byrow=TRUE)
+mu0 <- 1e-04
+theta <- 0.07
+ystart <- matrix(c(80, 25), nrow=2, byrow=TRUE)
+
+# Data preparation #
+data <- simdata_discr(N=1000, a=a, f1=f1, Q=Q, f=f0, b=b, ystart=ystart, mu0 = mu0, theta=theta, dt=2, format="short")
+
+# Delete some observations in order to have approx. 25% missing data
+incomplete.data <- data
+miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/4)) 
+incomplete.data <- data
+incomplete.data[miss.id,4] <- NA
+miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/4)) 
+incomplete.data[miss.id,5] <- NA
+# End of data preparation #
+
+##### Multiple imputation with SPM #####
+imp.data <- spm.impute(x=incomplete.data, id=1, case="xi", t1=3, covariates=c("y1", "y2"), minp=1, theta_range=seq(0.060, 0.07, by=0.001))$imputed
+
+##### Look at the incomplete data with missings #####
+head(incomplete.data)
+
+##### Look at the imputed data #####
+head(imp.data)
+
+```
 
 ## References
 
