@@ -207,7 +207,12 @@ getNextY.cont <- function(y1, t1, t2, a, f1, Q, f, b, mu0, theta, u, R) {
 }
 
 #'Multiple Data Imputation with SPM
-#'@param dataset A longitudinal dataset with missing observations
+#'@param x A longitudinal dataset with missing observations
+#'@param id A name (text) or index (numeric) of ID column. Default: 1
+#'@param case A case status column name (text) or index (numeric). Default: 2
+#'@param t1 A t1 (or t if short format is used) column name (text) or index (numeric). Default: 3
+#'@param t2 A t2 column name (if long format is used) (text) or index (numeric). Default: 4
+#'@param covariates A list of covariate column names or indices. Default: 5
 #'@param minp Number of imputations. Default: 5
 #'@param theta_range A range of parameter theta used for optimization, default: seq(0.01, 0.15, by=0.001).
 #'@return A list(imputed, imputations)
@@ -229,7 +234,7 @@ getNextY.cont <- function(y1, t1, t2, a, f1, Q, f, b, mu0, theta, u, R) {
 #'p
 #'
 #'##### Multiple imputation with SPM #####
-#'imp.data <- spm.impute(dataset=incomplete.data, 
+#'imp.data <- spm.impute(x=incomplete.data, 
 #'                       minp=5, 
 #'                       theta_range=seq(0.075, 0.09, by=0.001))$imputed
 #'head(imp.data)
@@ -237,11 +242,11 @@ getNextY.cont <- function(y1, t1, t2, a, f1, Q, f, b, mu0, theta, u, R) {
 #'pp.test <- spm_discrete(imp.data, theta_range = seq(0.075, 0.09, by=0.001))
 #'pp.test
 #'}
-spm.impute <- function(dat, 
-                       col.id=1, 
-                       col.status=2,
-                       col.age=3, 
-                       col.age.event=3, 
+spm.impute <- function(x, 
+                       id=1, 
+                       case=2,
+                       t1=3, 
+                       t2=3, 
                        covariates=4,
                        minp=5, 
                        theta_range=seq(0.01, 0.2, by=0.001), 
@@ -249,34 +254,34 @@ spm.impute <- function(dat,
 {
     
     # Check input parameters for correctness
-    if(class(dat) != "data.frame") {
+    if(class(x) != "data.frame") {
         stop("Class of dataset must be a 'data.frame'.")
     }
   
     datasets <- list() # To hold imputed datasets
     
-    col.id.ind <- ifelse(class(col.id)=="character", get.column.index(dat, col.id), col.id)
-    if(col.id.ind == 0) stop(paste("Column",col.id, "not found in data table!"))
+    col.id.ind <- ifelse(class(id)=="character", get.column.index(x, id), id)
+    if(col.id.ind == 0) stop(paste("Column",id, "not found in data table!"))
     
-    col.status.ind <- ifelse(class(col.status)=="character", get.column.index(dat, col.status), col.status)
-    if(col.status.ind == 0) stop(paste("Column",col.status, "not found in data table!"))
+    col.status.ind <- ifelse(class(case)=="character", get.column.index(x, case), case)
+    if(col.status.ind == 0) stop(paste("Column",case, "not found in data table!"))
     
-    col.age.ind <- ifelse(class(col.age)=="character", get.column.index(dat, col.age), col.age)
-    if(col.age.ind == 0) stop(paste("Column",col.age, "not found in data table!"))
+    col.age.ind <- ifelse(class(t1)=="character", get.column.index(x, t1), t1)
+    if(col.age.ind == 0) stop(paste("Column",t1, "not found in data table!"))
     
-    col.age.event.ind <- ifelse(class(col.age.event)=="character", get.column.index(dat, col.age.event), col.age.event)
-    if(col.age.event.ind == 0) stop(paste("Column", col.age.event, "not found in data table!"))
+    col.age.event.ind <- ifelse(class(t2)=="character", get.column.index(x, t2), t2)
+    if(col.age.event.ind == 0) stop(paste("Column", t2, "not found in data table!"))
     
     col.covar.ind <- c()
     for(c in covariates) {
-        c.ind <- ifelse(class(c)=="character", get.column.index(dat, c), c)
+        c.ind <- ifelse(class(c)=="character", get.column.index(x, c), c)
         if(c.ind == 0) stop(paste("Column", c, "not found in data table!"))
         col.covar.ind <- c(col.covar.ind, c.ind)
     } 
     
     if(format == "short") {
         # Prepare data to be in format id xi t1 t2 y y.next
-        dataset <- prepare_data_cont(dat, 
+        dataset <- prepare_data_cont(x, 
                                 col.id.ind=col.id.ind, 
                                 col.status.ind=col.status.ind,
                                 col.age.ind=col.age.ind, 
@@ -289,7 +294,7 @@ spm.impute <- function(dat,
         cov.tmp <- c(col.covar.ind, col.covar.ind)
         cov.tmp[seq(1,length(cov.tmp), 2)] <- col.covar.ind
         cov.tmp[seq(2,length(cov.tmp), 2)] <- col.covar.ind + 1
-        dataset <- dat[, c(col.id, col.status, col.age, col.age.event, cov.tmp)]
+        dataset <- x[, c(col.id.ind, col.status.ind, col.age.ind, col.age.event.ind, cov.tmp)]
     } else {
         stop("Format is incorrectly defined.")
     }
@@ -302,13 +307,13 @@ spm.impute <- function(dat,
   
     for(m in 1:minp)
     {
-        x <- dataset
+        dat <- dataset
         
-        Ncol <- dim(x)[2]
+        Ncol <- dim(dat)[2]
         for(k in ids) 
         {
             ########## Forward #########
-            df <- x[which(x[,1] == k), ]
+            df <- dat[which(dat[,1] == k), ]
       
             if(length(df[,1]) == 1) 
             {
@@ -336,7 +341,7 @@ spm.impute <- function(dat,
                         row.cur[j] <- y1
                     } else if(is.na(row.cur[j]) & is.na(row.cur[j+1]))
                     {
-                        y.start <- rnorm(1, mean = mean(x[,j], na.rm = T), sd=pp$dmodel$Sigma[((j-5) %/% 2)+1])
+                        y.start <- rnorm(1, mean = mean(dat[,j], na.rm = T), sd=pp$dmodel$Sigma[((j-5) %/% 2)+1])
                         row.cur[j] <- y.start
                     }
                 }
@@ -350,7 +355,7 @@ spm.impute <- function(dat,
                 }
         
                 df <- row.cur
-                x[which(x[,1] == k), ] <- df
+                dat[which(dat[,1] == k), ] <- df
                 
                 next
             }
@@ -384,7 +389,7 @@ spm.impute <- function(dat,
                             }
                         }
                     } else {
-                        meanY <- mean(x[, j], na.rm = TRUE)
+                        meanY <- mean(dat[, j], na.rm = TRUE)
                         y.start <- rnorm(1, mean = meanY, sd=pp$dmodel$Sigma[((j-5) %/% 2)+1])
                         df[1,j] <- y.start
                     }
@@ -395,10 +400,6 @@ spm.impute <- function(dat,
                     df[1,j+1] <- row.cur[j+1]
                 }
             }
-      
-            # Check the rest #
-            #df[1, ] <- row.cur
-            #df[2, ] <- row.next
       
             #### Preprocessing of the rest of df ####
             for(i in 2:Nrec) 
@@ -434,14 +435,7 @@ spm.impute <- function(dat,
                 if(i != Nrec & Nrec >2) {df[i+1, ] <- row.next}
             }
       
-            #if(dim(x[which(x[,1] == k), ])[1] != dim(df)[1]) {
-            #  print("!!")
-            #  print(x[which(x[,1] == k), ])
-            #  print(df)
-            #  print("???")
-            #}
-      
-        
+            
             #### Main imputation loop ####
         
             for(i in 2:Nrec) 
@@ -487,24 +481,24 @@ spm.impute <- function(dat,
             df[Nrec, ] <- row.cur
       
             tryCatch({
-                x[which(x[,1] == k), ] <- df
+                dat[which(dat[,1] == k), ] <- df
             },error=function(e) {
                 print(e)
-                print("x:")
-                print(x[which(x[,1] == k), ])
+                print("dat:")
+                print(dat[which(dat[,1] == k), ])
                 print("df:")
                 print(df)
             }, warning=function(w){
                 print(w)
-                print("x:")
-                print(x[which(x[,1] == k), ])
+                print("dat:")
+                print(dat[which(dat[,1] == k), ])
                 print("df:")
                 print(df)
-                x[which(x[,1] == k), ] <- df
+                dat[which(dat[,1] == k), ] <- df
             })
         }
         #################################################################################
-        datasets[[m]] <- x
+        datasets[[m]] <- dat
     }
   
     ### Summarizing imputed datasets together by averaging missing values, i.e. 'completion' ###
@@ -522,8 +516,8 @@ spm.impute <- function(dat,
     
     if(format == "short") {
         # Prepare data to be in format id xi t y
+        colnames(final.dataset) <- colnames(x)
         final.dataset <- make.short.format(final.dataset, col.id=1, col.status=2, col.t1=3, col.t2=4, col.cov=5)
-        colnames(final.dataset) <- colnames(dat)
     }
   
     res <- list(imputed=final.dataset, imputations=datasets)
