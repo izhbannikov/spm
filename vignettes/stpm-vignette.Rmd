@@ -4,6 +4,7 @@ title: "Stochastic Process Model for Analysis of Longitudinal and Time-to-Event 
 author: "Ilya Y. Zhbannikov"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_document
+bibliography: "references.bib"
 vignette: >
   
   %\VignetteIndexEntry{stpm}
@@ -12,9 +13,25 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r, message=FALSE, echo=FALSE}
+library(knitcitations)
+cleanbib()
+options("citation_format" = "pandoc")
+r<-citep("10.1016/0040-5809(77)90005-3") 
+r<-citep("10.1016/j.mbs.2006.11.006")
+r<-citep("10.1080/08898480590932296")
+r<-citep("10.1007/s10522-006-9073-3")
+r<-citep("10.1016/j.jtbi.2009.01.023")
+r<-citep("10.3389/fpubh.2014.00228")
+r<-citep("10.1002/gepi.22058")
+write.bibtex(file="references.bib")
+```
+
+
 ## Overview
 
-The Stochastic Process Model (SPM) was developed several decades ago [1,2], and applied for analyses of clinical, demographic, epidemiologic longitudinal data as well as in many other studies that relate stochastic dynamics of repeated measures to the probability of end-points (outcomes). SPM links the dynamic of stochastical variables with a hazard rate as a quadratic function of the state variables [3]. The R-package, "stpm", is a set of utilities to estimate parameters of stochastic process and modeling survival trajectories and time-to-event outcomes observed from longitudinal studies. It is a general framework for studying and modeling survival (censored) traits depending on random trajectories (stochastic paths) of variables.
+The Stochastic Process Model (SPM) was developed several decades ago [@Woodbury_1977, @Yashin_2007], and applied for analyses of clinical, demographic, epidemiologic longitudinal data as well as in many other studies that relate stochastic dynamics of repeated measures to the probability of end-points (outcomes). SPM links the dynamic of stochastical variables with a hazard rate as a quadratic function of the state variables [@Yashin_2007]. The R-package, "stpm", is a set of utilities to estimate parameters of stochastic process and modeling survival trajectories and time-to-event outcomes observed from longitudinal studies. It is a general framework for studying and modeling survival (censored) traits depending on random trajectories (stochastic paths) of variables.
+
 
 
 ## Installation
@@ -32,7 +49,7 @@ devtools::install_github("izhbannikov/stpm")
 
 ## Data description
 
-Data represents a typical longitudinal data in form of two datasets: longitudinal dataset (follow-up studies), in which one record represents a single observation, and vital (survival) statistics, where one record represents all information about the subject. Longitudinal dataset cat contain a subject ID (identification number), status (event(1)/censored(0)), time and measurements across the variables. The ```stpm``` can handle an infinite number of variables but in practice, 5-7 variables is enough.
+Data represents a typical longitudinal data in form of two datasets: longitudinal dataset (follow-up studies), in which one record represents a single observation, and vital (survival) statistics, where one record represents all information about the subject. Longitudinal dataset cat contain a subject ID (identification number), status (event(1)/censored(0)), time and measurements across the variables.
 
 ```{r,results='hide',warning=FALSE,echo=FALSE,message=FALSE}
 library(stpm)
@@ -55,14 +72,36 @@ head(longdat)
 * Age - current age of subject at observation.
 * DBP, BMI - covariates, here "DBP" represents a diastolic blood pressure, "BMI" a body-mass index.
 
+#### "Short" and "Long" longitudinal data formats
+
+The packate accepts longitudinal data in two formats: "short" and "long". 
+
+##### "Short" format
+
+```{r, echo=FALSE, message=FALSE}
+data <- simdata_discr(N=1000, format="short")
+```
+```{r, echo=FALSE}
+head(data)
+```
+
+##### "Long" format
+
+```{r, echo=FALSE, message=FALSE}
+data <- simdata_discr(N=1000, format="long")
+```
+```{r, echo=FALSE}
+head(data)
+```
+
 
 ## Discrete- and continuous-time models
 
-There are two main SPM types in the package: discrete-time model [4] and continuous-time model [3]. Discrete model assumes equal intervals between follow-up observations. The example of discrete dataset is given below.
+There are two main SPM types in the package: discrete-time model [@Akushevich_2005] and continuous-time model [@Yashin_2007]. Discrete model assumes equal intervals between follow-up observations. The example of discrete dataset is given below.
 
 ```{r}
 library(stpm)
-data <- simdata_discr(N=10) # simulate data for 10 individuals
+data <- simdata_discr(N=10) # simulate data for 10 individuals, "long" format (default)
 head(data)
 ```
 In this case there are equal intervals between $t_1$ and $t_2$.
@@ -71,7 +110,7 @@ In the continuous-time SPM, in which intervals between observations are not equa
 
 ```{r}
 library(stpm)
-data <- simdata_cont(N=5) # simulate data for 5 individuals
+data <- simdata_cont(N=5, format="short") # simulate data for 5 individuals, "short" format
 head(data)
 ```
 
@@ -100,7 +139,7 @@ pars
 
 ### Continuous-time model
 
-In the specification of the SPM described in 2007 paper by Yashin and collegaues [3] the stochastic differential equation describing the age dynamics of a covariate is:
+In the specification of the SPM described in 2007 paper by Yashin and collegaues [@Yashin_2007] the stochastic differential equation describing the age dynamics of a covariate is:
 
 $d\mathbf{Y}(t)= \mathbf{a}(t)(\mathbf{Y}(t) -\mathbf{f}_1(t))dt + \mathbf{b}(t)d\mathbf{W}(t), \mathbf{Y}(t=t_0)$
 
@@ -148,7 +187,7 @@ where $k$ is a number of covariates, which is equal to model's dimension and '*'
 
 ### Model with time-dependent coefficients
 
-In previous models, we assumed that coefficients is sort of time-dependant: we multiplied them on to $e^{\theta t}$. In general, this may not be the case [5]. We extend this to a general case, i.e. (we consider one-dimensional case):
+In previous models, we assumed that coefficients is sort of time-dependant: we multiplied them on to $e^{\theta t}$. In general, this may not be the case [@Yashin_2007a]. We extend this to a general case, i.e. (we consider one-dimensional case):
 
 $\mathbf{a(t)} = \mathbf{par}_1 t + \mathbf{par}_2$ - linear function. 
 
@@ -383,7 +422,7 @@ Stochastic Process Model has many applications in analysis of longitudinal biode
 
 ### Method
 
-In this package, SPM with partially observed covariates is implemented in form of GenSPM (Genetic SPM), presented in 2009 by Arbeev at al [6] and further advanced in [7,8], further elaborates the basic stochastic process model conception by introducing a categorical variable, $Z$, which may be a specific value of a genetic marker or, in general, any categorical variable. Currently, $Z$ has two gradations: 0 or 1 in a genetic group of interest, assuming that $P(Z=1) = p$, $p \in [0, 1]$, were $p$ is the proportion of carriers and non-carriers of an allele in a population. Example of longitudinal data with genetic component $Z$ is provided below.
+In this package, SPM with partially observed covariates is implemented in form of GenSPM (Genetic SPM), presented in [@Arbeev_2009] and further advanced in [@Arbeev_2014], further elaborates the basic stochastic process model conception by introducing a categorical variable, $Z$, which may be a specific value of a genetic marker or, in general, any categorical variable. Currently, $Z$ has two gradations: 0 or 1 in a genetic group of interest, assuming that $P(Z=1) = p$, $p \in [0, 1]$, were $p$ is the proportion of carriers and non-carriers of an allele in a population. Example of longitudinal data with genetic component $Z$ is provided below.
 
 ```{r, eval=T}
 library(stpm)
@@ -391,7 +430,7 @@ data <- sim_pobs(N=10)
 head(data)
 ```
 
-In the specification of the SPM described in 2007 paper by Yashin and colleagues [3] the stochastic differential equation describing the age dynamics of a physiological variable (a dynamic component of the model) is:
+In the specification of the SPM described in 2007 paper by Yashin and colleagues [@Yashin_2007] the stochastic differential equation describing the age dynamics of a physiological variable (a dynamic component of the model) is:
 
 $dY(t) = a(Z, t)(Y(t) - f1(Z, t))dt + b(Z, t)dW(t), Y(t = t_0)$
 
@@ -432,7 +471,7 @@ Here mode 'observed' is used for simlation of data with genetic component $Z$ an
 
 ## Genetic SPM 'GSPM'
 
-This type of SPM also uses genetic component by analogy from the previous chapters but uses explicit gradient function which speeds up computations significantly. See [9] for details. Below we provide examples of usage:
+This type of SPM also uses genetic component by analogy from the previous chapters but uses explicit gradient function which speeds up computations significantly. See [@He_2017] for details. Below we provide examples of usage:
 
 ```{r, eval=T}
 library(stpm) 
@@ -497,7 +536,7 @@ Here:
 The SPM offers longitudinal data imputation with results that are better than from other imputation tools since it preserves data structure, i.e. relation between 
 Y(t) and mu(Y(t),t). Below there are two examples of multiple data imputation with function spm.impute(...).
 
-```{r, eval=T}
+```{r, eval=TRUE, message=FALSE}
 library(stpm)
 
 #######################################################
@@ -570,7 +609,7 @@ imp.data <- spm.impute(x=incomplete.data, id=1, case="xi", t1=3, covariates=c("y
 head(incomplete.data)
 
 ##### Look at the imputed data #####
-head(imp.data)
+#head(imp.data)
 
 # Long format #
 # Delete some observations in order to have approx. 25% missing data
@@ -599,22 +638,6 @@ head(imp.data)
 
 ```
 
-## References
 
-[1] Woodbury M.A., Manton K.G., Random-Walk of Human Mortality and Aging. Theoretical Population Biology, 1977 11:37-48.
+##References
 
-[2] Yashin, A.I., Manton K.G., Vaupel J.W. Mortality and aging in a heterogeneous population: a stochastic process model with observed and unobserved varia-bles. Theor Pop Biology, 1985 27.
-
-[3] Yashin, A.I. et al. Stochastic model for analysis of longitudinal data on aging and mortality. Mathematical Biosciences, 2007 208(2) 538-551.
-
-[4] Akushevich I., Kulminski A. and Manton K.: Life tables with covariates: Dynamic model for Nonlinear Analysis of Longitudinal Data. 2005. Mathematical Popu-lation Studies, 12(2), pp.: 51-80.
-
-[5] Yashin, A. et al.  Health decline, aging and mortality: how are they related? Biogerontology, 2007 8(3), 291-302.
-
-[6]	Arbeev, K.G., Akushevich, I., Kulminski, A.M., Arbeeva, L.S., Akushevich, L., Ukraintseva, S.V., Culminskaya, I.V., Yashin, A.I.: Genetic model for longitudinal studies of aging, health, and longevity and its potential application to incomplete data. Journal of Theoretical Biology 258(1), 103{111 (2009).
-
-[7] Arbeev K.G, Akushevich I., Kulminski A.M., Ukraintseva S.V., Yashin A.I., Joint Analyses of Longitudinal and Time-to-Event Data in Research on Aging: Implications for Predicting Health and Survival, Front Public Health. 2014 Nov 6;2:228. doi: 10.3389/fpubh.2014.00228
-
-[8] Arbeev K., Arbeeva L., Akushevich I., Kulminski A., Ukraintseva S., Yashin A., Latent Class and Genetic Stochastic Process Models: Implications for Analyses of Longitudinal Data on Aging, Health, and Longevity, JSM-2015, Seattle, WA.
-
-[9] He, L., Zhbannikov, I., Arbeev, K. G., Yashin, A. I., and Kulminski, A.M., 2017. Genetic stochastic process model for detecting pleiotropic and interaction effects with longitudinal data. Genetic Epidemiology, DOI: 10.1002/gepi.22058
