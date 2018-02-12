@@ -609,7 +609,7 @@ imp.data <- spm.impute(x=incomplete.data, id=1, case="xi", t1=3, covariates=c("y
 head(incomplete.data)
 
 ##### Look at the imputed data #####
-#head(imp.data)
+head(imp.data)
 
 # Long format #
 # Delete some observations in order to have approx. 25% missing data
