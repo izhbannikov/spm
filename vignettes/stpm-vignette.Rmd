@@ -539,9 +539,9 @@ Y(t) and mu(Y(t),t). Below there are two examples of multiple data imputation wi
 ```{r, eval=TRUE, message=FALSE}
 library(stpm)
 
-#######################################################
-############## One dimensional case ###################
-#######################################################
+#######################################################################
+############## One dimensional case (one covariate) ###################
+#######################################################################
 
 # Data preparation (short format)#
 data <- simdata_discr(N=1000, dt = 2, format="short")

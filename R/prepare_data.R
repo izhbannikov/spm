@@ -248,37 +248,7 @@ prepare_data_cont <- function(merged.data,
 #'@param impute Multiple imputation ndicator. If TRUE then missing observations will be imputed with multiple imputation.
 prepare_data_discr <- function(merged.data, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute) {
   #---DEBUG---#
-  #longdat <- read.sas7bdat("/Volumes/G/spm/data/covar_aric_gru.sas7bdat")
-  #vitstat <- read.sas7bdat("/Volumes/G/spm/data/mortality_aric_all_gru.sas7bdat")
-  #interval <- 1
-  #col.id="SubjID"
-  #col.age="Age"
-  #col.age.event="LSmort"
-  #col.status="IsDead"
-  #covariates="BMI"
-  #col.status.ind <- grep(paste("\\b", col.status, "\\b", sep=""), colnames(vitstat))
-  #col.id.ind <- grep(paste("\\b", col.id, "\\b", sep=""), colnames(vitstat)) 
-  #col.age.ind <- grep(paste("\\b", col.age, "\\b", sep=""), colnames(longdat))
-  #col.age.event.ind <- grep(paste("\\b", col.age.event, "\\b", sep=""), colnames(vitstat))
-  #col.covar.ind <-  grep(paste("\\b", "BMI", "\\b", sep=""), colnames(longdat))
-  #verbose <- TRUE
-  #longdat <- longdat[which(!is.na(longdat[ , col.age.ind])),]
-  
-  
-  #longdat = longdat
-  #vitstat = vitstat
-  #col.id = "ID"
-  #col.status = "IsDead"
-  #col.age = "Age"
-  #col.age.event = "LSmort"
-  #covariates = "DBP"
-  #
-  #col.status.ind = col.status.ind
-  #col.id.ind  = col.id.ind
-  #col.age.ind = col.age.ind
-  #col.age.event.ind = col.age.event.ind
-  #col.covar.ind = col.covar.ind
-  #merged.data = miss.data
+  #merged.data = data
   #col.status.ind = 2 
   #col.id.ind = 1
   #col.age.ind = 3
@@ -314,14 +284,14 @@ prepare_data_discr <- function(merged.data, interval, col.status.ind, col.id.ind
       }
       # Individual ID:
       id <- splitted[[iii]][ , col.id.ind][1]
-      nrows <- (tail(splitted[[iii]][ , col.age.ind], n=1) - floor(splitted[[iii]][ , col.age.ind][1]))/dt + 1
+      nrows <- (floor(tail(splitted[[iii]][ , col.age.ind], n=1)) - floor(splitted[[iii]][ , col.age.ind][1]))/dt + 1
       
       # Perform approximation using two points:
       t1.approx <- matrix(ncol=4, nrow=nrows)
       t1.approx[,1] <- id
       t1.approx[,2] <- 0
       t1.approx[nrows,2] <- tail(splitted[[iii]][ , col.status.ind],n=1) #Last value
-      t1.approx[,3] <- seq(floor(splitted[[iii]][ , col.age.ind][1]), splitted[[iii]][ , col.age.ind][length(splitted[[iii]][ , col.age.ind])], by=dt)
+      t1.approx[,3] <- seq(floor(splitted[[iii]][ , col.age.ind][1]), floor(splitted[[iii]][ , col.age.ind][length(splitted[[iii]][ , col.age.ind])]), by=dt)
       if(nrows > 1) {
         t1.approx[,4] <- c(t1.approx[,3][2:nrows], tail(splitted[[iii]][ , col.age.event.ind],n=1))
       } else {
