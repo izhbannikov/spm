@@ -5,7 +5,7 @@
 #' @return sigma_square (see Akushevich et. al, 2005)
 sigma_sq <- function(t1, t2, b) {
   # t2 = t_{j}, t1 = t_{j-1}
-  ans <- b %*% (t2-t1)
+  ans <- b %*% as.numeric(t2-t1)
   ans
 }
 
@@ -18,7 +18,13 @@ sigma_sq <- function(t1, t2, b) {
 #' @return m m (see Yashin et. al, 2007)
 m <- function(y, t1, t2, a, f1) {
   # y = y_{j-1}, t1 = t_{j-1}, t2 = t_{j}
-  ans <- y + a %*% t(y - f1) %*% (t2 - t1)
+  #print(a)
+  #print(y)
+  #print(f1)
+  #print(t1)
+  #print(t2)
+  #print((t2 - t1))
+  ans <- y + a %*% t(y - f1) %*% as.numeric((t2 - t1))
   ans
 }
 
@@ -72,15 +78,22 @@ getNextY.cont2 <- function(y1, t1, t2, b, a, f1) {
 #' @param R R (see Akushevich et. al, 2005)
 #' @param Sigma Sigma (see Akushevich et. al, 2005)
 #' @return y.next Next value of y
-getNextY.discr <- function(y1, u, R, Sigma) {
-  #eps<-matrix(nrow=dim(R)[1], ncol=1)
-  #eps[,1] <- sapply(1:length(Sigma), function(i) {rnorm(1, mean=0.0, sd=Sigma[i])})
-  #for(i in 1:length(Sigma)) {
-  #  eps[i,1] <- rnorm(1, mean=0.0, sd=Sigma[i])
-  #}
-  #y2 <- u + R %*% y1  + eps
-  y2 <- rnorm(length(y1), mean=getNextY.discr.m(y1, u, R), sd=Sigma)
-  y2
+getNextY.discr <- function(y1, u, R, Sigma, f, t1, t2, mu0, theta, b, Q) {
+   
+    while(1) {
+        eps<-matrix(nrow=dim(R)[1], ncol=1)
+        eps[,1] <- sapply(1:length(Sigma), function(i) {rnorm(1, mean=0.0, sd=sqrt(Sigma[i]))})
+        y2 <- u + R %*% y1 + eps
+        dt <- t2 - t1
+        if(dt < 0) dt <- 1
+        #y, mu0, b, Q, theta, tt
+        #S1 = exp(-1*dt*mu(y1, mu0, b, Q, theta, t1));
+        S = exp(-1*dt*mu(y2, mu0, b, Q, theta, t1));
+        if(S >= runif(1, 0, 1))
+            break
+    }
+    
+    y2
 }
 
 #' An internal function to compute next m based on dicrete-time model 
@@ -111,12 +124,24 @@ getPrevY.discr.m <- function(y2, u, R) {
 #' @param R R
 #' @param Sigma Sigma
 #' @return y1 Previous value of y
-getPrevY.discr <- function(y2, u, R, Sigma) {
+getPrevY.discr <- function(y2, u, R, Sigma, f, t1, t2) {
   eps<-matrix(nrow=dim(R)[1], ncol=1)
-  eps[,1] <- sapply(1:dim(eps)[1], function(i) {rnorm(1, mean=0.0, sd=Sigma[i])})
+  eps[,1] <- sapply(1:dim(eps)[1], function(i) {rnorm(1, mean=0.0, sd=sqrt(Sigma[i]))})
+  #eps[,1] <- sapply(1:dim(eps)[1], function(i) {sqrt(Sigma[i])*rnorm(1, mean=0.0, sd=1.0)})
   
-  y1 <- solve(R) %*% (y2 - u - eps)
-  y1
+  #y1 <- solve(R) %*% (y2 - u - eps)
+    #y1 <- rnorm(length(y2), mean=f, sd=sqrt(Sigma))
+    y1 <- solve(R) %*% (y2 - u)
+    #for(ii in 1:dim(R)[1]) {
+    #    #y1[ii,1] <- rnorm(1, mean=y1[ii,1], sd=sqrt(Sigma[ii])) 
+    #    dt <- t2 - t1
+    #    if(dt < 0) dt <- 1
+    #    variance <- as.numeric(Sigma[ii])
+    #    #y1[ii,1] <- rnorm(1, mean=y1[ii,1], sd=sqrt(variance))
+    #    y1[ii,1] <- y1[ii,1] + rnorm(1, mean=0, sd=sqrt(variance[1]))
+    #}
+    y1 <- y1 + eps
+    y1
 }
 
 
@@ -132,6 +157,9 @@ getPrevY.discr <- function(y2, u, R, Sigma) {
 #' @param theta theta
 #' @return list(m, gamma) Next values of m and gamma (see Yashin et. al, 2007)
 func1 <- function(tt, y, a, f1, Q, f, b, theta) {
+    #print(a)
+    #print(f1)
+    #print(y)
     #a <- pars[1]; f1 <- pars[2]; Q <- pars[3]; f <- pars[4]; b <- pars[5]; theta <- pars[6];
     hf <- f - y[[1]]
     hf1 <- f1 - y[[1]]
@@ -288,8 +316,7 @@ spm.impute <- function(x,
                                 col.age.event.ind=col.age.event.ind, 
                                 col.covar.ind=covariates, 
                                 dt=1, 
-                                verbose=FALSE,
-                                impute=FALSE)
+                                verbose=FALSE)
     } else if(format == "long") {
         cov.tmp <- c(col.covar.ind, col.covar.ind)
         cov.tmp[seq(1,length(cov.tmp), 2)] <- col.covar.ind
@@ -314,7 +341,9 @@ spm.impute <- function(x,
         {
             ########## Forward #########
             df <- dat[which(dat[,1] == k), ]
-      
+            
+            first.row.imputed <- FALSE
+            
             if(length(df[,1]) == 1) 
             {
                 Nrec <- 1
@@ -326,23 +355,10 @@ spm.impute <- function(x,
             if(Nrec == 1) 
             {
                 row.cur <- df
-                for(j in seq(5,Ncol,by=2)) 
-                {
-                    if(is.na(row.cur[j]) & !is.na(row.cur[j+1])) 
-                    {
-                        kkk <- ((j-5) %/% 2)+1
-            
-                        #y.start <- rnorm(1, mean = mean(x[,j], na.rm = T), sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
-                        #row.cur[j] <- y.start
-            
-                        y2 <- df[1,j+1]
-                        y1 <- getPrevY.discr.m(t(as.matrix(y2)), pp$dmodel$u[kkk], pp$dmodel$R[kkk,kkk])
-                        #y1 <- getPrevY.discr.m(as.matrix(y2), pp$dmodel$u[kkk], pp$dmodel$R[kkk,kkk])
-                        df[1,j] <- y1
-                        row.cur[j] <- y1
-                    } else if(is.na(row.cur[j]) & is.na(row.cur[j+1]))
-                    {
-                        y.start <- rnorm(1, mean = mean(dat[,j], na.rm = T), sd=pp$dmodel$Sigma[((j-5) %/% 2)+1])
+                for(j in seq(5,Ncol,by=2)) {
+                    if(is.na(row.cur[j])) {
+                        #y.start <- rnorm(1, mean = mean(dat[,j], na.rm = T), sd=sqrt(pp$dmodel$Sigma[((j-5) %/% 2)+1]))
+                        y.start <- rnorm(1, mean = pp$cmodel$f, sd=sqrt(pp$dmodel$Sigma[((j-5) %/% 2)+1]))
                         row.cur[j] <- y.start
                     }
                 }
@@ -350,8 +366,14 @@ spm.impute <- function(x,
                 if(any(is.na(row.cur[seq(6, Ncol,by=2)])) & row.cur[2] == 0) 
                 {
                     y1 <- row.cur[seq(5,Ncol,by=2)]
-                    y.next <- getNextY.discr.m(t(as.matrix(y1)), pp$dmodel$u, pp$dmodel$R)
-                    #y.next <- getNextY.discr(t(as.matrix(y1)), pp$Ak2005$u, pp$Ak2005$R, pp$Ak2005$Sigma)
+                    #y.next <- getNextY.discr(t(as.matrix(y1)), pp$dmodel$u, pp$dmodel$R, pp$dmodel$Sigma, pp$cmodel$f, 
+                    #                         row.cur[3], row.cur[4], pp$dmodel$mu0, pp$dmodel$theta, pp$dmodel$b, pp$dmodel$Q)
+                    #y.next <- getNextY.discr.m(t(as.matrix(y1)), pp$dmodel$u, pp$dmodel$R)
+                    #y.next <- getNextY.cont(as.matrix(y1), as.numeric(row.cur[3]), as.numeric(row.cur[4]), 
+                    #                         as.matrix(pp$cmodel$a), as.matrix(pp$cmodel$f1), pp$cmodel$Q, pp$cmodel$f, 
+                    #                         pp$cmodel$b, pp$cmodel$mu0, pp$cmodel$theta, 
+                    #                         pp$dmodel$u, pp$dmodel$R)
+                    y.next <- getNextY.cont2(t(as.matrix(as.numeric(y1))), row.cur[3], row.cur[4], pp$cmodel$b, pp$cmodel$a, pp$cmodel$f1)
                     row.cur[which(is.na(row.cur))] <- y.next[(which(is.na(row.cur)) - 6 ) %/% 2 + 1]
                 }
         
@@ -365,50 +387,44 @@ spm.impute <- function(x,
             row.cur <- df[1, ]
             row.next <- df[2, ]
   
-            for(j in seq(5,Ncol,by=2)) 
-            {
-                kkk <- ((j-5) %/% 2)+1
-              
-                if(is.na(row.cur[j])) 
+            for(j in seq(5,Ncol,by=2)) {
+                if(is.na(row.cur[j]) & !is.na(row.cur[j+1])) 
                 {
-                    
-                    
-                    ##meanY <- mean(x[, j], na.rm = TRUE)
-                    #medianY <- median(x[, j], na.rm = TRUE)
-                    ##y.start <- rnorm(1, mean = meanY, sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
-                    #y.start <- medianY #rnorm(1, mean = meanY, sd=pp$Ak2005$Sigma[((j-5) %/% 2)+1])
-          
-                    for(ii in 1:Nrec) {
-                        if(!is.na(df[ii,j]))
-                            break
-                    }
-                    
-                    if(ii != Nrec) {
-                        for(iii in (ii-1):1) {
-                            y2 <- df[iii,j+1]
-                            y1 <- getPrevY.discr.m(t(as.matrix(y2)), pp$dmodel$u[kkk], pp$dmodel$R[kkk,kkk])
-                            df[iii,j] <- y1
-                            if(iii != 1) {
-                                df[iii-1,j+1] <- y1
-                            }
-                        }
-                    } else {
-                        meanY <- mean(dat[, j], na.rm = TRUE)
-                        y.start <- rnorm(1, mean = meanY, sd=pp$dmodel$Sigma[((j-5) %/% 2)+1])
-                        df[1,j] <- y.start
-                    }
-                } 
-              
-                if(is.na(row.cur[j+1])) {
-                    
-                    row.cur[j+1] <- getNextY.discr.m(t(as.matrix(row.cur[j])), pp$dmodel$u[kkk], pp$dmodel$R[kkk,kkk])
-                    df[1,j+1] <- row.cur[j+1]
+                    kkk <- ((j-5) %/% 2)+1
+                
+                    y2 <- df[1,j+1]
+                    y1 <- getPrevY.discr(t(as.matrix(y2)), pp$dmodel$u, pp$dmodel$R, pp$dmodel$Sigma, pp$cmodel$f, row.cur[3], row.cur[4])
+                    df[1,j] <- y1[j]
+                    row.cur[j] <- y1[j]
+                } else if(is.na(row.cur[j]) & is.na(row.cur[j+1])) {
+                    #y.start <- rnorm(1, mean = mean(dat[,j], na.rm = T), sd=sqrt(pp$dmodel$Sigma[((j-5) %/% 2)+1]))
+                    y.start <- rnorm(1, mean = pp$cmodel$f, sd=sqrt(pp$dmodel$Sigma[((j-5) %/% 2)+1]))
+                    row.cur[j] <- y.start
+                    first.row.imputed <- TRUE
                 }
             }
+            
+            if(any(is.na(row.cur[seq(6, Ncol,by=2)])) & row.cur[2] == 0) 
+            {
+                y1 <- row.cur[seq(5,Ncol,by=2)]
+                #y.next <- getNextY.discr(t(as.matrix(y1)), pp$dmodel$u, pp$dmodel$R, pp$dmodel$Sigma, pp$cmodel$f, 
+                #                         row.cur[3], row.cur[4], pp$dmodel$mu0, pp$dmodel$theta, pp$dmodel$b, pp$dmodel$Q)
+                #y.next <- getNextY.discr.m(t(as.matrix(y1)), pp$dmodel$u, pp$dmodel$R)
+                #y.next <- getNextY.cont(as.matrix(y1), as.numeric(row.cur[3]), as.numeric(row.cur[4]), 
+                #                        as.matrix(pp$cmodel$a), as.matrix(pp$cmodel$f1), pp$cmodel$Q, pp$cmodel$f, 
+                #                        pp$cmodel$b, pp$cmodel$mu0, pp$cmodel$theta, 
+                #                        pp$dmodel$u, pp$dmodel$R)
+                y.next <- getNextY.cont2(t(as.matrix(as.numeric(y1))), row.cur[3], row.cur[4], pp$cmodel$b, pp$cmodel$a, pp$cmodel$f1)
+                
+                row.cur[which(is.na(row.cur))] <- y.next[(which(is.na(row.cur)) - 6 ) %/% 2 + 1]
+            }
+            
+            df[1, ] <- row.cur
+            
       
             #### Preprocessing of the rest of df ####
-            for(i in 2:Nrec) 
-            {
+            for(i in 2:Nrec) {
+              
                 row.cur <- df[i,]
                 row.prev <- df[i-1,]
                 if(i != Nrec & Nrec >2) {row.next <- df[i+1,]}
@@ -447,15 +463,17 @@ spm.impute <- function(x,
             {
                 row.cur <- df[i, ]
                 if(i != Nrec & Nrec >2) {row.next <- df[i+1, ]}
-                #print(row.cur)
                 y1 <- row.cur[seq(5,Ncol,by=2)]
                 if(any(is.na(row.cur[seq(6, Ncol,by=2)]))) 
                 {
-                    y.next <- getNextY.discr.m(t(as.matrix(y1)), pp$dmodel$u, pp$dmodel$R)
-                    #y.next <- getNextY.discr(t(as.matrix(y1)), pp$Ak2005$u, pp$Ak2005$R, pp$Ak2005$Sigma)
-                    #y.next <- getNextY.cont(y1, row.cur[3], row.cur[4], pp$Ya2007$a, pp$Ya2007$f1, pp$Ya2007$Q, pp$Ya2007$f, pp$Ya2007$b, pp$Ya2007$mu0, pp$Ya2007$theta, pp$Ak2005$u, pp$Ak2005$R)
-                    #y.next <- getNextY.cont(t(as.matrix(y1)), t1=row.cur[3], t2=row.cur[4], a=pp$Ya2007$a, f1=pp$Ya2007$f1, Q=pp$Ya2007$Q, f=pp$Ya2007$f, b=pp$Ya2007$b, mu0=pp$Ya2007$mu0, theta=pp$Ya2007$theta, u=pp$Ak2007$u, R=pp$Ak2005$R) 
-                    #y.next <- getNextY.cont2(as.matrix(y1), row.cur[3], row.cur[4], pp$Ya2007$b, pp$Ya2007$a, pp$Ya2007$f1)
+                    #y.next <- getNextY.discr(t(as.matrix(y1)), pp$dmodel$u, pp$dmodel$R, pp$dmodel$Sigma, pp$cmodel$f, 
+                    #                         row.cur[3], row.cur[4], pp$dmodel$mu0, pp$dmodel$theta, pp$dmodel$b, pp$dmodel$Q)
+                    #y.next <- getNextY.cont(as.matrix(y1), as.numeric(row.cur[3]), as.numeric(row.cur[4]), 
+                    #                      as.matrix(pp$cmodel$a), as.matrix(pp$cmodel$f1), pp$cmodel$Q, pp$cmodel$f, 
+                    #                      pp$cmodel$b, pp$cmodel$mu0, pp$cmodel$theta, 
+                    #                      pp$dmodel$u, pp$dmodel$R)
+                    y.next <- getNextY.cont2(t(as.matrix(as.numeric(y1))), row.cur[3], row.cur[4], pp$cmodel$b, pp$cmodel$a, pp$cmodel$f1)
+                  
                     for(j in seq(6,Ncol,by=2)) 
                     {
                         if(is.na(row.cur[j])) { row.cur[j] <- y.next[(j - 6 ) %/% 2 + 1] }
@@ -471,9 +489,17 @@ spm.impute <- function(x,
             row.cur <- df[Nrec, ]
             if(any(is.na(row.cur[seq(6, Ncol,by=2)])) & row.cur[2] == 0) 
             {
+                
                 y1 <- row.cur[seq(5,Ncol,by=2)]
-                y.next <- getNextY.discr.m(t(as.matrix(y1)), pp$dmodel$u, pp$dmodel$R)
-                #y.next <- getNextY.discr(t(as.matrix(y1)), pp$Ak2005$u, pp$Ak2005$R, pp$Ak2005$Sigma)
+                #y.next <- getNextY.discr(t(as.matrix(y1)), pp$dmodel$u, pp$dmodel$R, pp$dmodel$Sigma, pp$cmodel$f, 
+                #                         row.cur[3], row.cur[4], pp$dmodel$mu0, pp$dmodel$theta, pp$dmodel$b, pp$dmodel$Q)
+                #y.next <- getNextY.discr.m(t(as.matrix(y1)), pp$dmodel$u, pp$dmodel$R)
+                #y.next <- getNextY.cont(as.matrix(y1), as.numeric(row.cur[3]), as.numeric(row.cur[4]), 
+                #                        as.matrix(pp$cmodel$a), as.matrix(pp$cmodel$f1), pp$cmodel$Q, pp$cmodel$f, 
+                #                        pp$cmodel$b, pp$cmodel$mu0, pp$cmodel$theta, 
+                #                        pp$dmodel$u, pp$dmodel$R)
+                y.next <- getNextY.cont2(t(as.matrix(as.numeric(y1))), row.cur[3], row.cur[4], pp$cmodel$b, pp$cmodel$a, pp$cmodel$f1)
+                
                 for(j in seq(6, Ncol, by=2)) 
                 {
                     if(is.na(row.cur[j])) 
@@ -515,8 +541,11 @@ spm.impute <- function(x,
         {
             data.tmp <- cbind(data.tmp, datasets[[i]][,j])
         }
-        data.tmp.2 <- apply(X = data.tmp, FUN = mean, MARGIN = 1, na.rm=T)
-        final.dataset[,j] <- data.tmp.2
+        data.tmp.2.mean <- apply(X = data.tmp, FUN = mean, MARGIN = 1, na.rm=T)
+        #data.tmp.2.sd <- apply(X=data.tmp, FUN=sd, MARGIN = 1, na.rm=T)
+        #miss.id <- which(data.tmp.2.sd == 0)
+        final.dataset[,j] <- data.tmp.2.mean
+        #final.dataset[miss.id,j] <- rnorm(length(data.tmp.2.mean[miss.id]), mean=data.tmp.2.mean[miss.id], sd=data.tmp.2.sd[miss.id])
     }
     
     if(format == "short") {

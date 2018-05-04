@@ -5,7 +5,7 @@
 \title{An internal function to compute the next value of physiological variable Y
 based on discrete-time model (Akushevich et. al., 2005)}
 \usage{
-getNextY.discr(y1, u, R, Sigma)
+getNextY.discr(y1, u, R, Sigma, f, t1, t2, mu0, theta, b, Q)
 }
 \arguments{
 \item{y1}{y1}

@@ -48,7 +48,7 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
   double t1;
   double t2;
   double dt=as<double>(dt_);
-  arma::mat y1;
+  arma::mat y1(k, 1);
   arma::mat y2;
   bool new_person = false;
   double S; 
@@ -66,7 +66,11 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
     }
     
     t2 = t1 + dt;
-    y1 = ystart;
+    //y1 = ystart;
+    for(int l=0; l < k; l++) {
+        //y1(l, 0) = Rcpp::rnorm(1, ystart(l,0), pow(epsilon(l,0),0.5))[0];
+        y1(l, 0) = Rcpp::rnorm(1, ystart(l,0), epsilon(l,0))[0];
+    }
     
     new_person = false;
     id = id + 1;
@@ -83,6 +87,7 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
         
         for(int ii=0; ii < k; ii++) {
           eps(ii,0) = Rcpp::rnorm(1, 0.0, epsilon(ii,0.0))[0];
+          //eps(ii,0) = Rcpp::rnorm(1, 0.0, pow(epsilon(ii,0.0),0.5))[0];
           //eps(ii,0) = R::rnorm(0.0, epsilon(ii,0.0));
         }
         

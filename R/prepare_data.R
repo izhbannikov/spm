@@ -1,8 +1,27 @@
 
-get.column.index <- function(x, col.name)
-{
+get.column.index <- function(x, col.name) {
     col.ind <- grep(paste("\\b", col.name, "\\b", sep=""), colnames(x))
     return(col.ind)
+}
+
+linear.interpolation <- function(times, points, n) { # Between known pair
+    res.times <- c(times[1])
+    res <- c(points[1])
+    #y = dy/dt * (t - t1) + y1
+    for(i in 1:(length(points)-1)) {
+        y1 <- points[i]
+        y2 <- points[i+1]
+        dy <- y2 - y1
+        t1 <- times[i]
+        t2 <- times[i+1]
+        dt <- t2 - t1
+        t <- seq(t1, t2, by=dt/n)
+        y <- dy/dt * (t - t1) + y1
+        res <- c(res, y[-1])
+        res.times <- c(res.times, t[-1])
+    }
+    
+    return(list(res, res.times))
 }
 
 #'Data pre-processing for analysis with stochastic process model methodology.
@@ -24,10 +43,8 @@ get.column.index <- function(x, col.name)
 #'@param covariates A list of covariates (physiological variables). 
 #'If covariates not provided, then all columns from longitudinal table having index > 3 will be used as covariates. 
 #'@param interval A number of breaks between observations for data for discrete model. 
-#'This interval must be numeric (integer).
-#'Default = 1 unit of time.
-#'@param impute Multiple imputation ndicator. If TRUE then missing observations will be imputed with multiple imputation.
-#'Default = TRUE.
+#'This interval must be integer and should be equal or greater than 1.
+#'Default = 1 unit of time. 
 #'@param verbose A verbosing output indicator. Default=FALSE.
 #'@return A list of two elements: first element contains a preprocessed data for continuous model, with arbitrary intervals between observations  and 
 #'second element contains a prepocessed data table for a discrete model (with constant intervals between observations).
@@ -45,7 +62,6 @@ prepare_data <- function(x,
                          col.age.event=NA, 
                          covariates=NA, 
                          interval=1, 
-                         impute=TRUE,
                          verbose=FALSE) {
   
     ### Constant variables ###
@@ -129,10 +145,10 @@ prepare_data <- function(x,
     merged.data <- merged.data[which(!is.na(merged.data[ , col.age.ind])),]
   
     # Prepare data for continuous optimisation:
-    data_cont <- prepare_data_cont(merged.data, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute, interval)
+    data_cont <- prepare_data_cont(merged.data, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, interval)
   
     # Prepare data for fast discrete optimization:
-    data_discr <- prepare_data_discr(merged.data, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute)
+    data_discr <- prepare_data_discr(merged.data, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose)
   
     list(model.continuous=data_cont, model.discrete=data_discr)
 }
@@ -145,7 +161,6 @@ prepare_data <- function(x,
 #'@param col.age.event.ind an index of the column which represents the time in which event occured.
 #'@param col.covar.ind a set of column indexes which represent covariates.
 #'@param verbose turns on/off verbosing output.
-#'@param impute Multiple imputation ndicator. If TRUE then missing observations will be imputed with multiple imputation.
 #'@param dt interval between observations.
 prepare_data_cont <- function(merged.data, 
                               col.status.ind, 
@@ -154,7 +169,6 @@ prepare_data_cont <- function(merged.data,
                               col.age.event.ind, 
                               col.covar.ind, 
                               verbose,
-                              impute,
                               dt) {
     #merged.data = miss.data
     #col.status.ind = 2 
@@ -196,19 +210,8 @@ prepare_data_cont <- function(merged.data,
   
     ans_final <- prep.dat
   
-    if(impute) {
-        if(verbose)
-            cat("Filing missing values with multiple imputations:\n")
-    
-        tmp_ans <- mice(prep.dat[,5:dim(prep.dat)[2]], printFlag=ifelse(verbose, TRUE, FALSE),m = 2, maxit=2)
-        ans1 <- complete(tmp_ans)
-        ans_final <- cbind(prep.dat[,1:4], ans1)
-    }
-  
     if(verbose)
         cat("Making final table...\n")
-  
-    
   
     # Finalizing:
     colnames(ans_final) <- c("id", "case", "t1", "t2", unlist(lapply(1:length(col.covar.ind), function(n) {c(names(merged.data)[col.covar.ind[n]], paste(names(merged.data)[col.covar.ind[n]],".next",sep=""))} )) )
@@ -245,8 +248,7 @@ prepare_data_cont <- function(merged.data,
 #'@param col.age.event.ind an index of the column which represents the time in which event occured.
 #'@param col.covar.ind a set of column indexes which represent covariates.
 #'@param verbose turns on/off verbosing output.
-#'@param impute Multiple imputation ndicator. If TRUE then missing observations will be imputed with multiple imputation.
-prepare_data_discr <- function(merged.data, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute) {
+prepare_data_discr <- function(merged.data, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose) {
   #---DEBUG---#
   #merged.data = data
   #col.status.ind = 2 
@@ -257,146 +259,78 @@ prepare_data_discr <- function(merged.data, interval, col.status.ind, col.id.ind
   #interval <- 1
   #---END DEBUG---#
   
-  #'Filling the last cell
-  fill_last <- function(x) {
-    na_idx <- which(is.na(x))
-    unique_elements <- unique(x[-na_idx])
-    set_diff <- unique_elements[length(unique_elements)]
-    x[na_idx] <- set_diff
-    x
-  }
+    #'Filling the last cell
+    fill_last <- function(x) {
+        na_idx <- which(is.na(x))
+        unique_elements <- unique(x[-na_idx])
+        set_diff <- unique_elements[length(unique_elements)]
+        x[na_idx] <- set_diff
+        x
+    }
   
   
-  # Interpolation
-  dt <- interval
-  tt <- matrix(nrow=0, ncol=4)
-  par <- matrix(nrow=0, ncol=length(col.covar.ind))
+    # Interpolation
+    dt <- interval
+    ans <- matrix(nrow=0, ncol=(4+2*length(col.covar.ind)))
+    # Split records by ID:
+    splitted <- split(merged.data, merged.data[, col.id.ind])
   
-  # Split records by ID:
-  splitted <- split(merged.data, merged.data[, col.id.ind])
-  
-  # For each particular person's record:
-  for(iii in 1:length(splitted)) {
-    
-    if( !is.na(tail(splitted[[iii]][ , col.age.event.ind],n=1)) & !is.na(tail(splitted[[iii]][ , col.status.ind],n=1)) ) {
-      if(verbose) {
-        print(paste(iii, "individual processed."))
-      }
-      # Individual ID:
-      id <- splitted[[iii]][ , col.id.ind][1]
-      nrows <- (floor(tail(splitted[[iii]][ , col.age.ind], n=1)) - floor(splitted[[iii]][ , col.age.ind][1]))/dt + 1
+    # For each particular person's record:
+    for(iii in 1:length(splitted)) {
+        if( !is.na(tail(splitted[[iii]][ , col.age.event.ind],n=1)) & !is.na(tail(splitted[[iii]][ , col.status.ind],n=1)) ) {
+            if(verbose) {
+                print(paste(iii, "individual processed."))
+            }
+            # Individual ID:
+            id <- splitted[[iii]][ , col.id.ind][1]
       
-      # Perform approximation using two points:
-      t1.approx <- matrix(ncol=4, nrow=nrows)
-      t1.approx[,1] <- id
-      t1.approx[,2] <- 0
-      t1.approx[nrows,2] <- tail(splitted[[iii]][ , col.status.ind],n=1) #Last value
-      t1.approx[,3] <- seq(floor(splitted[[iii]][ , col.age.ind][1]), floor(splitted[[iii]][ , col.age.ind][length(splitted[[iii]][ , col.age.ind])]), by=dt)
-      if(nrows > 1) {
-        t1.approx[,4] <- c(t1.approx[,3][2:nrows], tail(splitted[[iii]][ , col.age.event.ind],n=1))
-      } else {
-        t1.approx[,4] <- tail(splitted[[iii]][ , col.age.event.ind],n=1)
-      }
-      
-      tt <- rbind(tt,t1.approx)
-      par1.approx <- matrix(ncol=length(col.covar.ind), nrow=nrows, NA)
-      
-      j <- 1
-      for(ind in col.covar.ind) {
-        if ( (length(splitted[[iii]][, ind]) > 1) & (length(which(!is.na(splitted[[iii]][, ind]))) > 0) ) {
-          if(length(which(!is.na(splitted[[iii]][, ind]))) == 1) {
-            splitted[[iii]][, ind] <- fill_last(splitted[[iii]][, ind])
-          }
-          # Fill NAs by linear approximation with approx():
-          #nn <- length(splitted[[iii]][, ind])
-          #splitted[[iii]][, ind] <- approx(splitted[[iii]][, ind],n=nn)$y
+            if(col.age.ind != col.age.event.ind) {
+                stop("col.age.ind should be equal to col.age.event.ind for now")
+                #nrows <- ceiling((floor(tail(splitted[[iii]][ , col.age.ind], n=1)) - floor(splitted[[iii]][ , col.age.ind][1]))/dt )
+        
+                ## Perform approximation using two points:
+                #t1.approx <- matrix(ncol=4, nrow=nrows)
+                #t1.approx[,1] <- id
+                #t1.approx[,2] <- 0
+                #t1.approx[nrows,2] <- tail(splitted[[iii]][ , col.status.ind],n=1) #Last value
+                #t1.approx[,3] <- seq(floor(splitted[[iii]][ , col.age.ind][1]), floor(splitted[[iii]][ , col.age.ind][length(splitted[[iii]][ , col.age.ind])]), by=dt)
+                #if(nrows > 1) {
+                #    t1.approx[,4] <- c(t1.approx[,3][2:nrows], tail(splitted[[iii]][ , col.age.event.ind],n=1))
+                #} else {
+                #    t1.approx[,4] <- tail(splitted[[iii]][ , col.age.event.ind],n=1)
+                #}
+            } else {
+                nrows <- (dim(splitted[[iii]])[1]-1)*dt
+                t1.approx <- matrix(ncol=4, nrow=nrows)
+                t1.approx[,1] <- id
+                t1.approx[,2] <- 0
+                t1.approx[nrows,2] <- tail(splitted[[iii]][ , col.status.ind],n=1) #Last value
           
-          #aprx <- c()
-          #for(k in 1:(length(splitted[[iii]][, col.age.ind])-1)) {
-          #  nr <- ceiling((splitted[[iii]][, col.age.ind][k+1] - splitted[[iii]][, col.age.ind][k])/dt) + 1
-          #  aprx <- c(aprx[1:length(aprx)-1], approx(splitted[[iii]][, ind][k:(k+1)], n=nr)$y)
-          #  print(nr)
-          #  print(aprx)
-          #}
-          aprx <- approx(splitted[[iii]][, ind],n=nrows)$y
-          #print(par1.approx[,j])
-          par1.approx[,j] <- aprx
-          #par1.approx[,j] <-  approx(splitted[[iii]][, ind], n=nrows)$y
+                aprx <- linear.interpolation(splitted[[iii]][, col.age.ind], splitted[[iii]][, col.covar.ind[1]], n=dt)
+          
+                t1.approx[,3] <- aprx[[2]][1:(length(aprx[[2]])-1)]
+                t1.approx[,4] <- aprx[[2]][-1]
+          
+            }
+      
+            
+            for(ind in col.covar.ind) {
+                if ( (length(splitted[[iii]][, ind]) > 1) & (length(which(!is.na(splitted[[iii]][, ind]))) > 0) ) {
+                    if(length(which(!is.na(splitted[[iii]][, ind]))) == 1) {
+                        splitted[[iii]][, ind] <- fill_last(splitted[[iii]][, ind])
+                    }
+                    aprx <- linear.interpolation(splitted[[iii]][, col.age.ind], splitted[[iii]][, ind], n=dt)
+                    t1.approx <- cbind(t1.approx, aprx[[1]][1:(length(aprx[[1]])-1)], aprx[[1]][-1])
+                }
+            }
+            ans <- rbind(ans, t1.approx)
         }
-        
-        j <- j + 1
-        
-      }
-      par <- rbind(par,par1.approx)
     }
-  }
   
-  ans <- cbind(tt,par)
-  colnames(ans) <- c("id", "case", "t1", "t2", names(merged.data)[col.covar.ind])
-  
-  ans <- data.frame(ans[rowSums( matrix(is.na(ans[,5:dim(ans)[2]]), ncol=length(col.covar.ind),byrow=T)) !=length(col.covar.ind),])
-  
-  ans_final <- ans
-  
-  if(verbose)
-    cat("Making final table...\n")
-  
-  ndim <- length(col.covar.ind)
-  averages = matrix(nrow=1,ncol=length(col.covar.ind))
-  
-  dat <- ans_final[,1] #pid
-  dat <- cbind(dat, ans_final[,2]) #sta (outcome)
-  dat <- cbind(dat, ans_final[,3]) #tt1 (t1)
-  dat <- cbind(dat, ans_final[,4]) #tt3 (t2)
-  
-  
-  for(i in 0:(length(col.covar.ind)-1)) {
-    dat <- cbind(dat, ans_final[,(5+i)]) 
-    dat <- cbind(dat, ans_final[,(5+i)])
-  }
-  
-  if(impute) {
-    if(verbose)
-      cat("Filing missing values with multiple imputations:\n")
-    
-    tryCatch({
-      tmp_ans <- mice(as.data.frame(dat[,5:dim(dat)[2]]), printFlag=ifelse(verbose, TRUE, FALSE), m = 2, maxit = 2)
-      ans1 <- complete(tmp_ans)
-      ans_final <- cbind(ans[,1:4], ans1)
-      dat <- ans_final
-    }, error=function(e) {
-      print(e)
-      
-    })
-  }
-  
-  
-  k <- 0
-  for(i in 0:(length(col.covar.ind)-1)) {
-    for(j in 1:(dim(dat)[1]-1)) {
-      if(dat[j,1] != dat[(j+1), 1]) {
-        dat[j, (5+k+1)] <- NA
-        
-        if(dat[j,3] >= dat[j,4]) {
-          dat[j,4] <- dat[j,3] + dt/2
-        }
-        
-      } else {
-        dat[j, (5+k+1)] <- dat[(j+1), (5+k)]
-      }
-      
-      if(dat[j,2] > 1) {
-        dat[j,2] <- 1
-      }
-      
-    }
-    k <- k+2
-  }
-  
-  colnames(dat) <- c("id", "case", "t1", "t2", 
+    colnames(ans) <- c("id", "case", "t1", "t2", 
                      unlist(lapply(1:length(col.covar.ind), 
                                    function(n) {c(names(merged.data)[col.covar.ind[n]], 
                                                 paste(names(merged.data)[col.covar.ind[n]],".next",sep=""))})))
-  rownames(dat) <- 1:dim(dat)[1]
-  return(data.frame(dat))
+    rownames(ans) <- 1:dim(ans)[1]
+    return(data.frame(ans))
 }

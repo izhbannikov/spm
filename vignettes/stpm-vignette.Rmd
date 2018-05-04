@@ -543,36 +543,36 @@ library(stpm)
 ############## One dimensional case (one covariate) ###################
 #######################################################################
 
-# Data preparation (short format)#
-data <- simdata_discr(N=1000, dt = 2, format="short")
+## Data preparation (short format)#
+#data <- simdata_discr(N=1000, dt = 2, format="short")
 
-miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/4)) # ~25% missing data
-incomplete.data <- data
-incomplete.data[miss.id,4] <- NA
+#miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/4)) # ~25% missing data
+#incomplete.data <- data
+#incomplete.data[miss.id,4] <- NA
 # End of data preparation #
 
 ##### Multiple imputation with SPM #####
-imp.data <- spm.impute(x=incomplete.data, id=1, case="xi", t1=3, covariates="y1", minp=1, theta_range=seq(0.075, 0.09, by=0.001))$imputed
+#imp.data <- spm.impute(x=incomplete.data, id=1, case="xi", t1=3, covariates="y1", minp=1, theta_range=seq(0.075, 0.09, by=0.001))$imputed
 
 ##### Look at the incomplete data with missings #####
-head(incomplete.data)
+#head(incomplete.data)
 
 ##### Look at the imputed data #####
-head(imp.data)
+#head(imp.data)
 
-# Data preparation (long format)#
-data <- simdata_cont(N=1000, format="long")
-miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/2)) # ~40% missing data
-incomplete.data <- data
-incomplete.data[miss.id,6] <- NA
-incomplete.data[ifelse(miss.id < dim(incomplete.data)[1], miss.id+1, miss.id),5] <- NA
-imp.data <- spm.impute(x=incomplete.data, id=1, case=2, t1=3, t2=4, covariates=c("y1"), minp=2, format="long")$imputed
+## Data preparation (long format)#
+#data <- simdata_cont(N=1000, format="long")
+#miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/2)) # ~40% missing data
+#incomplete.data <- data
+#incomplete.data[miss.id,6] <- NA
+#incomplete.data[ifelse(miss.id < dim(incomplete.data)[1], miss.id+1, miss.id),5] <- NA
+#imp.data <- spm.impute(x=incomplete.data, id=1, case=2, t1=3, t2=4, covariates=c("y1"), minp=2, format="long")$imputed
 
 ##### Look at the incomplete data with missings #####
-head(incomplete.data)
+#head(incomplete.data)
 
 ##### Look at the imputed data #####
-head(imp.data)
+#head(imp.data)
 
 
 
@@ -580,60 +580,60 @@ head(imp.data)
 ################ Two-dimensional case ###################
 #########################################################
 
-# Parameters for data simulation #
-a <- matrix(c(-0.05, 0.01, 0.01, -0.05), nrow=2)
-f1 <- matrix(c(90, 30), nrow=1, byrow=FALSE)
-Q <- matrix(c(1e-7, 1e-8, 1e-8, 1e-7), nrow=2)
-f0 <- matrix(c(80, 25), nrow=1, byrow=FALSE)
-b <- matrix(c(5, 3), nrow=2, byrow=TRUE)
-mu0 <- 1e-04
-theta <- 0.07
-ystart <- matrix(c(80, 25), nrow=2, byrow=TRUE)
+## Parameters for data simulation #
+#a <- matrix(c(-0.05, 0.01, 0.01, -0.05), nrow=2)
+#f1 <- matrix(c(90, 30), nrow=1, byrow=FALSE)
+#Q <- matrix(c(1e-7, 1e-8, 1e-8, 1e-7), nrow=2)
+#f0 <- matrix(c(80, 25), nrow=1, byrow=FALSE)
+#b <- matrix(c(5, 3), nrow=2, byrow=TRUE)
+#mu0 <- 1e-04
+#theta <- 0.07
+#ystart <- matrix(c(80, 25), nrow=2, byrow=TRUE)
 
-# Data preparation #
-data <- simdata_discr(N=1000, a=a, f1=f1, Q=Q, f=f0, b=b, ystart=ystart, mu0 = mu0, theta=theta, dt=2, format="short")
+## Data preparation #
+#data <- simdata_discr(N=1000, a=a, f1=f1, Q=Q, f=f0, b=b, ystart=ystart, mu0 = mu0, theta=theta, dt=2, format="short")
 
-# Delete some observations in order to have approx. 25% missing data
-incomplete.data <- data
-miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/4)) 
-incomplete.data <- data
-incomplete.data[miss.id,4] <- NA
-miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/4)) 
-incomplete.data[miss.id,5] <- NA
-# End of data preparation #
+## Delete some observations in order to have approx. 25% missing data
+#incomplete.data <- data
+#miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/4)) 
+#incomplete.data <- data
+#incomplete.data[miss.id,4] <- NA
+#miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/4)) 
+#incomplete.data[miss.id,5] <- NA
+## End of data preparation #
+
+###### Multiple imputation with SPM #####
+#imp.data <- spm.impute(x=incomplete.data, id=1, case="xi", t1=3, covariates=c("y1", "y2"), minp=1, theta_range=seq(0.060, 0.07, by=0.001))$imputed
+
+###### Look at the incomplete data with missings #####
+#head(incomplete.data)
+
+###### Look at the imputed data #####
+#head(imp.data)
+
+## Long format #
+## Delete some observations in order to have approx. 25% missing data
+#data <- simdata_discr(N=1000, a=a, f1=f1, Q=Q, f=f0, b=b, ystart=ystart, mu0 = mu0, theta=theta, dt=2, format="long")
+#incomplete.data <- data
+## first biomarker
+#miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/4)) 
+#incomplete.data[miss.id,6] <- NA
+#incomplete.data[ifelse(miss.id < dim(incomplete.data)[1], miss.id+1, miss.id),5] <- NA
+## second biomarker
+#miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/4)) 
+#incomplete.data[miss.id,8] <- NA
+#incomplete.data[ifelse(miss.id < dim(incomplete.data)[1], miss.id+1, miss.id),7] <- NA
+
+## End of data preparation #
 
 ##### Multiple imputation with SPM #####
-imp.data <- spm.impute(x=incomplete.data, id=1, case="xi", t1=3, covariates=c("y1", "y2"), minp=1, theta_range=seq(0.060, 0.07, by=0.001))$imputed
+#imp.data <- spm.impute(x=incomplete.data, id=1, case=2, t1=3, t2=4, covariates=c("y1", "y2"), minp=1, format="long")$imputed
 
 ##### Look at the incomplete data with missings #####
-head(incomplete.data)
+#head(incomplete.data)
 
 ##### Look at the imputed data #####
-head(imp.data)
-
-# Long format #
-# Delete some observations in order to have approx. 25% missing data
-data <- simdata_discr(N=1000, a=a, f1=f1, Q=Q, f=f0, b=b, ystart=ystart, mu0 = mu0, theta=theta, dt=2, format="long")
-incomplete.data <- data
-# first biomarker
-miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/4)) 
-incomplete.data[miss.id,6] <- NA
-incomplete.data[ifelse(miss.id < dim(incomplete.data)[1], miss.id+1, miss.id),5] <- NA
-# second biomarker
-miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/4)) 
-incomplete.data[miss.id,8] <- NA
-incomplete.data[ifelse(miss.id < dim(incomplete.data)[1], miss.id+1, miss.id),7] <- NA
-
-# End of data preparation #
-
-##### Multiple imputation with SPM #####
-imp.data <- spm.impute(x=incomplete.data, id=1, case=2, t1=3, t2=4, covariates=c("y1", "y2"), minp=1, format="long")$imputed
-
-##### Look at the incomplete data with missings #####
-head(incomplete.data)
-
-##### Look at the imputed data #####
-head(imp.data)
+#head(imp.data)
 
 
 ```

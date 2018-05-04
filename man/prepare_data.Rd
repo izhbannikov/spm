@@ -4,9 +4,8 @@
 \alias{prepare_data}
 \title{Data pre-processing for analysis with stochastic process model methodology.}
 \usage{
-prepare_data(x, col.id = NULL, col.status = NULL, col.age = NULL,
-  col.age.event = NULL, covariates = NULL, interval = 1, impute = TRUE,
-  verbose = FALSE)
+prepare_data(x, col.id = NA, col.status = NA, col.age = NA,
+  col.age.event = NA, covariates = NA, interval = 1, verbose = FALSE)
 }
 \arguments{
 \item{x}{A path to the file with table of follow-up oservations (longitudinal table). 
@@ -33,11 +32,8 @@ Note: if not provided then the 3rd column from the y (vital statistics) dataset 
 If covariates not provided, then all columns from longitudinal table having index > 3 will be used as covariates.}
 
 \item{interval}{A number of breaks between observations for data for discrete model. 
-This interval must be numeric (integer).
+This interval must be integer and should be equal or greater than 1.
 Default = 1 unit of time.}
-
-\item{impute}{Multiple imputation ndicator. If TRUE then missing observations will be imputed with multiple imputation.
-Default = TRUE.}
 
 \item{verbose}{A verbosing output indicator. Default=FALSE.}
 }

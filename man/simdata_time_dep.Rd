@@ -6,7 +6,7 @@
 \usage{
 simdata_time_dep(N = 10, f = list(at = "-0.05", f1t = "80", Qt = "2e-8", ft
   = "80", bt = "5", mu0t = "1e-3"), step = 1, tstart = 30, tend = 105,
-  ystart = 80, sd0 = 1, nobs = NULL)
+  ystart = 80, sd0 = 1, nobs = NULL, format = "long")
 }
 \arguments{
 \item{N}{Number of individuals.}

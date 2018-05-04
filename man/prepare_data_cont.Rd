@@ -5,7 +5,7 @@
 \title{Prepares continuouts-time dataset.}
 \usage{
 prepare_data_cont(merged.data, col.status.ind, col.id.ind, col.age.ind,
-  col.age.event.ind, col.covar.ind, verbose, impute, dt)
+  col.age.event.ind, col.covar.ind, verbose, dt)
 }
 \arguments{
 \item{merged.data}{a longitudinal study dataset.}
@@ -21,8 +21,6 @@ prepare_data_cont(merged.data, col.status.ind, col.id.ind, col.age.ind,
 \item{col.covar.ind}{a set of column indexes which represent covariates.}
 
 \item{verbose}{turns on/off verbosing output.}
-
-\item{impute}{Multiple imputation ndicator. If TRUE then missing observations will be imputed with multiple imputation.}
 
 \item{dt}{interval between observations.}
 }

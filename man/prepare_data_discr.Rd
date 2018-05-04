@@ -5,7 +5,7 @@
 \title{Prepares discrete-time dataset.}
 \usage{
 prepare_data_discr(merged.data, interval, col.status.ind, col.id.ind,
-  col.age.ind, col.age.event.ind, col.covar.ind, verbose, impute)
+  col.age.ind, col.age.event.ind, col.covar.ind, verbose)
 }
 \arguments{
 \item{merged.data}{a longitudinal study dataset.}
@@ -22,9 +22,7 @@ prepare_data_discr(merged.data, interval, col.status.ind, col.id.ind,
 
 \item{col.covar.ind}{a set of column indexes which represent covariates.}
 
-\item{verbose}{turns on/off verbosing output.}
-
-\item{impute}{Multiple imputation ndicator. If TRUE then missing observations will be imputed with multiple imputation.
+\item{verbose}{turns on/off verbosing output.
 Filling the last cell}
 }
 \description{
