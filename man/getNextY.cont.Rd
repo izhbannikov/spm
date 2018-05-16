@@ -5,7 +5,7 @@
 \title{An internal function to compute next Y based on 
 continous-time model (Yashin et. al., 2007)}
 \usage{
-getNextY.cont(y1, t1, t2, a, f1, Q, f, b, mu0, theta, u, R)
+getNextY.cont(y1, t1, t2, a, f1, Q, f, b, theta)
 }
 \arguments{
 \item{y1}{y1}
@@ -24,13 +24,7 @@ getNextY.cont(y1, t1, t2, a, f1, Q, f, b, mu0, theta, u, R)
 
 \item{b}{b (see Yashin et. al, 2007)}
 
-\item{mu0}{mu (see Yashin et. al, 2007)}
-
 \item{theta}{theta (see Yashin et. al, 2007)}
-
-\item{u}{(see Akushevich et. al, 2007)}
-
-\item{R}{(see Akushevich et. al, 2007)}
 }
 \value{
 y.next Next value of Y

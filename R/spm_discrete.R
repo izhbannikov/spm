@@ -90,6 +90,7 @@ spm_discrete <- function(dat, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verb
   index_i <- 1
   index_j <- 1
   parameters_lsq <- matrix(nrow=0,ncol=(k+3))
+  parameters_lsq_stderr <- matrix(nrow=0,ncol=(k+3))
   for(i in seq(1,(k*2-1),2)) {
     newdat2 <- dat[,(5+i)]
     cnames <- c(paste("y2","_",index_i,sep=''))
@@ -103,12 +104,13 @@ spm_discrete <- function(dat, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verb
     reg_formula <- paste(cnames[1],"~", paste(cnames[2:length(cnames)],collapse='+'))
     
     res <- lm(as.formula(reg_formula),data=as.data.frame(newdat2),na.action = na.omit)
-    #res <- gls(as.formula(reg_formula),data=as.data.frame(newdat2),na.action = na.omit)
     #print(reg_formula)
-    #print(res)
+    #print(summary(res))
     coef <- res$coefficients # intercept, y1
+    std.err <- coef(summary(res))[, 2]
+    #print(std.err)
     parameters_lsq <- rbind(parameters_lsq, c(coef, sd(res$residuals), logLik(res)[1]))
-  
+    parameters_lsq_stderr <- rbind(parameters_lsq_stderr, c(std.err, sd(res$residuals), logLik(res)[1]))
     index_j <- 1
     index_i <- index_i + 1
   }
@@ -144,12 +146,15 @@ spm_discrete <- function(dat, theta_range=seq(0.02,0.2,by=0.001), tol=NULL, verb
     }
   }
   #------end of calculating of Q-matrix--------#
+  #print(summary(parameters_lsq))
   parameters_lsq <- unname(parameters_lsq);
   u <- parameters_lsq[,1]
+  u.std.err <- parameters_lsq_stderr[,1]
   R <- t(parameters_lsq[,2:(2+k-1)])
+  R.std.err <- t(parameters_lsq_stderr[,2:(2+k-1)])
   Sigma <- parameters_lsq[,(2+k)]
   
-  pars1 <- list(theta=theta, mu0=mu0, b=b, Q=Q, u=u, R=R, Sigma=Sigma)
+  pars1 <- list(theta=theta, mu0=mu0, b=b, Q=Q, u=u, u.std.err=u.std.err, R=R, R.std.err=R.std.err, Sigma=Sigma)
   
   # Making a new parameter set:
   QH <- Q

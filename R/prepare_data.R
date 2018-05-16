@@ -1,4 +1,7 @@
-
+#' An internal function to obtain column index by its name
+#' @param x Dataset
+#' @param col.name Column name 
+#' @return column index(es) in the provided dataset
 get.column.index <- function(x, col.name) {
     col.ind <- grep(paste("\\b", col.name, "\\b", sep=""), colnames(x))
     return(col.ind)

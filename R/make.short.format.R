@@ -1,4 +1,11 @@
-
+#' An internal function which construct short data format from a given long
+#' @param x Dataset
+#' @param col.id Column ID index
+#' @param col.status Column status index
+#' @param col.t1 Column t1 index
+#' @param col.t2 Column t2 index
+#' @param col.cov Column covariates indices
+#' @return column index(es) in the provided dataset
 make.short.format <- function(x, col.id=1, col.status=2, col.t1=3, col.t2=4, col.cov=5)
 {
     splitted <- split(x, x[ , col.id])
