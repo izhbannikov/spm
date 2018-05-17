@@ -17,6 +17,7 @@ linear.interpolation <- function(times, points, n) { # Between known pair
         dy <- y2 - y1
         t1 <- times[i]
         t2 <- times[i+1]
+        if(t1 == t2) t2 <- 1.01*t1
         dt <- t2 - t1
         t <- seq(t1, t2, by=dt/n)
         y <- dy/dt * (t - t1) + y1
@@ -145,15 +146,17 @@ prepare_data <- function(x,
     #-----------Done parsing imput parameters---------------------#
     
     # Remove records in which id = NA
-    merged.data <- merged.data[which(!is.na(merged.data[ , col.age.ind])),]
+    #merged.data <- merged.data[which(!is.na(merged.data[ , col.id.ind])),]
+    #merged.data <- merged.data[which(!is.na(merged.data[ , col.status.ind])),]
+    #merged.data <- merged.data[which(!is.na(merged.data[ , col.age.ind])),]
   
     # Prepare data for continuous optimisation:
     data_cont <- prepare_data_cont(merged.data, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose, interval)
   
     # Prepare data for fast discrete optimization:
-    data_discr <- prepare_data_discr(merged.data, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose)
+    #data_discr <- prepare_data_discr(merged.data, interval, col.status.ind, col.id.ind, col.age.ind, col.age.event.ind, col.covar.ind, verbose)
   
-    list(model.continuous=data_cont, model.discrete=data_discr)
+    list(model.continuous=data_cont, model.discrete=NULL)
 }
 
 #'Prepares continuouts-time dataset.
@@ -173,32 +176,55 @@ prepare_data_cont <- function(merged.data,
                               col.covar.ind, 
                               verbose,
                               dt) {
-    #merged.data = miss.data
-    #col.status.ind = 2 
+    #merged.data = long
+    #
     #col.id.ind = 1
+    #col.status.ind = 2 
     #col.age.ind = 3
     #col.age.event.ind = 3 
     #col.covar.ind = 4
-    #dt <- 1
+    #dt <- 2
     # Split records by ID:
-    splitted <- split(merged.data, merged.data[ , col.id.ind])
+    #splitted <- split(merged.data, factor(merged.data[ , col.id.ind]))
+    splitted <- split(merged.data, merged.data[[col.id.ind]])
+    
   
     for(iii in 1:length(splitted)) {
         nrows <- length(splitted[[iii]][ , col.id.ind])
-        id <- splitted[[iii]][ -1, col.id.ind]
-        case <- splitted[[iii]][-1, col.status.ind]
-        t1 <- splitted[[iii]][ 1:(nrows-1), col.age.ind]
-        #t2 <- c(splitted[[iii]][ , col.age.ind][-1], tail(splitted[[iii]][ , col.age.event.ind],n=1))
-        t2 <- splitted[[iii]][ , col.age.ind][-1]
-    
+        if(nrows > 1) {
+            id <- splitted[[iii]][ -1, col.id.ind]
+            case <- splitted[[iii]][-1, col.status.ind]
+            t1 <- splitted[[iii]][ 1:(nrows-1), col.age.ind]
+            #t2 <- c(splitted[[iii]][ , col.age.ind][-1], tail(splitted[[iii]][ , col.age.event.ind],n=1))
+            t2 <- splitted[[iii]][ , col.age.ind][-1]
+            
+        } else {
+            id <- splitted[[iii]][ 1 , col.id.ind]
+            case <- splitted[[iii]][1, col.status.ind]
+            t1 <- splitted[[iii]][ 1:(nrows-1), col.age.ind]
+            #t2 <- c(splitted[[iii]][ , col.age.ind][-1], tail(splitted[[iii]][ , col.age.event.ind],n=1))
+            t2 <- t1 + 0.01*t1
+            
+        }
+        
         tmp.frame <- cbind(id, case, t1, t2)
         # Adding covariates:
-        for(ind in col.covar.ind) {
-            tmp.frame <- cbind(tmp.frame, 
+        if(nrows > 1) {
+            for(ind in col.covar.ind) {
+                tmp.frame <- cbind(tmp.frame, 
                                splitted[[iii]][1:(nrows-1), ind], 
                                splitted[[iii]][-1, ind])
       
+            }
+        } else {
+            for(ind in col.covar.ind) {
+                tmp.frame <- cbind(tmp.frame, 
+                               splitted[[iii]][1:(nrows-1), ind], 
+                               splitted[[iii]][1, ind])
+            
+            }
         }
+        
         splitted[[iii]] <- tmp.frame
     }
     
@@ -287,45 +313,54 @@ prepare_data_discr <- function(merged.data, interval, col.status.ind, col.id.ind
             # Individual ID:
             id <- splitted[[iii]][ , col.id.ind][1]
       
-            if(col.age.ind != col.age.event.ind) {
-                stop("col.age.ind should be equal to col.age.event.ind for now")
-                #nrows <- ceiling((floor(tail(splitted[[iii]][ , col.age.ind], n=1)) - floor(splitted[[iii]][ , col.age.ind][1]))/dt )
-        
-                ## Perform approximation using two points:
-                #t1.approx <- matrix(ncol=4, nrow=nrows)
-                #t1.approx[,1] <- id
-                #t1.approx[,2] <- 0
-                #t1.approx[nrows,2] <- tail(splitted[[iii]][ , col.status.ind],n=1) #Last value
-                #t1.approx[,3] <- seq(floor(splitted[[iii]][ , col.age.ind][1]), floor(splitted[[iii]][ , col.age.ind][length(splitted[[iii]][ , col.age.ind])]), by=dt)
-                #if(nrows > 1) {
-                #    t1.approx[,4] <- c(t1.approx[,3][2:nrows], tail(splitted[[iii]][ , col.age.event.ind],n=1))
-                #} else {
-                #    t1.approx[,4] <- tail(splitted[[iii]][ , col.age.event.ind],n=1)
-                #}
-            } else {
-                nrows <- (dim(splitted[[iii]])[1]-1)*dt
+            #nrows <- (dim(splitted[[iii]])[1]-1)*dt
+            nrows <- (dim(splitted[[iii]])[1])*dt
+            
+            if(nrows > 1) {
                 t1.approx <- matrix(ncol=4, nrow=nrows)
                 t1.approx[,1] <- id
                 t1.approx[,2] <- 0
                 t1.approx[nrows,2] <- tail(splitted[[iii]][ , col.status.ind],n=1) #Last value
-          
+                    
                 aprx <- linear.interpolation(splitted[[iii]][, col.age.ind], splitted[[iii]][, col.covar.ind[1]], n=dt)
-          
-                t1.approx[,3] <- aprx[[2]][1:(length(aprx[[2]])-1)]
-                t1.approx[,4] <- aprx[[2]][-1]
-          
+                
+                print(splitted[[iii]])
+                print(nrows)
+                print(aprx)
+                print(t1.approx)
+                
+                #t1.approx[,3] <- aprx[[2]][1:(length(aprx[[2]])-1)]
+                t1.approx[,3] <- aprx[[2]][1:(length(aprx[[2]]))]
+                
+                if(col.age.ind == col.age.event.ind) {
+                    t1.approx[,4] <- c(aprx[[2]][-1], tail(aprx[[2]],1)*0.01)
+                } else {
+                    t1.approx[,4] <- c(aprx[[2]][-1], tail(splitted[[iii]][, col.age.event.ind], 1))
+                }
+            } else {
+                print(splitted[[iii]])
+                t1.approx <- matrix(ncol=4, nrow=1)
+                t1.approx[,1] <- id
+                t1.approx[,2] <- tail(splitted[[iii]][ , col.status.ind],n=1) #Last value
+                t1.approx[,3] <- splitted[[iii]][ , col.age.ind]
+                t1.approx[,4] <- 1.01*t1.approx[,3]
             }
-      
+          
             
             for(ind in col.covar.ind) {
                 if ( (length(splitted[[iii]][, ind]) > 1) & (length(which(!is.na(splitted[[iii]][, ind]))) > 0) ) {
                     if(length(which(!is.na(splitted[[iii]][, ind]))) == 1) {
                         splitted[[iii]][, ind] <- fill_last(splitted[[iii]][, ind])
                     }
+                    
                     aprx <- linear.interpolation(splitted[[iii]][, col.age.ind], splitted[[iii]][, ind], n=dt)
+                    
                     t1.approx <- cbind(t1.approx, aprx[[1]][1:(length(aprx[[1]])-1)], aprx[[1]][-1])
+                } else {
+                    t1.approx <- cbind(t1.approx, splitted[[iii]][, ind], splitted[[iii]][, ind])
                 }
             }
+            
             ans <- rbind(ans, t1.approx)
         }
     }
