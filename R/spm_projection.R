@@ -27,6 +27,7 @@
 #'When it is set, then time-dependent exponential form of mu0 and Q are used:
 #' mu0 = mu0*exp(theta*t), Q = Q*exp(theta*t). 
 #' Only for continous-time SPM.
+#' @param format Data format: "short" (default), "long".
 #'@return An object of 'spm.projection' class with two elements. 
 #'(1) A simulated data set.
 #'(2) A summary statistics which includes (i) age-specific means of state variables and

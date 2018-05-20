@@ -4,7 +4,6 @@
 #' @import nloptr
 #' @import survival
 #' @import tools
-#' @import mice
 #' @importFrom utils head read.csv tail
 #' @useDynLib stpm, .registration = TRUE
 NULL

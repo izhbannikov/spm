@@ -2,7 +2,7 @@ Package: stpm
 Type: Package
 Title: Stochastic Process Model for Analysis of Longitudinal and Time-to-Event Outcomes
 Version: 1.6.9
-Date: 2018-05-04
+Date: 2018-05-18
 Author: I. Y. Zhbannikov, Liang He, K. G. Arbeev, A. I. Yashin.
 Maintainer: Ilya Y. Zhbannikov <ilya.zhbannikov@duke.edu>
 Description: Utilities to estimate parameters of the models with survival functions 
@@ -16,7 +16,7 @@ Description: Utilities to estimate parameters of the models with survival functi
              Biogerontology 8(3), 291(302), <DOI:10.1007/s10522-006-9073-3>.
 License: GPL
 Imports: 
-    sas7bdat,stats,nloptr,survival,tools
+    sas7bdat,stats,nloptr,survival,tools,knitcitations
 LinkingTo: 
     Rcpp,RcppArmadillo
 Depends:

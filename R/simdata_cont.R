@@ -22,6 +22,7 @@
 #' @param gomp A flag (FALSE by default). When it is set, then time-dependent exponential form of mu0 and Q are used:
 #' mu0 = mu0*exp(theta*t).
 #' @param nobs A number of observations (lines) for individual observations.
+#' @param format Data format: "long" (default), "short".
 #' @return A table with simulated data.
 #' @export
 #' @examples

@@ -18,6 +18,7 @@
 #' @param tend A number, defines final time (105 by default).
 #' @param dt A time step (1 by default).
 #' @param nobs A number, defines a number of observations (lines) for an individual, NULL by default.
+#' @param format Data format: "long" (default), "short".
 #' @return A table with simulated data.
 #' @export
 #' @examples

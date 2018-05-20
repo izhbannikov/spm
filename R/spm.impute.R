@@ -118,9 +118,10 @@ getPrevY.discr.m <- function(y2, u, R) {
 #' @param R R
 #' @param Sigma Sigma
 #' @return y1 Previous value of y
-getPrevY.discr <- function(y2, u, R, Sigma, f, t1, t2) {
+getPrevY.discr <- function(y2, u, R, Sigma) {
     eps<-matrix(nrow=dim(R)[1], ncol=1)
     eps[,1] <- sapply(1:dim(eps)[1], function(i) {rnorm(1, mean=0.0, sd=Sigma[i])})
+    
     y1 <- solve(R) %*% (y2 - u - eps)
     y1
 }
@@ -252,8 +253,7 @@ spm.impute <- function(x,
                        t2=3, 
                        covariates=4,
                        minp=5, 
-                       theta_range=seq(0.01, 0.2, by=0.001), 
-                       format="short") 
+                       theta_range=seq(0.01, 0.2, by=0.001)) 
 {
     
     # Check input parameters for correctness
@@ -282,12 +282,19 @@ spm.impute <- function(x,
         col.covar.ind <- c(col.covar.ind, c.ind)
     } 
     
+    if(length(which(is.na(x[, col.id.ind]))) != 0) {
+        stop("Dataset contains NAs in ID column.")
+    }
     # Remove rows with id = NA/NULL
-    x <- x[which(!is.na(x[, col.id.ind])), ]
-    dataset <- x
-    if(format == "short") {
-        # Prepare data to be in format id xi t1 t2 y y.next
-        dataset <- prepare_data_cont(x, 
+    #x <- x[which(!is.na(x[, col.id.ind])), ]
+    
+    # Constructing working dataset
+    dataset.work <- data.frame(x[, c(col.id.ind, col.status.ind, col.age.ind, col.covar.ind)])
+    
+    Ncol <- dim(dataset.work)[2]
+    
+    # Estimate parameters from raw data
+    dataset <- prepare_data_cont(x, 
                                 col.id.ind=col.id.ind, 
                                 col.status.ind=col.status.ind,
                                 col.age.ind=col.age.ind, 
@@ -295,22 +302,8 @@ spm.impute <- function(x,
                                 col.covar.ind=covariates, 
                                 dt=1, 
                                 verbose=FALSE)
-    } else if(format == "long") {
-        cov.tmp <- c(col.covar.ind, col.covar.ind)
-        cov.tmp[seq(1,length(cov.tmp), 2)] <- col.covar.ind
-        cov.tmp[seq(2,length(cov.tmp), 2)] <- col.covar.ind + 1
-        dataset <- x[, c(col.id.ind, col.status.ind, col.age.ind, col.age.event.ind, cov.tmp)]
-    } else {
-        stop("Format is incorrectly defined.")
-    }
     
-    #print(head(dataset))
-    # Estimate parameters from raw data
     pp <- spm_discrete(dataset, theta_range = theta_range)
-    
-    
-    
-    
     
     # Individual IDs
     ids <- unique(dataset[,1])
@@ -319,46 +312,42 @@ spm.impute <- function(x,
       
         ####
         # for u:
-        mu <- rnorm(10000, mean=pp$dmodel$u, sd=sqrt(pp$dmodel$u.std.err))
-        z <- rnorm(10000, mean=mu, sd=pp$dmodel$u.std.err)
-        pp.dmodel.u <- as.matrix(mean(z))
+        pp.dmodel.u <- pp$dmodel$u
+        for(i in 1:length(pp$dmodel$u)) {
+            mu <- rnorm(10000, mean=pp$dmodel$u[i], sd=sqrt(pp$dmodel$u.std.err[i]))
+            z <- rnorm(10000, mean=mu, sd=pp$dmodel$u.std.err[i])
+            pp.dmodel.u[i] <- mean(z)
+        }
         # For R:
-        mu <- rnorm(10000, mean=pp$dmodel$R, sd=sqrt(pp$dmodel$R.std.err))
-        z <- rnorm(10000, mean=mu, sd=pp$dmodel$R.std.err)
-        pp.dmodel.R <- as.matrix(mean(z))
+        pp.dmodel.R <- pp$dmodel$R
+        for(i in dim(pp$dmodel$R)[1]) {
+            for(j in dim(pp$dmodel$R)[2]) {
+                mu <- rnorm(10000, mean=pp$dmodel$R[i,j], sd=sqrt(pp$dmodel$R.std.err[i,j]))
+                z <- rnorm(10000, mean=mu, sd=pp$dmodel$R.std.err[i,j])
+                pp.dmodel.R[i,j] <- mean(z)
+            }
+        }
         ####
-      
-        dat <- dataset
+        ## Temporary working dataset:
+        dat <- dataset.work
         
-        Ncol <- dim(dat)[2]
         for(k in ids) {
             ########## Forward #########
             # Retrieve records for single subject
             df <- dat[which(dat[,1] == k), ]
             
-            first.row.imputed <- FALSE
-            
             Nrec <- dim(df)[1]
       
             if(Nrec == 1) {
                 row.cur <- df
-                for(j in seq(5,Ncol,by=2)) {
-                    l <- ((j-5) %/% 2)+1
+                for(j in 4:Ncol) {
+                    l <- j-3
                     if(is.na(row.cur[j])) {
                         y.start <- rnorm(1, mean = pp$cmodel$f[l], sd=pp$dmodel$Sigma[l])
                         row.cur[j] <- y.start
                     }
                 }
                 
-                if(any(is.na(row.cur[seq(6, Ncol,by=2)])) & row.cur[2] == 0) {
-                    y1 <- row.cur[seq(5,Ncol,by=2)]
-                    #y.next <- getNextY.cont2(t(as.matrix(as.numeric(y1))), row.cur[3], row.cur[4], pp$cmodel$b, pp$cmodel$a, pp$cmodel$f1)
-                    #y.next <- getNextY.discr2(t(as.matrix(as.numeric(y1))), pp$dmodel$u, pp$dmodel$R, pp$dmodel$Sigma)
-                    y.next <- getNextY.discr.m(t(as.matrix(as.numeric(y1))), pp.dmodel.u, pp.dmodel.R)
-                    #y.next <- getNextY.discr(t(as.matrix(as.numeric(y1))), pp.dmodel.u, pp.dmodel.R, pp$dmodel$Sigma)
-                    row.cur[which(is.na(row.cur))] <- y.next[(which(is.na(row.cur)) - 6 ) %/% 2 + 1]
-                }
-        
                 df <- row.cur
                 dat[which(dat[,1] == k), ] <- df
                 
@@ -369,106 +358,49 @@ spm.impute <- function(x,
             row.cur <- df[1, ]
             row.next <- df[2, ]
   
-            for(j in seq(5,Ncol,by=2)) {
-                l <- ((j-5) %/% 2)+1
-                if(is.na(row.cur[j]) & !is.na(row.cur[j+1])) {
-                    y2 <- df[1,j+1]
-                    y1 <- getPrevY.discr(t(as.matrix(y2)), pp.dmodel.u, pp.dmodel.R, pp$dmodel$Sigma, pp$cmodel$f, row.cur[3], row.cur[4])
-                    df[1,j] <- y1[l]
-                    row.cur[j] <- y1[l]
-                } else if(is.na(row.cur[j]) & is.na(row.cur[j+1])) {
+            for(j in 4:Ncol) {
+                l <- j-3
+                if(is.na(row.cur[j]) & !is.na(row.next[j])) {
+                    y2 <- row.next[j]
+                    # Only one-dimension
+                    y1 <- getPrevY.discr(as.matrix(y2), pp.dmodel.u[l], as.matrix(pp.dmodel.R[l,l]), pp$dmodel$Sigma[l])
+                    row.cur[j] <- y1
+                } else if(is.na(row.cur[j]) & is.na(row.next[j])) {
                     y.start <- rnorm(1, mean = pp$cmodel$f1[l], sd=pp$cmodel$b[l])
-                    row.cur[j] <- y.start[l]
-                    first.row.imputed <- TRUE
+                    row.cur[j] <- y.start
                 }
-            }
-            
-            if(any(is.na(row.cur[seq(6, Ncol,by=2)])) & row.cur[2] == 0) {
-                y1 <- row.cur[seq(5,Ncol,by=2)]
-                #y.next <- getNextY.cont2(t(as.matrix(as.numeric(y1))), row.cur[3], row.cur[4], pp$cmodel$b, pp$cmodel$a, pp$cmodel$f1)
-                #y.next <- getNextY.discr2(t(as.matrix(as.numeric(y1))), pp$dmodel$u, pp$dmodel$R, pp$dmodel$Sigma)
-                y.next <- getNextY.discr.m(t(as.matrix(as.numeric(y1))), pp.dmodel.u, pp.dmodel.R)
-                #y.next <- getNextY.discr(t(as.matrix(as.numeric(y1))), pp.dmodel.u, pp.dmodel.R, pp$dmodel$Sigma)
-                
-                row.cur[which(is.na(row.cur))] <- y.next[(which(is.na(row.cur)) - 6 ) %/% 2 + 1]
             }
             
             df[1, ] <- row.cur
             
       
-            #### Preprocessing of the rest of df ####
-            for(i in 2:Nrec) {
-                row.cur <- df[i,]
-                row.prev <- df[i-1,]
-                if(i != Nrec & Nrec >2) {row.next <- df[i+1,]}
-          
-                for(j in seq(5, Ncol,by=2)) {
-                    if(is.na(row.cur[j])) {
-                        row.cur[j] <- row.prev[j+1]
-                    } else {
-                        row.prev[j+1] <- row.cur[j]
-                    }
-                }
-          
-                for(j in seq(6, Ncol,by=2)){
-                    if(is.na(row.cur[j])) {
-                        if(i != Nrec & Nrec >2) {row.cur[j] <- row.next[j-1]}
-                    } else {
-                        if(i != Nrec & Nrec >2) {row.next[j-1] <- row.cur[j]}
-                    }
-                }
-          
-                df[i-1, ] <- row.prev
-                df[i, ] <- row.cur
-                if(i != Nrec & Nrec >2) {df[i+1, ] <- row.next}
-            }
-      
-            
             #### Main imputation loop ####
         
             for(i in 2:Nrec) {
+                row.prev <- df[i-1,]
                 row.cur <- df[i,]
                 
-                t1 <- row.cur[3]
-                t2 <- row.cur[4]
                 if(i != Nrec & Nrec >2) {row.next <- df[i+1,]}
                 
-                y1 <- row.cur[seq(5,Ncol,by=2)]
+                y1 <- row.prev[4:Ncol]
                 
                 if(any(is.na(row.cur))) {
-                    #y.next <- getNextY.discr(t(as.matrix(as.numeric(y1))), pp$dmodel$u, pp$dmodel$R, pp$dmodel$Sigma, pp$cmodel$f, t1, t2, pp$cmodel$mu0, pp$cmodel$theta, pp$cmodel$b, pp$cmodel$Q)
-                    #y.next <- getNextY.cont2(t(as.matrix(as.numeric(y1))), row.cur[3], row.cur[4], pp$cmodel$b, pp$cmodel$a, pp$cmodel$f1)
-                    #y.next <- getNextY.cont(t(as.matrix(as.numeric(y1))), row.cur[3], row.cur[4], pp$cmodel$a, pp$cmodel$f1, pp$cmodel$Q, pp$cmodel$f, pp$cmodel$b, pp$cmodel$theta)
-                    #y.next <- getNextY.discr2(t(as.matrix(as.numeric(y1))), pp$dmodel$u, pp$dmodel$R, pp$dmodel$Sigma)
-                    y.next <- getNextY.discr.m(t(as.matrix(as.numeric(y1))), pp.dmodel.u, pp.dmodel.R)
-                    #y.next <- getNextY.discr(t(as.matrix(as.numeric(y1))), pp.dmodel.u, pp.dmodel.R, pp$dmodel$Sigma)
-                    
+                    y.next <- getNextY.discr.m(as.matrix(as.numeric(y1)), as.matrix(pp.dmodel.u), pp.dmodel.R)
                     row.cur.na <- which(is.na(row.cur))
-                    row.cur[row.cur.na] <- y.next[(row.cur.na - 6) %/% 2 + 1]
-                    row.next[row.cur.na-1] <- y.next[(row.cur.na - 6) %/% 2 + 1]
-                    
+                    row.cur[row.cur.na] <- y.next[row.cur.na - 3]
                 }
-    
+            
                 df[i, ] <- row.cur
-                if(i != Nrec & Nrec >2) {df[i+1, ] <- row.next}
             }
       
             ### Last record in a dataset ###
             row.cur <- df[Nrec, ]
-            if(any(is.na(row.cur[seq(6, Ncol,by=2)])) & row.cur[2] == 0) {
-                y1 <- row.cur[seq(5,Ncol,by=2)]
-                #y.next <- getNextY.cont2(t(as.matrix(as.numeric(y1))), row.cur[3], row.cur[4], pp$cmodel$b, pp$cmodel$a, pp$cmodel$f1)
-                #y.next <- getNextY.discr(t(as.matrix(as.numeric(y1))), pp$dmodel$u, pp$dmodel$R, pp$dmodel$Sigma, pp$cmodel$f, row.cur[3], row.cur[4], pp$cmodel$mu0, pp$cmodel$theta, pp$cmodel$b, pp$cmodel$Q)
-                #y.next <- getNextY.cont2(t(as.matrix(as.numeric(y1))), row.cur[3], row.cur[4], pp$cmodel$b, pp$cmodel$a, pp$cmodel$f1)
-                #y.next <- getNextY.discr2(t(as.matrix(as.numeric(y1))), pp$dmodel$u, pp$dmodel$R, pp$dmodel$Sigma)
-                y.next <- getNextY.discr.m(t(as.matrix(as.numeric(y1))), pp.dmodel.u, pp.dmodel.R)
-                #y.next <- getNextY.discr.m(t(as.matrix(as.numeric(y1))), pp.dmodel.u, pp.dmodel.R, pp$dmodel$Sigma)
-                
-                for(j in seq(6, Ncol, by=2)){
-                    if(is.na(row.cur[j])){
-                        row.cur[j] <- y.next[(j - 6) %/% 2 + 1]
-                    }
-                }
+            row.prev <- df[Nrec-1,]
+            if(any(is.na(row.cur[4:Ncol])) & row.cur[2] == 0) {
+                y1 <- row.prev
+                y.next <- getNextY.discr.m(as.matrix(as.numeric(y1)), as.matrix(pp.dmodel.u), pp.dmodel.R)
+                row.cur.na <- which(is.na(row.cur))
+                row.cur[row.cur.na] <- y.next[row.cur.na - 3]
             }
       
             df[Nrec, ] <- row.cur
@@ -497,27 +429,20 @@ spm.impute <- function(x,
     }
   
     ### Summarizing imputed datasets together by averaging missing values, i.e. 'completion' ###
-    final.dataset <- dataset
-    for(j in seq(5,dim(final.dataset)[2])) 
-    {
-        data.tmp <- matrix(nrow = dim(final.dataset)[1], ncol=0)
-        for(i in 1:minp) 
-        {
+    final.dataset <- x
+    for(j in 4:Ncol) {
+        data.tmp <- matrix(nrow = dim(dataset.work)[1], ncol=0)
+        for(i in 1:minp) {
             data.tmp <- cbind(data.tmp, datasets[[i]][,j])
         }
         data.tmp.2.mean <- apply(X = data.tmp, FUN = mean, MARGIN = 1, na.rm=T)
-        #data.tmp.2.sd <- apply(X=data.tmp, FUN=sd, MARGIN = 1, na.rm=T)
-        #miss.id <- which(data.tmp.2.sd == 0)
-        final.dataset[,j] <- data.tmp.2.mean
-        #final.dataset[miss.id,j] <- rnorm(length(data.tmp.2.mean[miss.id]), mean=data.tmp.2.mean[miss.id], sd=data.tmp.2.sd[miss.id])
+        dataset.work[,j] <- data.tmp.2.mean
     }
     
-    if(format == "short") {
-        # Prepare data to be in format id xi t y
-        final.dataset <- make.short.format(final.dataset, col.id=1, col.status=2, col.t1=3, col.t2=4, col.cov=5)
-        colnames(final.dataset) <- colnames(x)
-    }
-  
+    colnames.x <- colnames(x)
+    final.dataset[, col.covar.ind] <- dataset.work[,4:Ncol]
+    colnames(final.dataset) <- colnames(x)
+    
     res <- list(imputed=final.dataset, imputations=datasets, data.long.format=dataset)
     res
 }

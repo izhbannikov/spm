@@ -9,6 +9,7 @@
 #' @param ystart A starting value of covariates.
 #' @param sd0 A standard deviation for modelling the next covariate value, sd0 = 1 by default. 
 #' @param nobs A number of observations (lines) for individual observations.
+#' @param format Data format: "short" (default), "long".
 #' @return A table with simulated data.
 #'@references Yashin, A. et al (2007), Health decline, aging and mortality: how are they related? 
 #'Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
@@ -19,7 +20,7 @@
 #' head(dat)
 #'
 simdata_time_dep <- function(N=10,f=list(at="-0.05", f1t="80", Qt="2e-8", ft="80", bt="5", mu0t="1e-3"),
-                         step=1, tstart=30, tend=105, ystart=80, sd0=1, nobs=NULL, format="long") {
+                         step=1, tstart=30, tend=105, ystart=80, sd0=1, nobs=NULL, format="short") {
   formulas <- f  
   at <- NULL
   f1t <- NULL

@@ -75,7 +75,8 @@ spm <- function(x, model="discrete",
   
   if(model == "discrete") {
     # Estimation of starting point with discrete optimization:
-    pars <- spm_discrete(dat=x[[2]],verbose = verbose, tol = tol, theta_range=theta.range)
+    #pars <- spm_discrete(dat=x[[2]],verbose = verbose, tol = tol, theta_range=theta.range)
+    pars <- spm_discrete(dat=x[[1]],verbose = verbose, tol = tol, theta_range=theta.range)
     res <- list(dmodel=list(u=pars$dmodel$u, 
                             R=pars$dmodel$R, 
                             b=pars$dmodel$b, 
@@ -95,7 +96,8 @@ spm <- function(x, model="discrete",
   
   
   if(model == "continuous") {
-    pars <- spm_discrete(dat=x[[2]],verbose = verbose, tol = tol)
+    #pars <- spm_discrete(dat=x[[2]],verbose = verbose, tol = tol)
+    pars <- spm_discrete(dat=x[[1]],verbose = verbose, tol = tol)
     data <- data.frame(x[[1]])
   
     if(verbose) {

@@ -37,6 +37,8 @@ is simulated via uniform(a,b) distribution.}
 \item{dt}{A time step (1 by default).}
 
 \item{nobs}{A number, defines a number of observations (lines) for an individual, NULL by default.}
+
+\item{format}{Data format: "long" (default), "short".}
 }
 \value{
 A table with simulated data.

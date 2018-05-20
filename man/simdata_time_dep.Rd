@@ -6,7 +6,7 @@
 \usage{
 simdata_time_dep(N = 10, f = list(at = "-0.05", f1t = "80", Qt = "2e-8", ft
   = "80", bt = "5", mu0t = "1e-3"), step = 1, tstart = 30, tend = 105,
-  ystart = 80, sd0 = 1, nobs = NULL, format = "long")
+  ystart = 80, sd0 = 1, nobs = NULL, format = "short")
 }
 \arguments{
 \item{N}{Number of individuals.}
@@ -26,6 +26,8 @@ is simulated via uniform(a,b) distribution.}
 \item{sd0}{A standard deviation for modelling the next covariate value, sd0 = 1 by default.}
 
 \item{nobs}{A number of observations (lines) for individual observations.}
+
+\item{format}{Data format: "short" (default), "long".}
 }
 \value{
 A table with simulated data.

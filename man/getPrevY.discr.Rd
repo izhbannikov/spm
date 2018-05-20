@@ -6,7 +6,7 @@
 physiological variable Y based on 
 discrete-time model}
 \usage{
-getPrevY.discr(y2, u, R, Sigma, f, t1, t2)
+getPrevY.discr(y2, u, R, Sigma)
 }
 \arguments{
 \item{y2}{y2}
