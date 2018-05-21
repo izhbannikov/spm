@@ -170,21 +170,6 @@ head(incomplete.data)
 ##### Look at the imputed data #####
 head(imp.data)
 
-# Data preparation (long format)#
-data <- simdata_cont(N=1000, format="long")
-miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/2)) # ~40% missing data
-incomplete.data <- data
-incomplete.data[miss.id,6] <- NA
-incomplete.data[ifelse(miss.id < dim(incomplete.data)[1], miss.id+1, miss.id),5] <- NA
-imp.data <- spm.impute(x=incomplete.data, id=1, case=2, t1=3, t2=4, covariates=c("y1"), minp=2, format="long")$imputed
-
-##### Look at the incomplete data with missings #####
-head(incomplete.data)
-
-##### Look at the imputed data #####
-head(imp.data)
-
-
 
 #########################################################
 ################ Two-dimensional case ###################
@@ -221,28 +206,5 @@ head(incomplete.data)
 ##### Look at the imputed data #####
 head(imp.data)
 
-# Long format #
-# Delete some observations in order to have approx. 25% missing data
-data <- simdata_discr(N=1000, a=a, f1=f1, Q=Q, f=f0, b=b, ystart=ystart, mu0 = mu0, theta=theta, dt=2, format="long")
-incomplete.data <- data
-# first biomarker
-miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/4)) 
-incomplete.data[miss.id,6] <- NA
-incomplete.data[ifelse(miss.id < dim(incomplete.data)[1], miss.id+1, miss.id),5] <- NA
-# second biomarker
-miss.id <- sample(x=dim(data)[1], size=round(dim(data)[1]/4)) 
-incomplete.data[miss.id,8] <- NA
-incomplete.data[ifelse(miss.id < dim(incomplete.data)[1], miss.id+1, miss.id),7] <- NA
-
-# End of data preparation #
-
-##### Multiple imputation with SPM #####
-imp.data <- spm.impute(x=incomplete.data, id=1, case=2, t1=3, t2=4, covariates=c("y1", "y2"), minp=1, format="long")$imputed
-
-##### Look at the incomplete data with missings #####
-head(incomplete.data)
-
-##### Look at the imputed data #####
-head(imp.data)
 
 ```
