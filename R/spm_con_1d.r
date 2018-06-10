@@ -52,6 +52,7 @@ spm_con_1d <- function(spm_data, a = NA, b = NA, q = NA, f = NA, f1 = NA, mu0 = 
   tij <- data$t2
   t0 <- data$t1
   delta <- aggdata$xi
+  name_par <- c('a','b','q','f','f1','mu0','theta')
 
   if(is.na(f))
   {f <- mean(m0, na.rm=TRUE)}
@@ -111,9 +112,23 @@ spm_con_1d <- function(spm_data, a = NA, b = NA, q = NA, f = NA, f1 = NA, mu0 = 
   {
 	a_hes <- hes_loglik(re$par,m0,r0,tau,yij,delta,tij, n_j,t0)
   }
+  
+  colnames(a_hes) <- name_par
+  rownames(a_hes) <- name_par
 
-  par_re <- matrix(re$par, 1, 7)
-  colnames(par_re) <- c('a','b','q','f','f1','mu0','theta')
+  #par_re <- matrix(re$par, 1, 7)
+  #colnames(par_re) <- c('a','b','q','f','f1','mu0','theta')
+  
+  ##### Calculate p-values for estimates ####
+  coef <- re$par
+  names(coef) <- name_par
+  fi <- solve(a_hes)   #### Fischer Information Matrix. Note we're not using the negative of the hessian here
+  stderr <- sqrt(diag(fi))
+  zscore <- coef/stderr
+  pvalue <- 2*(1 - pnorm(abs(zscore)))
+  results.par_re <- cbind(coef,stderr,zscore,pvalue)
+  colnames(results.par_re) <- c("Coeff.", "Std. Err.", "z", "p value")
+  
 
-  list(est=par_re,hessian=a_hes, lik=re$value, con=re$convergence, message = re$message)
+  list(est=results.par_re,hessian=a_hes, lik=re$value, con=re$convergence, message = re$message)
 }

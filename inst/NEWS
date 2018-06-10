@@ -1,9 +1,5 @@
-New for version 1.6.9
+New for version 1.7.0
 ======================
 * Version released
-* Names "Ya2007", "Ak2005" replaced with "cmodel" and "dmodel"
-* Linear terms added to continuous-time model
-* Documentation updated
-* 'impute' parameter flag deleted from prepare_data() function
-* Discreta time processed data set was deleted from prepare_data() function output
+* Essential statistics added for output coefficients of functions spm_con_1d and spm_con_1d_g
 * Minor bug fixes
