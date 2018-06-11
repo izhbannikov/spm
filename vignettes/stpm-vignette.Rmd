@@ -333,9 +333,24 @@ opt.par
 
 You can do the same manner if you want two or more parameters to be equal to zero.
 
+## Fast parameter estimating for one-dimentional model using spm_con_1d
+
+Function ```spm_con_1d(...)``` allows for very fast parameter estimating for one-dimensional model. This function implements a analytical solution to estimate the parameters in the continuous SPM model by assuming all the parameters are constants. Below there is an example.
+
+```{r}
+library(stpm) 
+dat <- simdata_cont(N=500)
+colnames(dat) <- c("id", "xi", "t1", "t2", "y", "y.next")
+res <- spm_con_1d(as.data.frame(dat), a=-0.05, b=2, q=1e-8, f=80, f1=90, mu0=1e-3, theta=0.08)
+res
+```
+
+
 ## Simulation (individual trajectory projection, also known as microsimulations)
 
 We added one- and multi- dimensional simulation to be able to generate test data for hyphotesis testing. Data,  which can be simulated can be discrete (equal intervals between observations) and continuous (with arbitrary intervals).
+
+
 
 ### Discrete-time simulation
 
