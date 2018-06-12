@@ -10,6 +10,36 @@ trim.trailing <- function (x) sub("\\s+$", "", x)
 #'@param x a string to trim
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
+# Parse input parameter string
+parse_parameters <- function(formulas, parameter, p.const.ind, p.coeff.ind, variables) {
+    #---
+    parameters <- trim(unlist(strsplit(formulas[[parameter]],"[\\+\\*\\(\\)]",fixed=F)))
+    parameters <- parameters[which(!(parameters %in% c("t","exp")))]
+    #for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
+    for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);}
+    variables <- unique(variables)
+    p.constants <- c()
+    p.coeffs <- c()
+    p.temp <- trim(unlist(strsplit(formulas$at,"[\\+\\-\\(\\)]",fixed=F)))
+    for(i in 1:length(p.temp)) {
+        if(grepl('t', p.temp[i]) == FALSE) {
+            p.constants <- c(p.constants, p.temp[i])
+        } else {
+            p.temp.coeff <- trim(unlist(strsplit(p.temp[i],"[\\*]",fixed=F)))
+            p.coeffs <- c(p.coeffs, p.temp.coeff[which(!(p.temp.coeff %in% c("t","exp")))])
+        }
+    }
+  
+    for(i in 1:length(p.constants)) {
+        p.const.ind <- c(p.const.ind, which(variables == p.constants[i]))
+    }
+    for(i in 1:length(p.coeffs)) {
+        p.coeff.ind <- c(p.coeff.ind, which(variables == p.coeffs[i]))
+    }
+    
+    return(list(p.const.ind=p.const.ind, p.coeff.ind=p.coeff.ind, variables=variables))
+
+}
 
 #'spm_time_dep : a function for the model with 
 #'time-dependent model parameters.
@@ -97,161 +127,45 @@ spm_time_dep <- function(x,
         p.coeff.ind <- c()
     
         #---
-        parameters <- trim(unlist(strsplit(formulas$at,"[\\+\\*\\(\\)]",fixed=F)))
-        parameters <- parameters[which(!(parameters %in% c("t","exp")))]
-        #for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
-        for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);}
-        variables <- unique(variables)
-        p.constants <- c()
-        p.coeffs <- c()
-        p.temp <- trim(unlist(strsplit(formulas$at,"[\\+\\-\\(\\)]",fixed=F)))
-        for(i in 1:length(p.temp)) {
-            if(grepl('t', p.temp[i]) == FALSE) {
-                p.constants <- c(p.constants, p.temp[i])
-            } else {
-                p.temp.coeff <- trim(unlist(strsplit(p.temp[i],"[\\*]",fixed=F)))
-                p.coeffs <- c(p.coeffs, p.temp.coeff[which(!(p.temp.coeff %in% c("t","exp")))])
-            }
-        }
-    
-        for(i in 1:length(p.constants)) {
-            p.const.ind <- c(p.const.ind, which(variables == p.constants[i]))
-        }
-        for(i in 1:length(p.coeffs)) {
-            p.coeff.ind <- c(p.coeff.ind, which(variables == p.coeffs[i]))
-        }
-    
+        parsed <- parse_parameters(formulas, "at", p.const.ind, p.coeff.ind, variables)
+        p.const.ind <- parsed$p.const.ind
+        p.coeff.ind <- parsed$p.coeff.ind
+        variables <- parsed$variables
+        
         #----
-        parameters <- trim(unlist(strsplit(formulas$f1t,"[\\+\\*\\(\\)]",fixed=F)))
-        parameters <- parameters[which(!(parameters %in% c("t","exp")))]
-        #for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);} 
-        for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);} 
-        variables <- unique(variables)
-        p.constants <- c()
-        p.coeffs <- c()
-        p.temp <- trim(unlist(strsplit(formulas$f1t,"[\\+\\-\\(\\)]",fixed=F)))
-        for(i in 1:length(p.temp)) {
-            if(grepl('t', p.temp[i]) == FALSE) {
-                p.constants <- c(p.constants, p.temp[i])
-            } else {
-                p.temp.coeff <- trim(unlist(strsplit(p.temp[i],"[\\*]",fixed=F)))
-                p.coeffs <- c(p.coeffs, p.temp.coeff[which(!(p.temp.coeff %in% c("t","exp")))])
-            }
-        }
-    
-        for(i in 1:length(p.constants)) {
-            p.const.ind <- c(p.const.ind, which(variables == p.constants[i]))
-        }
-        for(i in 1:length(p.coeffs)) {
-            p.coeff.ind <- c(p.coeff.ind, which(variables == p.coeffs[i]))
-        }
+        parsed <- parse_parameters(formulas, "f1t", p.const.ind, p.coeff.ind, variables)
+        p.const.ind <- parsed$p.const.ind
+        p.coeff.ind <- parsed$p.coeff.ind
+        variables <- parsed$variables
     
         #---
-        parameters <- trim(unlist(strsplit(formulas$Qt,"[\\+\\*\\(\\)]",fixed=F)))
-        parameters <- parameters[which(!(parameters %in% c("t","exp")))]
-        #for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
-        for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);}
-        variables <- unique(variables)
-        p.constants <- c()
-        p.coeffs <- c()
-        p.temp <- trim(unlist(strsplit(formulas$Qt,"[\\+\\-\\(\\)]",fixed=FALSE)))
-        for(i in 1:length(p.temp)) {
-            if(grepl("*t", p.temp[i]) == FALSE) {
-                p.temp.coeff <- trim(unlist(strsplit(p.temp[i],"[\\*]",fixed=FALSE)))
-                p.constants <- c(p.constants,p.temp.coeff[which(!(p.temp.coeff %in% c("t","exp")))])
-            } else {
-                p.temp.coeff <- trim(unlist(strsplit(p.temp[i],"[\\*]",fixed=FALSE)))
-                p.coeffs <- c(p.coeffs, p.temp.coeff[which(!(p.temp.coeff %in% c("t","exp")))])
-            }
-        }
-    
-        for(i in 1:length(p.constants)) {
-            p.const.ind <- c(p.const.ind, which(variables == p.constants[i]))
-        }
-        for(i in 1:length(p.coeffs)) {
-            p.coeff.ind <- c(p.coeff.ind, which(variables == p.coeffs[i]))
-        }
+        parsed <- parse_parameters(formulas, "Qt", p.const.ind, p.coeff.ind, variables)
+        p.const.ind <- parsed$p.const.ind
+        p.coeff.ind <- parsed$p.coeff.ind
+        variables <- parsed$variables
+        
+        #---
+        parsed <- parse_parameters(formulas, "ft", p.const.ind, p.coeff.ind, variables)
+        p.const.ind <- parsed$p.const.ind
+        p.coeff.ind <- parsed$p.coeff.ind
+        variables <- parsed$variables
+        #---
+        
+        parsed <- parse_parameters(formulas, "bt", p.const.ind, p.coeff.ind, variables)
+        p.const.ind <- parsed$p.const.ind
+        p.coeff.ind <- parsed$p.coeff.ind
+        variables <- parsed$variables
     
         #---
-        parameters <- trim(unlist(strsplit(formulas$ft,"[\\+\\*\\(\\)]",fixed=F)))
-        parameters <- parameters[which(!(parameters %in% c("t","exp")))]
-        #for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
-        for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);}
-        variables <- unique(variables)
-        p.constants <- c()
-        p.coeffs <- c()
-        p.temp <- trim(unlist(strsplit(formulas$ft,"[\\+\\-\\(\\)]",fixed=F)))
-        for(i in 1:length(p.temp)) {
-            if(grepl('t', p.temp[i]) == FALSE) {
-                p.constants <- c(p.constants, p.temp[i])
-            } else {
-                p.temp.coeff <- trim(unlist(strsplit(p.temp[i],"[\\*]",fixed=F)))
-                p.coeffs <- c(p.coeffs, p.temp.coeff[which(!(p.temp.coeff %in% c("t","exp")))])
-            }
-        }
-    
-        for(i in 1:length(p.constants)) {
-            p.const.ind <- c(p.const.ind, which(variables == p.constants[i]))
-        }
-        for(i in 1:length(p.coeffs)) {
-            p.coeff.ind <- c(p.coeff.ind, which(variables == p.coeffs[i]))
-        }
-    
-        #---
-        parameters <- trim(unlist(strsplit(formulas$bt,"[\\+\\*\\(\\)]",fixed=F)))
-        parameters <- parameters[which(!(parameters %in% c("t","exp")))]
-        for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);}
-        variables <- unique(variables)
-        p.constants <- c()
-        p.coeffs <- c()
-        p.temp <- trim(unlist(strsplit(formulas$bt,"[\\+\\-\\(\\)]",fixed=F)))
-        for(i in 1:length(p.temp)) {
-            if(grepl('t', p.temp[i]) == FALSE) {
-                p.constants <- c(p.constants, p.temp[i])
-            } else {
-                p.temp.coeff <- trim(unlist(strsplit(p.temp[i],"[\\*]",fixed=F)))
-                p.coeffs <- c(p.coeffs, p.temp.coeff[which(!(p.temp.coeff %in% c("t","exp")))])
-            }
-        }
-    
-        for(i in 1:length(p.constants)) {
-            p.const.ind <- c(p.const.ind, which(variables == p.constants[i]))
-        }
-        for(i in 1:length(p.coeffs)) {
-            p.coeff.ind <- c(p.coeff.ind, which(variables == p.coeffs[i]))
-        }
-    
-        #---
-        parameters <- trim(unlist(strsplit(formulas$mu0t,"[\\+\\*\\(\\)]",fixed=F)))
-        parameters <- parameters[which(!(parameters %in% c("t","exp")))]
-        for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);}
-        variables <- unique(variables)
-        p.constants <- c()
-        p.coeffs <- c()
-        p.temp <- trim(unlist(strsplit(formulas$mu0t,"[\\+\\-\\(\\)]",fixed=F)))
-        for(i in 1:length(p.temp)) {
-            if(grepl("*t", p.temp[i]) == FALSE) {
-                p.temp.coeff <- trim(unlist(strsplit(p.temp[i],"[\\*]",fixed=FALSE)))
-                p.constants <- c(p.constants,p.temp.coeff[which(!(p.temp.coeff %in% c("t","exp")))])
-            } else {
-                p.temp.coeff <- trim(unlist(strsplit(p.temp[i],"[\\*]",fixed=FALSE)))
-                p.coeffs <- c(p.coeffs, p.temp.coeff[which(!(p.temp.coeff %in% c("t","exp")))])
-            }
-        }
-    
-        for(i in 1:length(p.constants)) {
-            p.const.ind <- c(p.const.ind, which(variables == p.constants[i]))
-        }
-        for(i in 1:length(p.coeffs)) {
-            p.coeff.ind <- c(p.coeff.ind, which(variables == p.coeffs[i]))
-        }
+        parsed <- parse_parameters(formulas, "mu0t", p.const.ind, p.coeff.ind, variables)
+        p.const.ind <- parsed$p.const.ind
+        p.coeff.ind <- parsed$p.coeff.ind
+        variables <- parsed$variables
     
         ########=============
         p.const.ind <- unique(p.const.ind)
         p.coeff.ind <- unique(p.coeff.ind)
-    
         variables <- variables[which(variables != "0")]
-    
     
         stpar <- rep(0, length(variables))
         for(i in 1:length(stpar)) {
