@@ -85,6 +85,36 @@ spm_time_dep <- function(x,
                          stopifbound=FALSE, 
                          lb=NULL, ub=NULL,
                          verbose=FALSE, opts=list(algorithm="NLOPT_LN_NELDERMEAD", 
+                                                  maxeval=100, ftol_rel=1e-8),
+                         lrtest=FALSE) {
+    res <- NA
+    if(lrtest == FALSE) {
+        res <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
+                                     verbose = verbose, opts=opts)
+    } else if(lrtest=="H01" | lrtest==TRUE) {
+        res <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
+                                   verbose = verbose, opts=opts)
+        frm[["Qt"]] <- "0"
+        start[["Q"]] <- NULL
+        lb <- lb[-which(names(lb) == "Q")]
+        ub <- ub[-which(names(ub) == "Q")]
+        
+        res.null <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
+                                     verbose = verbose, opts=opts)
+        lr.test.pval <- LRTest(res[[1]]$LogLik, res.null[[1]]$LogLik)
+        res[["lr.test.pval"]] <- lr.test.pval
+    }
+    
+    return(list(res=res, res.null=res.null))
+}
+#'
+spm_time_dep_internal <- function(x, 
+                         start=list(a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3),
+                         frm=list(at="a", f1t="f1", Qt="Q", ft="f", 
+                                  bt="b", mu0t="mu0"), 
+                         stopifbound=FALSE, 
+                         lb=NULL, ub=NULL,
+                         verbose=FALSE, opts=list(algorithm="NLOPT_LN_NELDERMEAD", 
                                                   maxeval=100, ftol_rel=1e-8)) {
   
     #avail_algorithms <- c("NLOPT_GN_DIRECT", "NLOPT_GN_DIRECT_L",
@@ -179,7 +209,7 @@ spm_time_dep <- function(x,
         }
     
         # Lower and upper boundaries calculation:
-    
+        
         lower_bound <- c()
     
         if(is.null(lb)) {
@@ -359,7 +389,7 @@ spm_time_dep <- function(x,
             if(verbose  == TRUE) {print(e)}
         }, finally=NA)
     
-        final_res <- list(results)
+        #final_res <- list(results)
         final_res
     }
     #---------------------End of optimize---------------------------#
@@ -372,6 +402,6 @@ spm_time_dep <- function(x,
         formulas.work[[item]] <- formulas[[item]]
     }
     # Optimization:
-    res = optimize(data, start, formulas.work, verbose, lb, ub, stopifbound, opts)
+    res <- optimize(data, start, formulas.work, verbose, lb, ub, stopifbound, opts)
     invisible(res)
 }

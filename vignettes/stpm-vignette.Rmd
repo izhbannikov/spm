@@ -201,10 +201,10 @@ library(stpm)
 n <- 10
 data <- simdata_time_dep(N=n)
 # Estimation:
-opt.par <- spm_time_dep(data, 
-                        start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0 = 0.001), 
-                        frm = list(at = "a", f1t = "f1", Qt = "Q", ft = "f", bt = "b", mu0t= "mu0"))
-opt.par
+#opt.par <- spm_time_dep(data, 
+#                        start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = #5, mu0 = 0.001), 
+#                        frm = list(at = "a", f1t = "f1", Qt = "Q", ft = "f", bt #= "b", mu0t= "mu0"))
+#opt.par
 ```
 
 
@@ -293,10 +293,11 @@ This model uses only one covariate, therefore setting-up model parameters is eas
 ```{r}
 n <- 10
 data <- simdata_time_dep(N=n)
+# !!!! Temporarily commented
 # Estimation:
-opt.par <- spm_time_dep(data, start=list(a=-0.05, f1=80, Q=2e-08, f=80, b=5, mu0=0.001), 
-                        lb=c(-1, 30, 1e-8, 30, 1, 1e-6), ub=c(0, 120, 5e-8, 130, 10, 1e-2))
-opt.par
+#opt.par <- spm_time_dep(data, start=list(a=-0.05, f1=80, Q=2e-08, f=80, b=5, #mu0=0.001), 
+#                        lb=c(-1, 30, 1e-8, 30, 1, 1e-6), ub=c(0, 120, 5e-8, 130, 10, 1e-2))
+#opt.par
 
 
 ```
@@ -310,9 +311,10 @@ Imagine a situation when one parameter function you want to be equal to zero: $f
 library(stpm)
 n <- 10
 data <- simdata_time_dep(N=n)
+# Temprarily commented
 # Estimation:
-opt.par <- spm_time_dep(data, frm = list(at="a", f1t="f1", Qt="Q", ft="0", bt="b", mu0t="mu0"))
-opt.par
+#opt.par <- spm_time_dep(data, frm = list(at="a", f1t="f1", Qt="Q", ft="0", bt="b", mu0t="mu0"))
+#opt.par
 ```
 
 As you can see, there is no parameter $f$ in $opt.par$. This because we set $f=0$ in $frm$!
@@ -323,11 +325,12 @@ Then, is you want to set the constraints, you must not specify the starting valu
 
 n <- 10
 data <- simdata_time_dep(N=n)
+# Temporarily commented below
 # Estimation:
-opt.par <- spm_time_dep(data, frm = list(at="a", f1t="f1", Qt="Q", ft="0", bt="b", mu0t="mu0"), 
-                        start=list(a=-0.05, f1=80, Q=2e-08, b=5, mu0=0.001), 
-                        lb=c(-1, 30, 1e-8, 1, 1e-6), ub=c(0, 120, 5e-8, 10, 1e-2))
-opt.par
+#opt.par <- spm_time_dep(data, frm = list(at="a", f1t="f1", Qt="Q", ft="0", bt="b", mu0t="mu0"), 
+#                        start=list(a=-0.05, f1=80, Q=2e-08, b=5, mu0=0.001), 
+#                        lb=c(-1, 30, 1e-8, 1, 1e-6), ub=c(0, 120, 5e-8, 10, 1e-2))
+#opt.par
 
 ```
 
@@ -609,6 +612,23 @@ head(incomplete.data)
 
 ###### Look at the imputed data #####
 head(imp.data)
+```
+
+## Prediction
+
+We provide a simple function to predict the next value of \code{Y}.
+Refer to the example below:
+
+```{r}
+library(stpm)
+data <- simdata_discr(N=100, format="long")
+res <- spm_discrete(data)
+splitted <- split(data, data$id)
+df <- data.frame()
+lapply(1:100, function(i) {df<<-rbind(df,splitted[[i]][dim(splitted[[i]])[1],c("id", "xi", "t1", "y1")])})
+names(df) <- c("id", "xi", "t", "y")
+predicted <- predict(object=res, data=df, dt=3)
+head(predicted)
 ```
 
 

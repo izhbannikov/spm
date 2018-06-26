@@ -31,8 +31,8 @@ m <- function(y, t1, t2, a, f1) {
 #' @param tt t (time)
 #' @return mu Next value of mu
 mu <- function(y, mu0, b, Q, theta, tt) {
-  ans <- (mu0 + t(y) %*% b + t(y) %*% Q %*% y)*exp(theta*tt)
-  ans
+    ans <- (mu0 + t(y) %*% b + t(y) %*% Q %*% y)*exp(theta*tt)
+    ans
 }
 
 #mu <- function(tt, y1, gamma1, f, f1, mu0, theta, Q) {
@@ -162,52 +162,51 @@ func1 <- function(tt, y, a, f1, Q, f, b, theta) {
 #' @param theta theta (see Yashin et. al, 2007)
 #' @return y.next Next value of Y
 getNextY.cont <- function(y1, t1, t2, a, f1, Q, f, b, theta) {
-  nsteps <- 4
-  tdiff <- t2-t1
-  h <- tdiff/nsteps
-  gamma1 <- matrix(nrow=dim(a)[1], ncol=dim(a)[1], 0) # set gamma1 to zero matrix
-  #gamma1 <- matrix(nrow=1, ncol=1, 0) # set gamma1 to zero matrix
-  tt <- t1
+    nsteps <- 4
+    tdiff <- t2-t1
+    h <- tdiff/nsteps
+    gamma1 <- matrix(nrow=dim(a)[1], ncol=dim(a)[1], 0) # set gamma1 to zero matrix
+    #gamma1 <- matrix(nrow=1, ncol=1, 0) # set gamma1 to zero matrix
+    tt <- t1
   
-  out <- list()
-  out[[1]] <- y1
-  out[[2]] <- gamma1
+    out <- list()
+    out[[1]] <- y1
+    out[[2]] <- gamma1
   
   
-  for(j in 1:nsteps) {
-    #Runge-Kutta method:
+    for(j in 1:nsteps) {
+        #Runge-Kutta method:
+        yn <- out
+        k1 <- func1(tt, yn, a, f1, Q, f, b, theta)
     
-    yn <- out
-    k1 <- func1(tt, yn, a, f1, Q, f, b, theta)
+        yn[[1]] <- out[[1]] + h/2 * k1[[1]]
+        yn[[2]] <- out[[2]] + h/2 * k1[[2]]
+        k2 <- func1(tt+h/2, yn, a, f1, Q, f, b, theta)
     
-    yn[[1]] <- out[[1]] + h/2 * k1[[1]]
-    yn[[2]] <- out[[2]] + h/2 * k1[[2]]
-    k2 <- func1(tt+h/2, yn, a, f1, Q, f, b, theta)
+        yn[[1]] <- out[[1]] + h/2 * k2[[1]]
+        yn[[2]] <- out[[2]] + h/2 * k2[[2]]
+        k3 <- func1(tt+h/2, yn, a, f1, Q, f, b, theta)
     
-    yn[[1]] <- out[[1]] + h/2 * k2[[1]]
-    yn[[2]] <- out[[2]] + h/2 * k2[[2]]
-    k3 <- func1(tt+h/2, yn, a, f1, Q, f, b, theta)
+        yn[[1]] <- out[[1]] + h * k3[[1]]
+        yn[[2]] <- out[[2]] + h * k3[[2]]
+        k4 <- func1(tt+h, yn, a, f1, Q, f, b, theta)
     
-    yn[[1]] <- out[[1]] + h * k3[[1]]
-    yn[[2]] <- out[[2]] + h * k3[[2]]
-    k4 <- func1(tt+h, yn, a, f1, Q, f, b, theta)
+        out[[1]] <- out[[1]] + h/6 * (k1[[1]] + 2*k2[[1]] + 2*k3[[1]] + k4[[1]])
+        out[[2]] <- out[[2]] + h/6 * (k1[[2]] + 2*k2[[2]] + 2*k3[[2]] + k4[[2]])
     
-    out[[1]] <- out[[1]] + h/6 * (k1[[1]] + 2*k2[[1]] + 2*k3[[1]] + k4[[1]])
-    out[[2]] <- out[[2]] + h/6 * (k1[[2]] + 2*k2[[2]] + 2*k3[[2]] + k4[[2]])
-    
-    tt <- tt + h
-  }
-  
-  m2 <- out[[1]]
-  gamma2 <- out[[2]]
-  
-  # New y2:
-  y2 <- matrix(nrow=dim(m2)[1], ncol=1, 0)
-  for(ii in 1:dim(m2)[1]) {
-    y2[ii,1] <- rnorm(1, mean=m2[ii,1], sd=sqrt(gamma2[ii,ii])) 
-    #y2[ii,1] <- rnorm(1, mean=m2[ii,1], sd=gamma2[ii,ii]) 
+        tt <- tt + h
     }
-  y2
+  
+    m2 <- out[[1]]
+    gamma2 <- out[[2]]
+  
+    # New y2:
+    y2 <- matrix(nrow=dim(m2)[1], ncol=1, 0)
+    for(ii in 1:dim(m2)[1]) {
+        y2[ii,1] <- rnorm(1, mean=m2[ii,1], sd=sqrt(gamma2[ii,ii])) 
+        #y2[ii,1] <- rnorm(1, mean=m2[ii,1], sd=gamma2[ii,ii]) 
+    }
+    y2
 }
 
 #'Multiple Data Imputation with SPM
