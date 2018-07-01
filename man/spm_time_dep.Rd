@@ -2,8 +2,7 @@
 % Please edit documentation in R/spm_time-dependent.R
 \name{spm_time_dep}
 \alias{spm_time_dep}
-\title{spm_time_dep : a function for the model with 
-time-dependent model parameters.}
+\title{A function for the model with time-dependent model parameters.}
 \usage{
 spm_time_dep(x, start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0
   = 0.001), frm = list(at = "a", f1t = "f1", Qt = "Q", ft = "f", bt = "b",
@@ -49,8 +48,7 @@ message A message given by \code{nloptr} optimization function
 (see documentation for nloptr package).
 }
 \description{
-spm_time_dep : a function for the model with 
-time-dependent model parameters.
+A function for the model with time-dependent model parameters.
 }
 \examples{
 library(stpm)
@@ -60,7 +58,6 @@ data <- simdata_time_dep(N=n)
 # Estimation:
 opt.par <- spm_time_dep(data)
 opt.par
-
 }
 \references{
 Yashin, A. et al (2007), Health decline, 

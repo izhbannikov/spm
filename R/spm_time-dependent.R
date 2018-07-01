@@ -1,48 +1,5 @@
-#'Returns string w/o leading whitespace
-#'@param x a string to trim
-trim.leading <- function (x)  sub("^\\s+", "", x)
-
-#'Returns string w/o trailing whitespace
-#'@param x a string to trim
-trim.trailing <- function (x) sub("\\s+$", "", x)
-
-#'Returns string w/o leading or trailing whitespace
-#'@param x a string to trim
-trim <- function (x) gsub("^\\s+|\\s+$", "", x)
-
-# Parse input parameter string
-parse_parameters <- function(formulas, parameter, p.const.ind, p.coeff.ind, variables) {
-    #---
-    parameters <- trim(unlist(strsplit(formulas[[parameter]],"[\\+\\*\\(\\)]",fixed=F)))
-    parameters <- parameters[which(!(parameters %in% c("t","exp")))]
-    #for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
-    for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);}
-    variables <- unique(variables)
-    p.constants <- c()
-    p.coeffs <- c()
-    p.temp <- trim(unlist(strsplit(formulas$at,"[\\+\\-\\(\\)]",fixed=F)))
-    for(i in 1:length(p.temp)) {
-        if(grepl('t', p.temp[i]) == FALSE) {
-            p.constants <- c(p.constants, p.temp[i])
-        } else {
-            p.temp.coeff <- trim(unlist(strsplit(p.temp[i],"[\\*]",fixed=F)))
-            p.coeffs <- c(p.coeffs, p.temp.coeff[which(!(p.temp.coeff %in% c("t","exp")))])
-        }
-    }
-  
-    for(i in 1:length(p.constants)) {
-        p.const.ind <- c(p.const.ind, which(variables == p.constants[i]))
-    }
-    for(i in 1:length(p.coeffs)) {
-        p.coeff.ind <- c(p.coeff.ind, which(variables == p.coeffs[i]))
-    }
-    
-    return(list(p.const.ind=p.const.ind, p.coeff.ind=p.coeff.ind, variables=variables))
-
-}
-
-#'spm_time_dep : a function for the model with 
-#'time-dependent model parameters.
+#' A function for the model with time-dependent model parameters.
+#'
 #'@param x Input data table.
 #'@param start A list of starting parameters, default: 
 #'\code{start=list(a=-0.5, f1=80, Q=2e-8, f=80, b=5, mu0=1e-5)}.
@@ -77,7 +34,6 @@ parse_parameters <- function(formulas, parameter, p.const.ind, p.coeff.ind, vari
 #'# Estimation:
 #'opt.par <- spm_time_dep(data)
 #'opt.par
-#'
 spm_time_dep <- function(x, 
                          start=list(a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3),
                          frm=list(at="a", f1t="f1", Qt="Q", ft="f", 
@@ -87,10 +43,16 @@ spm_time_dep <- function(x,
                          verbose=FALSE, opts=list(algorithm="NLOPT_LN_NELDERMEAD", 
                                                   maxeval=100, ftol_rel=1e-8),
                          lrtest=FALSE) {
+  
+    if(is.null(start)) {
+        start <- list(a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3)
+    }
+  
     res <- NA
     if(lrtest == FALSE) {
         res <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
                                      verbose = verbose, opts=opts)
+        res.null <- NA
     } else if(lrtest=="H01" | lrtest==TRUE) {
         res <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
                                    verbose = verbose, opts=opts)
@@ -101,22 +63,17 @@ spm_time_dep <- function(x,
         
         res.null <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
                                      verbose = verbose, opts=opts)
+        
         lr.test.pval <- LRTest(res[[1]]$LogLik, res.null[[1]]$LogLik)
         res[["lr.test.pval"]] <- lr.test.pval
     }
     
     return(list(res=res, res.null=res.null))
 }
-#'
-spm_time_dep_internal <- function(x, 
-                         start=list(a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3),
-                         frm=list(at="a", f1t="f1", Qt="Q", ft="f", 
-                                  bt="b", mu0t="mu0"), 
-                         stopifbound=FALSE, 
-                         lb=NULL, ub=NULL,
-                         verbose=FALSE, opts=list(algorithm="NLOPT_LN_NELDERMEAD", 
-                                                  maxeval=100, ftol_rel=1e-8)) {
-  
+
+
+spm_time_dep_internal <- function(x, start, frm, stopifbound, lb, ub, verbose, opts) {
+    
     #avail_algorithms <- c("NLOPT_GN_DIRECT", "NLOPT_GN_DIRECT_L",
     #                      "NLOPT_GN_DIRECT_L_RAND", "NLOPT_GN_DIRECT_NOSCAL",
     #                      "NLOPT_GN_DIRECT_L_NOSCAL",
@@ -128,10 +85,7 @@ spm_time_dep_internal <- function(x,
     #                      "NLOPT_LN_SBPLX",
     #                      "NLOPT_LN_BOBYQA", "NLOPT_GN_ISRES")
   
-    if(is.null(start)) {
-        start <- list(a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3)
-    }
-  
+    
     #--------------Begin of optimize function-------------------#
     optimize <- function(data, starting_params,  formulas, verbose, 
                          lb, ub, 
@@ -385,12 +339,13 @@ spm_time_dep_internal <- function(x,
             results[["LogLik"]] <- L.prev
             results[["objective"]] <- ans$objective
             results[["message"]] <- ans$message
+            
         },  error=function(e) {
             if(verbose  == TRUE) {print(e)}
         }, finally=NA)
     
-        #final_res <- list(results)
-        final_res
+        final_res <- list(results)
+        return(final_res)
     }
     #---------------------End of optimize---------------------------#
   
@@ -403,5 +358,37 @@ spm_time_dep_internal <- function(x,
     }
     # Optimization:
     res <- optimize(data, start, formulas.work, verbose, lb, ub, stopifbound, opts)
+    
     invisible(res)
+}
+
+
+parse_parameters <- function(formulas, parameter, p.const.ind, p.coeff.ind, variables) {
+  #---
+  parameters <- trim(unlist(strsplit(formulas[[parameter]],"[\\+\\*\\(\\)]",fixed=F)))
+  parameters <- parameters[which(!(parameters %in% c("t","exp")))]
+  #for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
+  for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);}
+  variables <- unique(variables)
+  p.constants <- c()
+  p.coeffs <- c()
+  p.temp <- trim(unlist(strsplit(formulas$at,"[\\+\\-\\(\\)]",fixed=F)))
+  for(i in 1:length(p.temp)) {
+    if(grepl('t', p.temp[i]) == FALSE) {
+      p.constants <- c(p.constants, p.temp[i])
+    } else {
+      p.temp.coeff <- trim(unlist(strsplit(p.temp[i],"[\\*]",fixed=F)))
+      p.coeffs <- c(p.coeffs, p.temp.coeff[which(!(p.temp.coeff %in% c("t","exp")))])
+    }
+  }
+  
+  for(i in 1:length(p.constants)) {
+    p.const.ind <- c(p.const.ind, which(variables == p.constants[i]))
+  }
+  for(i in 1:length(p.coeffs)) {
+    p.coeff.ind <- c(p.coeff.ind, which(variables == p.coeffs[i]))
+  }
+  
+  return(list(p.const.ind=p.const.ind, p.coeff.ind=p.coeff.ind, variables=variables))
+  
 }

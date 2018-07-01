@@ -1,5 +1,6 @@
-New for version 1.7.0
+New for version 1.7.2
 ======================
 * Version released
 * Essential statistics added for output coefficients of functions spm_con_1d and spm_con_1d_g
+* Added LRtest for H01 hyphothesis.
 * Minor bug fixes
