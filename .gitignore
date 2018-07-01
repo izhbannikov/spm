@@ -6,3 +6,4 @@ src/*.so
 man/.Rhistory
 R/Untitled.R
 inst/doc
+vignettes/.Rhistory
