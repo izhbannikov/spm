@@ -315,7 +315,7 @@ opt.par <- spm_time_dep(data, frm = list(at="a", f1t="f1", Qt="Q", ft="0", bt="b
 opt.par
 ```
 
-As you can see, there is no parameter $f$ in $opt.par$. This because we set $f=0$ in $frm$!
+As you can see, there is no parameter $f$ in $opt.par$. This is because we set $f=0$ in $frm$!
 
 Then, is you want to set the constraints, you must not specify the starting value (parameter $start$) and $lb$/$ub$ for the parameter $f$ (otherwise, the function raises an error):
 

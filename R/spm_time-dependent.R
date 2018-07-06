@@ -53,7 +53,7 @@ spm_time_dep <- function(x,
         res <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
                                      verbose = verbose, opts=opts)
         res.null <- NA
-    } else if(lrtest=="H01" | lrtest==TRUE) {
+    } else if(lrtest=="H01" | lrtest==TRUE) { # a_q = 0, b_q = 0
         res <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
                                    verbose = verbose, opts=opts)
         frm[["Qt"]] <- "0"
@@ -64,6 +64,51 @@ spm_time_dep <- function(x,
         res.null <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
                                      verbose = verbose, opts=opts)
         
+        lr.test.pval <- LRTest(res[[1]]$LogLik, res.null[[1]]$LogLik)
+        res[["lr.test.pval"]] <- lr.test.pval
+    } else if(lrtest=="H02") { # a_q = const, b_q = 0
+        const.q <- frm[["Qt"]]
+        frm[["Qt"]] <- "Q"
+        res <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
+                                   verbose = verbose, opts=opts)
+        
+        frm[["Qt"]] <- const.q
+        start[["Q"]] <- NULL
+        lb <- lb[-which(names(lb) == "Q")]
+        ub <- ub[-which(names(ub) == "Q")]
+      
+        res.null <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
+                                        verbose = verbose, opts=opts)
+        res.null[[1]][["Q"]] <- as.numeric(const.q)
+        lr.test.pval <- LRTest(res[[1]]$LogLik, res.null[[1]]$LogLik)
+        res[["lr.test.pval"]] <- lr.test.pval
+    } else if(lrtest=="H03") { # a_f1 = 0, b_f1 = 0
+        res <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
+                                   verbose = verbose, opts=opts)
+        frm[["f1t"]] <- "0"
+        start[["f1"]] <- NULL
+        lb <- lb[-which(names(lb) == "f1")]
+        ub <- ub[-which(names(ub) == "f1")]
+      
+        res.null <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
+                                        verbose = verbose, opts=opts)
+      
+        lr.test.pval <- LRTest(res[[1]]$LogLik, res.null[[1]]$LogLik)
+        res[["lr.test.pval"]] <- lr.test.pval
+    } else if(lrtest=="H05") { # a_y = const, b_y = 0
+        const.q <- frm[["at"]]
+        frm[["at"]] <- "a"
+        res <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
+                                   verbose = verbose, opts=opts)
+      
+        frm[["at"]] <- const.q
+        start[["a"]] <- NULL
+        lb <- lb[-which(names(lb) == "a")]
+        ub <- ub[-which(names(ub) == "a")]
+      
+        res.null <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
+                                        verbose = verbose, opts=opts)
+        res.null[[1]][["a"]] <- as.numeric(const.q)
         lr.test.pval <- LRTest(res[[1]]$LogLik, res.null[[1]]$LogLik)
         res[["lr.test.pval"]] <- lr.test.pval
     }
@@ -109,48 +154,21 @@ spm_time_dep_internal <- function(x, start, frm, stopifbound, lb, ub, verbose, o
         # Assigning parameters:
         p.const.ind <- c()
         p.coeff.ind <- c()
-    
-        #---
-        parsed <- parse_parameters(formulas, "at", p.const.ind, p.coeff.ind, variables)
-        p.const.ind <- parsed$p.const.ind
-        p.coeff.ind <- parsed$p.coeff.ind
-        variables <- parsed$variables
         
-        #----
-        parsed <- parse_parameters(formulas, "f1t", p.const.ind, p.coeff.ind, variables)
-        p.const.ind <- parsed$p.const.ind
-        p.coeff.ind <- parsed$p.coeff.ind
-        variables <- parsed$variables
-    
-        #---
-        parsed <- parse_parameters(formulas, "Qt", p.const.ind, p.coeff.ind, variables)
-        p.const.ind <- parsed$p.const.ind
-        p.coeff.ind <- parsed$p.coeff.ind
-        variables <- parsed$variables
+        model.coef <- c("at", "f1t", "Qt", "ft", "bt", "mu0t")
         
-        #---
-        parsed <- parse_parameters(formulas, "ft", p.const.ind, p.coeff.ind, variables)
-        p.const.ind <- parsed$p.const.ind
-        p.coeff.ind <- parsed$p.coeff.ind
-        variables <- parsed$variables
-        #---
+        for(c in model.coef) {
+            parsed <- parse_parameters(formulas, c, p.const.ind, p.coeff.ind, variables)
+            p.const.ind <- parsed$p.const.ind
+            p.coeff.ind <- parsed$p.coeff.ind
+            variables <- parsed$variables
+        }
         
-        parsed <- parse_parameters(formulas, "bt", p.const.ind, p.coeff.ind, variables)
-        p.const.ind <- parsed$p.const.ind
-        p.coeff.ind <- parsed$p.coeff.ind
-        variables <- parsed$variables
-    
-        #---
-        parsed <- parse_parameters(formulas, "mu0t", p.const.ind, p.coeff.ind, variables)
-        p.const.ind <- parsed$p.const.ind
-        p.coeff.ind <- parsed$p.coeff.ind
-        variables <- parsed$variables
-    
         ########=============
         p.const.ind <- unique(p.const.ind)
         p.coeff.ind <- unique(p.coeff.ind)
-        variables <- variables[which(variables != "0")]
-    
+        variables <- suppressWarnings(variables[which(is.na(as.numeric(variables)))])
+        
         stpar <- rep(0, length(variables))
         for(i in 1:length(stpar)) {
             stpar[i] <- unlist(starting_params, use.names = FALSE)[i]
@@ -205,6 +223,7 @@ spm_time_dep_internal <- function(x, start, frm, stopifbound, lb, ub, verbose, o
                 cat("Iteration: ", iteration, "\n")
       
             names(params) <- names(stpar)
+            
       
             for(p in names(stpar)) {
                 assign(p, params[[p]], envir=baseenv())
