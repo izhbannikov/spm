@@ -95,6 +95,21 @@ spm_time_dep <- function(x,
       
         lr.test.pval <- LRTest(res[[1]]$LogLik, res.null[[1]]$LogLik)
         res[["lr.test.pval"]] <- lr.test.pval
+    } else if(lrtest=="H04") { # a_f1 = const, b_f1 = 0
+        const.q <- frm[["f1t"]]
+        frm[["f1t"]] <- "f1"
+        res <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
+                                   verbose = verbose, opts=opts)
+        frm[["f1t"]] <- const.q
+        start[["f1"]] <- NULL
+        lb <- lb[-which(names(lb) == "Q")]
+        ub <- ub[-which(names(ub) == "Q")]
+      
+        res.null <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
+                                        verbose = verbose, opts=opts)
+      
+        lr.test.pval <- LRTest(res[[1]]$LogLik, res.null[[1]]$LogLik)
+        res[["lr.test.pval"]] <- lr.test.pval
     } else if(lrtest=="H05") { # a_y = const, b_y = 0
         const.q <- frm[["at"]]
         frm[["at"]] <- "a"
