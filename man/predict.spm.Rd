@@ -9,9 +9,7 @@
 \arguments{
 \item{object}{An object of class \code{spm}}
 
-\item{data}{A data frame with current values of \code{Y} and \code{t}}
-
-\item{dt}{A time interval. Default: 8.}
+\item{...}{Other arguments passed to \code{predict}.}
 }
 \value{
 A data frame consisting of predicted values of \code{Y},
@@ -28,9 +26,13 @@ data <- simdata_discr(N=100, format="long")
 res <- spm_discrete(data)
 splitted <- split(data, data$id)
 df <- data.frame()
-lapply(1:100, function(i) {df<<-rbind(df,splitted[[i]][dim(splitted[[i]])[1],c("id", "xi", "t1", "y1")])})
+lapply(1:100, 
+      function(i) {
+                     df<<-rbind(df,
+                                splitted[[i]][dim(splitted[[i]])[1],
+                                                  c("id", "xi", "t1", "y1")])})
 names(df) <- c("id", "xi", "t", "y")
-predicted <- predict(object=res, data=df, dt=3)
+predicted <- predict(object=res, x=df, dt=3)
 head(predicted)
 }
 

@@ -14,6 +14,10 @@
 #'@param opts A list of options for \code{nloptr}.
 #'Default value: \code{opt=list(algorithm="NLOPT_LN_NELDERMEAD", 
 #'maxeval=100, ftol_rel=1e-8)}.
+#'@param lrtest Indicates should Likelihood-Ratio test be performed.
+#'Possible values: \code{TRUE}, \code{H01}, \code{H02}, \code{H03},
+#'\code{H04}, \code{H05} (see package Vignette for details)
+#'Default value: \code{FALSE}.
 #'Please see \code{nloptr} documentation for more information.
 #'@return A set of estimates of \code{a}, \code{f1}, \code{Q}, 
 #'\code{f}, \code{b}, \code{mu0}.
@@ -44,6 +48,8 @@ spm_time_dep <- function(x,
                                                   maxeval=100, ftol_rel=1e-8),
                          lrtest=FALSE) {
   
+    hypotheses <- c("H01", "H02", "H03", "H04", "H05")
+    
     if(is.null(start)) {
         start <- list(a=-0.05, f1=80, Q=2e-8, f=80, b=5, mu0=1e-3)
     }
@@ -64,7 +70,7 @@ spm_time_dep <- function(x,
         res.null <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
                                      verbose = verbose, opts=opts)
         
-        lr.test.pval <- LRTest(res[[1]]$LogLik, res.null[[1]]$LogLik)
+        lr.test.pval <- LRTest(res$LogLik, res.null$LogLik)
         res[["lr.test.pval"]] <- lr.test.pval
     } else if(lrtest=="H02") { # a_q = const, b_q = 0
         const.q <- frm[["Qt"]]
@@ -79,8 +85,8 @@ spm_time_dep <- function(x,
       
         res.null <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
                                         verbose = verbose, opts=opts)
-        res.null[[1]][["Q"]] <- as.numeric(const.q)
-        lr.test.pval <- LRTest(res[[1]]$LogLik, res.null[[1]]$LogLik)
+        res.null[["Q"]] <- as.numeric(const.q)
+        lr.test.pval <- LRTest(res$LogLik, res.null$LogLik)
         res[["lr.test.pval"]] <- lr.test.pval
     } else if(lrtest=="H03") { # a_f1 = 0, b_f1 = 0
         res <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
@@ -93,7 +99,7 @@ spm_time_dep <- function(x,
         res.null <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
                                         verbose = verbose, opts=opts)
       
-        lr.test.pval <- LRTest(res[[1]]$LogLik, res.null[[1]]$LogLik)
+        lr.test.pval <- LRTest(res$LogLik, res.null$LogLik)
         res[["lr.test.pval"]] <- lr.test.pval
     } else if(lrtest=="H04") { # a_f1 = const, b_f1 = 0
         const.q <- frm[["f1t"]]
@@ -108,7 +114,7 @@ spm_time_dep <- function(x,
         res.null <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
                                         verbose = verbose, opts=opts)
       
-        lr.test.pval <- LRTest(res[[1]]$LogLik, res.null[[1]]$LogLik)
+        lr.test.pval <- LRTest(res$LogLik, res.null$LogLik)
         res[["lr.test.pval"]] <- lr.test.pval
     } else if(lrtest=="H05") { # a_y = const, b_y = 0
         const.q <- frm[["at"]]
@@ -123,12 +129,16 @@ spm_time_dep <- function(x,
       
         res.null <- spm_time_dep_internal(x=x, start=start, frm=frm, stopifbound=stopifbound, lb=lb, ub=ub,
                                         verbose = verbose, opts=opts)
-        res.null[[1]][["a"]] <- as.numeric(const.q)
-        lr.test.pval <- LRTest(res[[1]]$LogLik, res.null[[1]]$LogLik)
+        res.null[["a"]] <- as.numeric(const.q)
+        lr.test.pval <- LRTest(res$LogLik, res.null$LogLik)
         res[["lr.test.pval"]] <- lr.test.pval
     }
     
-    return(list(res=res, res.null=res.null))
+    if((lrtest == TRUE) | (lrtest %in% hypotheses)) {
+        return(list(alternative=res, null=res.null))
+    } else {
+        return(res)
+    }
 }
 
 
@@ -184,38 +194,37 @@ spm_time_dep_internal <- function(x, start, frm, stopifbound, lb, ub, verbose, o
         p.coeff.ind <- unique(p.coeff.ind)
         variables <- suppressWarnings(variables[which(is.na(as.numeric(variables)))])
         
-        stpar <- rep(0, length(variables))
-        for(i in 1:length(stpar)) {
-            stpar[i] <- unlist(starting_params, use.names = FALSE)[i]
+        
+        for(name in names(starting_params)) {
+            if(!(name %in% names(lb))) {
+                lb[[name]] <- ifelse(starting_params[[name]] < 0, 
+                                 starting_params[[name]] + 0.25*starting_params[[name]], 
+                                 starting_params[[name]] - 0.25*starting_params[[name]])
+            }
+          
+            if(!(name %in% names(ub))) {
+                ub[[name]] <- ifelse(starting_params[[name]] < 0, 
+                                 starting_params[[name]] - 0.25*starting_params[[name]],
+                                 starting_params[[name]] + 0.25*starting_params[[name]])
+            }
+        }
+        
+        
+        
+        # Starting parameters, lower and upper boundaries:
+        stpar <- c()
+        lower_bound <- c()
+        upper_bound <- c()
+        for(name in names(starting_params)) {
+            stpar <- c(stpar, starting_params[[name]])
+            lower_bound <- c(lower_bound, lb[[name]])
+            upper_bound <- c(upper_bound, ub[[name]])
         }
         names(stpar) <- variables
     
         for(p in names(stpar)) {
             results[[p]] <- stpar[p]
             assign(p, stpar[p], envir=baseenv())
-        }
-    
-        # Lower and upper boundaries calculation:
-        
-        lower_bound <- c()
-    
-        if(is.null(lb)) {
-            for(i in 1:length(stpar)) {
-                if(stpar[[i]] == 0) {stpar[[i]] = 1e-12}
-                lower_bound <- c(lower_bound, ifelse(stpar[[i]] < 0, stpar[[i]] + 0.25*stpar[[i]], stpar[[i]] - 0.25*stpar[[i]]))
-            }
-        } else {
-            lower_bound <- lb
-        }
-    
-        upper_bound <- c()
-        if(is.null(ub)) {
-            for(i in 1:length(stpar)) {
-                if(stpar[[i]] == 0) {stpar[[i]] = 1e-12}
-                upper_bound <- c(upper_bound, ifelse(stpar[[i]] < 0, stpar[[i]] - 0.25*stpar[[i]], stpar[[i]] + 0.25*stpar[[i]]))
-            }
-        } else {
-            upper_bound <- ub
         }
     
     
@@ -246,7 +255,7 @@ spm_time_dep_internal <- function(x, start, frm, stopifbound, lb, ub, verbose, o
                 if(verbose)
                     cat(paste(p, results[[p]]), " ")
             }
-      
+            
       
             sigma_sq <- function(t1, t2) {
                 # t2 = t_{j}, t1 = t_{j-1}
@@ -363,6 +372,7 @@ spm_time_dep_internal <- function(x, start, frm, stopifbound, lb, ub, verbose, o
                             eval_f = maxlik_t, opts = opts,
                             lb = lower_bound, ub = upper_bound)
             i <- 1
+            
             for(p in names(stpar)) {
                 results[[p]] <<- ans$solution[i]
                 i <- i + 1
@@ -378,7 +388,7 @@ spm_time_dep_internal <- function(x, start, frm, stopifbound, lb, ub, verbose, o
             if(verbose  == TRUE) {print(e)}
         }, finally=NA)
     
-        final_res <- list(results)
+        final_res <- results
         return(final_res)
     }
     #---------------------End of optimize---------------------------#
@@ -422,6 +432,7 @@ parse_parameters <- function(formulas, parameter, p.const.ind, p.coeff.ind, vari
   for(i in 1:length(p.coeffs)) {
     p.coeff.ind <- c(p.coeff.ind, which(variables == p.coeffs[i]))
   }
+  
   
   return(list(p.const.ind=p.const.ind, p.coeff.ind=p.coeff.ind, variables=variables))
   

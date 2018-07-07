@@ -31,7 +31,12 @@ achieves lower or upper boundaries. Default: \code{FALSE}.}
 
 \item{opts}{A list of options for \code{nloptr}.
 Default value: \code{opt=list(algorithm="NLOPT_LN_NELDERMEAD", 
-maxeval=100, ftol_rel=1e-8)}.
+maxeval=100, ftol_rel=1e-8)}.}
+
+\item{lrtest}{Indicates should Likelihood-Ratio test be performed.
+Possible values: \code{TRUE}, \code{H01}, \code{H02}, \code{H03},
+\code{H04}, \code{H05} (see package Vignette for details)
+Default value: \code{FALSE}.
 Please see \code{nloptr} documentation for more information.}
 }
 \value{

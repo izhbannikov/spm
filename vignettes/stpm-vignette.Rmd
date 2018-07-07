@@ -24,6 +24,7 @@ r<-citep("10.1007/s10522-006-9073-3")
 r<-citep("10.1016/j.jtbi.2009.01.023")
 r<-citep("10.3389/fpubh.2014.00228")
 r<-citep("10.1002/gepi.22058")
+r<-citep("10.3389/fpubh.2016.00003")
 write.bibtex(file="references.bib")
 ```
 
@@ -631,23 +632,24 @@ Refer to the example below:
 
 ## Hypothesis testing
 
-The package offers following five hypotheses to test for \code{spm_time_dep(...)} function (CITE Arbeev):
+The package offers following five hypotheses to test for \code{spm_time_dep(...)} function [@Arbeev_2016]:
 
 ```H01```: $Q(t)=0$ (i.e., $a_Q = 0$ and $b_Q = 0$,so that there is no quadratic term in the hazard rate and mortality is described by the baseline Gompertz rate $μ_0(t)$).
 
 ```H02```: $Q(t) = a_Q$ (i.e., $b_Q = 0$). 
 
-```H03```: $f_1(t) = 0$ (i.e., $a_{f1} = 0$ and $b_f1 = 0$).
+```H03```: $f_1(t) = 0$ (i.e., $a_{f1} = 0$ and $b_{f1} = 0$).
 
 ```H04```: $f_1(t) = a_{f_1}$ (i.e., $b_{f_1} = 0$).
 
 ```H05```: $a(t) = a_Y$ (i.e., $b_Y = 0$).
 
-To perform hypothesis testing you should put the variable \code{lrtest} to \code{TRUE} (\code{"H01"} by default) or to any of the following: \code{"H01"}, \code{"H02"}, \code{"H03"}, \code{"H04"}, \code{"H05"}.
+
+To perform hypothesis testing you should put the variable ```lrtest``` to ```TRUE``` (this is ```"H01"``` by default) or to any of the following: ```"H01"```, ```"H02"```, ```"H03"```, ```"H04"```, ```"H05"```.
 
 ### Examples of hypothesis testing
 
-```{r}
+```{r, eval=FALSE}
 library(stpm)
 n <- 1000
 
@@ -664,9 +666,9 @@ res <- spm_time_dep(data, verbose=F,
                     lb=c(a=-1, f1=30, Q=1e-9, f=10, b=1, mu0=1e-6), 
                     ub=c(a=0, f1=120, Q=1e-7, f=150, b=10, mu0=1e-2),
                     opts = list(algorithm = "NLOPT_LN_NELDERMEAD", 
-                    maxeval = 2, ftol_rel = 1e-12), lrtest="H01")
+                    maxeval = 200, ftol_rel = 1e-12), lrtest="H01")
 
-res$res$lr.test.pval
+res$alternative$lr.test.pval
 
 ## H02
 res <- spm_time_dep(data, verbose=F, 
@@ -675,40 +677,38 @@ res <- spm_time_dep(data, verbose=F,
                     lb=c(a=-1, f1=30, Q=1e-9, f=10, b=1, mu0=1e-6), 
                     ub=c(a=0, f1=120, Q=1e-7, f=150, b=10, mu0=1e-2),
                     opts = list(algorithm = "NLOPT_LN_NELDERMEAD", 
-                    maxeval = 2, ftol_rel = 1e-12), lrtest="H02")
-res$res$lr.test.pval
+                    maxeval = 200, ftol_rel = 1e-12), lrtest="H02")
+
+res$alternative$lr.test.pval
 
 ## H03
 res <- spm_time_dep(data, verbose=F, 
                     frm = list(at="a", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"),
                     start=list(a=-0.05, f1=80, Q=1e-8, f=90, b=5, mu0=0.001), 
-                    lb=c(a=-1, f1=30, Q=1e-9, f=10, b=1, mu0=1e-6), 
                     ub=c(a=0, f1=120, Q=1e-7, f=150, b=10, mu0=1e-2),
                     opts = list(algorithm = "NLOPT_LN_NELDERMEAD", 
-                    maxeval = 2, ftol_rel = 1e-12), lrtest="H03")
+                    maxeval = 200, ftol_rel = 1e-12), lrtest="H03")
 
-res$res$lr.test.pval
+res$alternative$lr.test.pval
 
 ## H04
 res <- spm_time_dep(data, verbose=F, 
                     frm = list(at="a", f1t="120", Qt="Q", ft="f", bt="b", mu0t="mu0"),
                     start=list(a=-0.05, f1=80, Q=1e-8, f=90, b=5, mu0=0.001), 
-                    lb=c(a=-1, f1=30, Q=1e-9, f=10, b=1, mu0=1e-6), 
-                    ub=c(a=0, f1=120, Q=1e-7, f=150, b=10, mu0=1e-2),
+                    lb=list(a=-1, f1=30, Q=1e-9, f=10, b=1, mu0=1e-6), 
                     opts = list(algorithm = "NLOPT_LN_NELDERMEAD", 
-                    maxeval = 2, ftol_rel = 1e-12), lrtest="H04")
+                    maxeval = 200, ftol_rel = 1e-12), lrtest="H04")
 
-res$res$lr.test.pval
+res$alternative$lr.test.pval
 
 ## H05
 res <- spm_time_dep(data, verbose=F, 
                     frm = list(at="-0.1", f1t="f1", Qt="Q", ft="f", bt="b", mu0t="mu0"),
                     start=list(a=-0.05, f1=80, Q=1e-8, f=90, b=5, mu0=0.001), 
-                             lb=c(a=-1, f1=30, Q=1e-9, f=10, b=1, mu0=1e-6), 
-                             ub=c(a=0, f1=120, Q=1e-7, f=150, b=10, mu0=1e-2),
-                             opts = list(algorithm = "NLOPT_LN_NELDERMEAD", 
-                                         maxeval = 2, ftol_rel = 1e-12), lrtest="H05")
-res$res$lr.test.pval
+                    opts = list(algorithm = "NLOPT_LN_NELDERMEAD", 
+                    maxeval = 200, ftol_rel = 1e-12), lrtest="H05")
+
+res$alternative$lr.test.pval
 ```
 
 
