@@ -33,6 +33,9 @@
 #' @param ahessian A logical variable indicating whether the 
 #' approximate (FALSE) or analytical (TRUE) Hessian is returned.
 #' @return est The estimates of the parameters.
+#' @param method Optimization method. 
+#' Can be one of the following: lbfgs, mlsl, mma, slsqp, tnewton, varmetric.
+#' Default: lbfgs.
 #' @return hessian The Hessian matrix of the estimates.
 #' @return lik The minus log-likelihood.
 #' @return con A number indicating the convergence. See the 'nloptr' package for more details.
@@ -49,7 +52,7 @@
 #' upper=c(-0.01,3,0.1,10,10,0.1,1e-05), lower=c(-1,0.01,0.00001,1,1,0.001,1e-05), 
 #' effect=c('q'))
 #'}
-spm_con_1d_g <- function(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA, f1 = NA, mu0 = NA, theta = NA, effect = c('a'), lower = c(), upper = c(), control = list(xtol_rel = 1e-6), global = FALSE, verbose = TRUE, ahessian = FALSE)
+spm_con_1d_g <- function(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA, f1 = NA, mu0 = NA, theta = NA, effect = c('a'), lower = c(), upper = c(), control = list(xtol_rel = 1e-6), global = FALSE, verbose = TRUE, ahessian = FALSE, method="lbfgs")
 {
 
   #a <- -0.1
@@ -210,12 +213,28 @@ spm_con_1d_g <- function(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA, f1
 
     # re <- lik_con_1d(param, m0,r0,tau,yij,delta,tij, n_j, t0)
     # re <- c(re, gr_con_1d(param, m0,r0,tau,yij,delta,tij, n_j, t0))
-    if(global == FALSE) {
+    #if(global == FALSE) {
+    #    re <- lbfgs( x0=param,fn=lik_con_1d_g,gr=gr_con_1d_g,m0=m0,r0=r0,tau=tau,yij=yij,delta=delta,tij=tij, n_j=n_j, geno_a=snps_a, geno_b=snps_b, geno_q=snps_q, geno_f=snps_f, geno_mu=snps_mu, t0=t0,lower=lower_t,upper=upper_t, control = control)
+    #} else {
+	  #     re <- mlsl( x0=param,fn=lik_con_1d_g,gr=gr_con_1d_g,m0=m0,r0=r0,tau=tau,yij=yij,delta=delta,tij=tij, n_j=n_j, geno_a=snps_a, geno_b=snps_b, geno_q=snps_q, geno_f=snps_f, geno_mu=snps_mu, t0=t0,lower=lower_t,upper=upper_t, control = control)
+	  #}
+    
+    if(method=="lbfgs") {
         re <- lbfgs( x0=param,fn=lik_con_1d_g,gr=gr_con_1d_g,m0=m0,r0=r0,tau=tau,yij=yij,delta=delta,tij=tij, n_j=n_j, geno_a=snps_a, geno_b=snps_b, geno_q=snps_q, geno_f=snps_f, geno_mu=snps_mu, t0=t0,lower=lower_t,upper=upper_t, control = control)
-    } else {
-	      re <- mlsl( x0=param,fn=lik_con_1d_g,gr=gr_con_1d_g,m0=m0,r0=r0,tau=tau,yij=yij,delta=delta,tij=tij, n_j=n_j, geno_a=snps_a, geno_b=snps_b, geno_q=snps_q, geno_f=snps_f, geno_mu=snps_mu, t0=t0,lower=lower_t,upper=upper_t, control = control)
+    } else if(method=="mlsl") {
+        re <- mlsl( x0=param,fn=lik_con_1d_g,gr=gr_con_1d_g,m0=m0,r0=r0,tau=tau,yij=yij,delta=delta,tij=tij, n_j=n_j, geno_a=snps_a, geno_b=snps_b, geno_q=snps_q, geno_f=snps_f, geno_mu=snps_mu, t0=t0,lower=lower_t,upper=upper_t, control = control)
+    } else if(method=="mma") {
+        re <- mma( x0=param,fn=lik_con_1d_g,gr=gr_con_1d_g,m0=m0,r0=r0,tau=tau,yij=yij,delta=delta,tij=tij, n_j=n_j, geno_a=snps_a, geno_b=snps_b, geno_q=snps_q, geno_f=snps_f, geno_mu=snps_mu, t0=t0,lower=lower_t,upper=upper_t, control = control)
+    } else if(method=="slsqp") {
+        re <- slsqp( x0=param,fn=lik_con_1d_g,gr=gr_con_1d_g,m0=m0,r0=r0,tau=tau,yij=yij,delta=delta,tij=tij, n_j=n_j, geno_a=snps_a, geno_b=snps_b, geno_q=snps_q, geno_f=snps_f, geno_mu=snps_mu, t0=t0,lower=lower_t,upper=upper_t, control = control)
+    #} else if(method=="stogo") {
+    #    re <- stogo( x0=param,fn=lik_con_1d_g,gr=gr_con_1d_g,lower=lower_t,upper=upper_t, m0=m0,r0=r0,tau=tau,yij=yij,delta=delta,tij=tij, n_j=n_j, geno_a=snps_a, geno_b=snps_b, geno_q=snps_q, geno_f=snps_f, geno_mu=snps_mu, t0=t0)
+    } else if(method=="tnewton") {
+        re <- tnewton( x0=param,fn=lik_con_1d_g,gr=gr_con_1d_g,m0=m0,r0=r0,tau=tau,yij=yij,delta=delta,tij=tij, n_j=n_j, geno_a=snps_a, geno_b=snps_b, geno_q=snps_q, geno_f=snps_f, geno_mu=snps_mu, t0=t0,lower=lower_t,upper=upper_t, control = control)
+    } else if(method=="varmetric") {
+        re <- varmetric( x0=param,fn=lik_con_1d_g,gr=gr_con_1d_g,m0=m0,r0=r0,tau=tau,yij=yij,delta=delta,tij=tij, n_j=n_j, geno_a=snps_a, geno_b=snps_b, geno_q=snps_q, geno_f=snps_f, geno_mu=snps_mu, t0=t0,lower=lower_t,upper=upper_t, control = control)
     }
-
+    
     if('a' %in% effect) {
 	      beta_a <- (re$par[2] - re$par[1])/2
     }
