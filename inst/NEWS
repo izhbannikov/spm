@@ -1,5 +1,4 @@
-New for version 1.7.3
+New for version 1.7.4
 ======================
 * Version released
-* spm_con_1d_g: added "method" parameter.
-* Minor bug fixes
+* spm_con_1d_g: generalized inverse added in order to invert hessian.

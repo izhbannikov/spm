@@ -281,7 +281,15 @@ spm_con_1d_g <- function(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA, f1
     ##### Calculate p-values for estimates ####
     coef <- re$par[h_index]
     names(coef) <- name_par
-    fi <- solve(a_hes)   #### Fischer Information Matrix. Note we're not using the negative of the hessian here
+    
+    fi <- tryCatch({
+        solve(a_hes)   #### Fischer Information Matrix. Note we're not using the negative of the hessian here
+    }, error=function(e) {
+        print(e)
+        print("Now we use generalized inverse...")
+        ginv(a_hes)
+    })
+    
     stderr <- sqrt(diag(fi))
     zscore <- coef/stderr
     pvalue <- 2*(1 - pnorm(abs(zscore)))
