@@ -1,8 +1,9 @@
 Package: stpm
 Type: Package
-Title: Stochastic Process Model for Analysis of Longitudinal and Time-to-Event Outcomes
-Version: 1.7.4
-Date: 2018-07-13
+Title: Stochastic Process Model for Analysis of Longitudinal and
+        Time-to-Event Outcomes
+Version: 1.7.5
+Date: 2018-07-16
 Author: I. Y. Zhbannikov, Liang He, K. G. Arbeev, A. I. Yashin.
 Maintainer: Ilya Y. Zhbannikov <ilya.zhbannikov@duke.edu>
 Description: Utilities to estimate parameters of the models with survival functions 
@@ -15,12 +16,13 @@ Description: Utilities to estimate parameters of the models with survival functi
              by Yashin A. et al. (2007), 
              Biogerontology 8(3), 291(302), <DOI:10.1007/s10522-006-9073-3>.
 License: GPL
-Imports: 
-    sas7bdat,stats,nloptr,survival,tools,knitcitations,MASS
-LinkingTo: 
-    Rcpp,RcppArmadillo
-Depends:
-    Rcpp (>= 0.11.1)
+Imports: sas7bdat,stats,nloptr,survival,tools,knitcitations,MASS
+LinkingTo: Rcpp,RcppArmadillo
+Depends: R (>= 2.10), Rcpp (>= 0.11.1)
 VignetteBuilder: knitr
 Suggests: knitr (>= 1.11)
 RoxygenNote: 6.0.1
+NeedsCompilation: yes
+Packaged: 2018-07-17 12:38:30 UTC; ilya
+Repository: CRAN
+Date/Publication: 2018-07-17 13:40:03 UTC
