@@ -48,12 +48,13 @@ void d_f_j1_g_2(double a0, double a2, double b0, double b2, double q0, double q2
 	// return(df);
 }
 
-void d_f_j2_g_2(double a0, double a2, double b0, double b2, double q0, double q2, double f0, double f2, double f1, double m0, double r0, double tij, double yij, double t0, double geno_a, double geno_b, double geno_q, double geno_f, double * df)
+void d_f_j2_g_2(double a0, double a2, double b0, double b2, double q0, double q2, double f0, double f2, double f10, double f12, double m0, double r0, double tij, double yij, double t0, double geno_a, double geno_b, double geno_q, double geno_f, double geno_f1, double * df)
 {
 	double a = (a2 - a0) / 2 * geno_a + a0;
 	double b = (b2 - b0) / 2 * geno_b + b0;
 	double q = (q2 - q0) / 2 * geno_q + q0;
 	double f = (f2 - f0) / 2 * geno_f + f0;
+	double f1 = (f12 - f10) / 2 * geno_f1 + f10;
 
 	double e1 = pow(a, 2);
 	double e2 = pow(b, 2);
@@ -122,12 +123,13 @@ void d_f_j2_g_2(double a0, double a2, double b0, double b2, double q0, double q2
 
 }
 
-void d_f_i1_g_2(double a0, double a2, double b0, double b2, double q0, double q2, double f0, double f2, double f1, double mu00, double mu02, double theta, double m0, double r0, double tau, double t0, double geno_a, double geno_b, double geno_q, double geno_f, double geno_mu, double * df)
+void d_f_i1_g_2(double a0, double a2, double b0, double b2, double q0, double q2, double f0, double f2, double f10, double f12, double mu00, double mu02, double theta, double m0, double r0, double tau, double t0, double geno_a, double geno_b, double geno_q, double geno_f, double geno_f1, double geno_mu, double * df)
 {
 	double a = (a2 - a0) / 2 * geno_a + a0;
 	double b = (b2 - b0) / 2 * geno_b + b0;
 	double q = (q2 - q0) / 2 * geno_q + q0;
 	double f = (f2 - f0) / 2 * geno_f + f0;
+	double f1 = (f12 - f10) / 2 * geno_f1 + f10;
 	double mu0 = (mu02 - mu00) / 2 * geno_mu + mu00;
 
 	double e1 = pow(a, 2);
@@ -196,12 +198,13 @@ void d_f_i1_g_2(double a0, double a2, double b0, double b2, double q0, double q2
 	// return(df);
 }
 
-void dev_mu_int_g_2(double a0, double a2, double b0, double b2, double q0, double q2, double f0, double f2, double f1, double mu00, double mu02, double theta, double tij, double r0, double m0, double t0, double geno_a, double geno_b, double geno_q, double geno_f, double geno_mu, double * df)
+void dev_mu_int_g_2(double a0, double a2, double b0, double b2, double q0, double q2, double f0, double f2, double f10, double f12, double mu00, double mu02, double theta, double tij, double r0, double m0, double t0, double geno_a, double geno_b, double geno_q, double geno_f, double geno_f1, double geno_mu, double * df)
 {
 	double a = (a2 - a0) / 2 * geno_a + a0;
 	double b = (b2 - b0) / 2 * geno_b + b0;
 	double q = (q2 - q0) / 2 * geno_q + q0;
 	double f = (f2 - f0) / 2 * geno_f + f0;
+	double f1 = (f12 - f10) / 2 * geno_f1 + f10;
 	double mu0 = (mu02 - mu00) / 2 * geno_mu + mu00;
 
 	double e1 = pow(a,2);
@@ -314,7 +317,7 @@ void dev_mu_int_g_2(double a0, double a2, double b0, double b2, double q0, doubl
 }
 
 
-RcppExport SEXP devlik_g_2(SEXP param, SEXP m0, SEXP r0, SEXP tau, SEXP yij, SEXP delta, SEXP tij, SEXP n_j, SEXP geno_a, SEXP geno_b, SEXP geno_q, SEXP geno_f, SEXP geno_mu, SEXP t0)
+RcppExport SEXP devlik_g_2(SEXP param, SEXP m0, SEXP r0, SEXP tau, SEXP yij, SEXP delta, SEXP tij, SEXP n_j, SEXP geno_a, SEXP geno_b, SEXP geno_q, SEXP geno_f, SEXP geno_f1, SEXP geno_mu, SEXP t0)
 {
 
 	arma::vec param_c = as<arma::vec>(param);
@@ -332,6 +335,7 @@ RcppExport SEXP devlik_g_2(SEXP param, SEXP m0, SEXP r0, SEXP tau, SEXP yij, SEX
 	arma::vec geno_b_v = as<arma::vec>(geno_b);
 	arma::vec geno_q_v = as<arma::vec>(geno_q);
 	arma::vec geno_f_v = as<arma::vec>(geno_f);
+	arma::vec geno_f1_v = as<arma::vec>(geno_f1);
 	arma::vec geno_mu_v = as<arma::vec>(geno_mu);
 
 	double a0 = param_c(0);
@@ -342,10 +346,11 @@ RcppExport SEXP devlik_g_2(SEXP param, SEXP m0, SEXP r0, SEXP tau, SEXP yij, SEX
 	double q2 = param_c(5);
 	double f0 = param_c(6);
 	double f2 = param_c(7);
-	double f1 = param_c(8);
-	double mu00 = param_c(9);
-	double mu02 = param_c(10);
-	double theta = param_c(11);
+	double f10 = param_c(8);
+	double f12 = param_c(9);
+	double mu00 = param_c(10);
+	double mu02 = param_c(11);
+	double theta = param_c(12);
 
 	int i_n = n_v.n_elem;
 	int t_n = m0_v.n_elem;
@@ -359,7 +364,8 @@ RcppExport SEXP devlik_g_2(SEXP param, SEXP m0, SEXP r0, SEXP tau, SEXP yij, SEX
 	double dev_q2 = 0;
 	double dev_f0 = 0;
 	double dev_f2 = 0;
-	double dev_f1 = 0;
+	double dev_f10 = 0;
+	double dev_f12 = 0;
 	double dev_mu00 = 0;
 	double dev_mu02 = 0;
 	double dev_theta = 0;
@@ -372,6 +378,7 @@ RcppExport SEXP devlik_g_2(SEXP param, SEXP m0, SEXP r0, SEXP tau, SEXP yij, SEX
 		double geno_b_i = geno_b_v(i);
 		double geno_q_i = geno_q_v(i);
 		double geno_f_i = geno_f_v(i);
+		double geno_f1_i = geno_f1_v(i);
 		double geno_mu_i = geno_mu_v(i);
 
 		for (int j = start; j < end; j++)
@@ -382,19 +389,21 @@ RcppExport SEXP devlik_g_2(SEXP param, SEXP m0, SEXP r0, SEXP tau, SEXP yij, SEX
 				re_1[k] = 0;
 			}
 			d_f_j1_g_2(a0, a2, b0, b2, q0, q2, r0_v[j], t_v[j], t0_v[j], geno_a_i, geno_b_i, geno_q_i, re_1);
-			double re_2[9];
-			for (int k = 0; k < 9; k++)
+			
+			double re_2[10];
+			for (int k = 0; k < 10; k++)
 			{
 				re_2[k] = 0;
 			}
-			d_f_j2_g_2(a0, a2, b0, b2, q0, q2, f0, f2, f1, m0_v[j], r0_v[j], t_v[j], y_v[j], t0_v[j], geno_a_i, geno_b_i, geno_q_i, geno_f_i, re_2);
-			double re_4[12];
-			for (int k = 0; k < 12; k++)
+			
+			d_f_j2_g_2(a0, a2, b0, b2, q0, q2, f0, f2, f10, f12, m0_v[j], r0_v[j], t_v[j], y_v[j], t0_v[j], geno_a_i, geno_b_i, geno_q_i, geno_f_i, geno_f1_i, re_2);
+			double re_4[13];
+			for (int k = 0; k < 13; k++)
 			{
 				re_4[k] = 0;
 			}
 
-			dev_mu_int_g_2(a0, a2, b0, b2, q0, q2, f0, f2, f1, mu00, mu02, theta, t_v[j], r0_v[j], m0_v[j], t0_v[j], geno_a_i, geno_b_i, geno_q_i, geno_f_i, geno_mu_i, re_4);
+			dev_mu_int_g_2(a0, a2, b0, b2, q0, q2, f0, f2, f10, f12, mu00, mu02, theta, t_v[j], r0_v[j], m0_v[j], t0_v[j], geno_a_i, geno_b_i, geno_q_i, geno_f_i, geno_f1_i, geno_mu_i, re_4);
 
 			dev_a0 = dev_a0 + re_1[0] + re_2[0] - re_4[0];
 			dev_a2 = dev_a2 + re_1[1] + re_2[1] - re_4[1];
@@ -404,18 +413,19 @@ RcppExport SEXP devlik_g_2(SEXP param, SEXP m0, SEXP r0, SEXP tau, SEXP yij, SEX
 			dev_q2 = dev_q2 + re_1[5] + re_2[5] - re_4[5];
 			dev_f0 = dev_f0 + re_2[6] - re_4[6];
 			dev_f2 = dev_f2 + re_2[7] - re_4[7];
-			dev_f1 = dev_f1 + re_2[8] - re_4[8];
-			dev_mu00 -= re_4[9];
-			dev_mu02 -= re_4[10];
-			dev_theta -= re_4[11];
+			dev_f10 = dev_f10 + re_2[8] - re_4[8];
+			dev_f12 = dev_f12 + re_2[9] - re_4[9];
+			dev_mu00 -= re_4[10];
+			dev_mu02 -= re_4[11];
+			dev_theta -= re_4[12];
 		}
 
 		int pre_end = end - 1;
-		double re_3[12];
+		double re_3[13];
 
 		if (delta_v(i)>0)
 		{
-			d_f_i1_g_2(a0, a2, b0, b2, q0, q2, f0, f2, f1, mu00, mu02, theta, m0_v(pre_end), r0_v(pre_end), tau_v(i), t0_v(pre_end), geno_a_i, geno_b_i, geno_q_i, geno_f_i, geno_mu_i, re_3);
+			d_f_i1_g_2(a0, a2, b0, b2, q0, q2, f0, f2, f10, f12, mu00, mu02, theta, m0_v(pre_end), r0_v(pre_end), tau_v(i), t0_v(pre_end), geno_a_i, geno_b_i, geno_q_i, geno_f_i, geno_f1_i, geno_mu_i, re_3);
 
 			dev_a0 += re_3[0];
 			dev_a2 += re_3[1];
@@ -425,17 +435,18 @@ RcppExport SEXP devlik_g_2(SEXP param, SEXP m0, SEXP r0, SEXP tau, SEXP yij, SEX
 			dev_q2 += re_3[5];
 			dev_f0  += re_3[6];
 			dev_f2 += re_3[7];
-			dev_f1 += re_3[8];
-			dev_mu00 += re_3[9];
-			dev_mu02 += re_3[10];
-			dev_theta += re_3[11];
+			dev_f10 += re_3[8];
+			dev_f12 += re_3[9];
+			dev_mu00 += re_3[10];
+			dev_mu02 += re_3[11];
+			dev_theta += re_3[12];
 
 		}
 
 		index = end;
 	}
 
-	arma::vec res = arma::zeros<arma::vec>(12);
+	arma::vec res = arma::zeros<arma::vec>(13);
 	res(0) = dev_a0*(-1);
 	res(1) = dev_a2*(-1);
 	res(2) = dev_b0*(-1);
@@ -444,10 +455,11 @@ RcppExport SEXP devlik_g_2(SEXP param, SEXP m0, SEXP r0, SEXP tau, SEXP yij, SEX
 	res(5) = dev_q2*(-1);
 	res(6) = dev_f0*(-1);
 	res(7) = dev_f2*(-1);
-	res(8) = dev_f1*(-1);
-	res(9) = dev_mu00*(-1);
-	res(10) = dev_mu02*(-1);
-	res(11) = dev_theta*(-1);
+	res(8) = dev_f10*(-1);
+	res(9) = dev_f12*(-1);
+	res(10) = dev_mu00*(-1);
+	res(11) = dev_mu02*(-1);
+	res(12) = dev_theta*(-1);
 
 	return(Rcpp::wrap(res));
 
