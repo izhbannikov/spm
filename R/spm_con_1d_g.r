@@ -36,6 +36,8 @@
 #' @param method Optimization method. 
 #' Can be one of the following: lbfgs, mlsl, mma, slsqp, tnewton, varmetric.
 #' Default: lbfgs.
+#' @param method.hessian Optimization method for hessian calculation (if ahessian=F).
+#' Default: \code{L-BFGS-B}.
 #' @return hessian The Hessian matrix of the estimates.
 #' @return lik The minus log-likelihood.
 #' @return con A number indicating the convergence. See the 'nloptr' package for more details.
@@ -52,7 +54,7 @@
 #' upper=c(-0.01,3,0.1,10,10,0.1,1e-05), lower=c(-1,0.01,0.00001,1,1,0.001,1e-05), 
 #' effect=c('q'))
 #'}
-spm_con_1d_g <- function(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA, f1 = NA, mu0 = NA, theta = NA, effect = c('a'), lower = c(), upper = c(), control = list(xtol_rel = 1e-6), global = FALSE, verbose = TRUE, ahessian = FALSE, method="lbfgs")
+spm_con_1d_g <- function(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA, f1 = NA, mu0 = NA, theta = NA, effect = c('a'), lower = c(), upper = c(), control = list(xtol_rel = 1e-6), global = FALSE, verbose = TRUE, ahessian = FALSE, method="lbfgs", method.hessian="L-BFGS-B")
 {
 
   #a <- -0.1
@@ -268,10 +270,14 @@ spm_con_1d_g <- function(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA, f1
 	      a_hes <- hes_loglik_g(re$par,m0,r0,tau,yij,delta,tij, n_j,t0,geno_a_l,geno_b_l,geno_q_l,geno_f_l,geno_mu_l)
 	      a_hes <- a_hes[h_index,h_index]
     } else {
-	      a_hes <- optim(re$par, lik_con_1d_g, gr_con_1d_g, m0,r0,tau,yij,delta,tij, n_j, snps_a, snps_b, snps_q, snps_f, snps_mu, t0, method = "L-BFGS-B", lower = re$par, upper = re$par, hessian=TRUE)
-	      a_hes <- a_hes$hessian[h_index,h_index]
+        if(method.hessian %in% c("CG", "BFGS", "Nelder-Mead", "SANN")) {
+            a_hes <- optim(re$par, lik_con_1d_g, gr_con_1d_g, m0,r0,tau,yij,delta,tij, n_j, snps_a, snps_b, snps_q, snps_f, snps_mu, t0, method = method.hessian, hessian=TRUE)
+        } else if(method.hessian == "L-BFGS-B") {
+            a_hes <- optim(re$par, lik_con_1d_g, gr_con_1d_g, m0,r0,tau,yij,delta,tij, n_j, snps_a, snps_b, snps_q, snps_f, snps_mu, t0, method = method.hessian, lower = re$par, upper = re$par, hessian=TRUE)
+        }
+        a_hes <- a_hes$hessian[h_index,h_index]
     }
-  
+    
     colnames(a_hes) <- name_par
     rownames(a_hes) <- name_par
   
@@ -289,6 +295,9 @@ spm_con_1d_g <- function(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA, f1
         print("Now we use generalized inverse...")
         ginv(a_hes)
     })
+    
+    colnames(fi) <- name_par
+    rownames(fi) <- name_par
     
     stderr <- sqrt(diag(fi))
     zscore <- coef/stderr
