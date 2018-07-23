@@ -59,13 +59,19 @@ approximate (FALSE) or analytical (TRUE) Hessian is returned.}
 
 \item{method}{Optimization method. 
 Can be one of the following: lbfgs, mlsl, mma, slsqp, tnewton, varmetric.
+<<<<<<< HEAD
 Default: lbfgs.}
+=======
+Default: \code{lbfgs.}}
+>>>>>>> iss5
 
 \item{method.hessian}{Optimization method for hessian calculation (if ahessian=F).
 Default: \code{L-BFGS-B}.}
 }
 \value{
 est The estimates of the parameters.
+
+hessian The Hessian matrix of the estimates.
 
 hessian The Hessian matrix of the estimates.
 
