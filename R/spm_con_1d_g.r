@@ -35,7 +35,10 @@
 #' @return est The estimates of the parameters.
 #' @param method Optimization method. 
 #' Can be one of the following: lbfgs, mlsl, mma, slsqp, tnewton, varmetric.
-#' Default: lbfgs.
+#' Default: \code{lbfgs.}
+#' @param method.hessian Optimization method for hessian calculation (if ahessian=F).
+#' Default: \code{L-BFGS-B}.
+#' @return hessian The Hessian matrix of the estimates.
 #' @return hessian The Hessian matrix of the estimates.
 #' @return lik The minus log-likelihood.
 #' @return con A number indicating the convergence. See the 'nloptr' package for more details.
@@ -52,16 +55,16 @@
 #' upper=c(-0.01,3,0.1,10,10,0.1,1e-05), lower=c(-1,0.01,0.00001,1,1,0.001,1e-05), 
 #' effect=c('q'))
 #'}
-spm_con_1d_g <- function(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA, f1 = NA, mu0 = NA, theta = NA, effect = c('a'), lower = c(), upper = c(), control = list(xtol_rel = 1e-6), global = FALSE, verbose = TRUE, ahessian = FALSE, method="lbfgs")
+spm_con_1d_g <- function(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA, f1 = NA, mu0 = NA, theta = NA, effect = c('a'), lower = c(), upper = c(), control = list(xtol_rel = 1e-6), global = FALSE, verbose = TRUE, ahessian = FALSE, method="lbfgs", method.hessian="L-BFGS-B")
 {
 
-    #a <- -0.1
-    #b <- 1.2
-    #q <- 0.001
-    #f <- 25
-    #f1 <- 26
-    #mu0 <- 0.01
-    #theta <- 0
+  #a <- -0.1
+  #b <- 1.2
+  #q <- 0.001
+  #f <- 25
+  #f1 <- 26
+  #mu0 <- 0.01
+  #theta <- 0
 
     data <- spm_data
     data[which(is.na(data$y.next)),'y.next'] <- data[which(is.na(data$y.next)),'y']
@@ -82,11 +85,13 @@ spm_con_1d_g <- function(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA, f1
     if(sum(is.na(snps))>0)
     {'There are individuals who have missing genotypes.'}
 
-    if(is.na(f1)) {
-        f10 <- f12 <- mean(m0, na.rm=TRUE)
-    } else {
-        f10 <- f12 <- f1
-    }
+    if(is.na(f1))
+	{
+		f10 <- f12 <- mean(m0, na.rm=TRUE)
+	}else{
+		f10 <- f12 <- f1
+	}
+
 
     if(is.na(f)) {
         f0 <- f2 <- mean(m0, na.rm=TRUE)
@@ -129,7 +134,7 @@ spm_con_1d_g <- function(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA, f1
     param <- c(a0,a2,b0,b2,q0,q2,f0,f2,f10,f12,mu00,mu02,theta)
 
   
-    beta_a <- beta_b <- beta_q <- beta_f <- beta_f1 <- beta_mu <- NA
+    beta_a <- beta_b <- beta_q <- beta_f <- beta_mu <- beta_f1 <- NA
 
     h_index <- c()
     name_par <- c()
@@ -174,16 +179,17 @@ spm_con_1d_g <- function(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA, f1
 	      name_par <- c(name_par,'f')
     }
   
-    if('f1' %in% effect) {
-        snps_f1 <- snps
-        h_index <- c(h_index,c(9,10))
-        name_par <- c(name_par,'f1_0','f1_2')
-    } else {
-        snps_f1 <- rep(0, length(snps))
-        h_index <- c(h_index,c(9))
-        name_par <- c(name_par,'f1')
-    }
-
+    if('f1' %in% effect)
+	  {
+		snps_f1 <- snps
+		h_index <- c(h_index,c(9,10))
+		name_par <- c(name_par,'f_10','f_12')
+	  }else{
+		snps_f1 <- rep(0, length(snps))
+		h_index <- c(h_index,c(9))
+		name_par <- c(name_par,'f1')
+	  }
+  
     if('mu0' %in% effect) {
 	      snps_mu <- snps
 	      h_index <- c(h_index,c(11,12))
@@ -193,7 +199,6 @@ spm_con_1d_g <- function(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA, f1
 	      h_index <- c(h_index,c(11))
 	      name_par <- c(name_par,'mu0')
     }
-    
     h_index <- c(h_index,c(13))
     name_par <- c(name_par,'theta')
   
@@ -209,7 +214,7 @@ spm_con_1d_g <- function(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA, f1
 	      if(length(upper)!=7) {stop('The number of upper bounds should be consistent with the number of parameters.')}
     }
   
-    lower_t <- c(lower[1],lower[1],lower[2],lower[2],lower[3],lower[3],lower[4],lower[4],lower[5],lower[5], lower[6],lower[6],lower[7])
+    lower_t <- c(lower[1],lower[1],lower[2],lower[2],lower[3],lower[3],lower[4],lower[4],lower[5],lower[5],lower[6],lower[6],lower[7])
     upper_t <- c(upper[1],upper[1],upper[2],upper[2],upper[3],upper[3],upper[4],upper[4],upper[5],upper[5],upper[6],upper[6],upper[7])
   
     if(verbose == TRUE) {
@@ -261,36 +266,40 @@ spm_con_1d_g <- function(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA, f1
     if('f' %in% effect) {
 	      beta_f <- (re$par[8] - re$par[7])/2
     }
-    
-    if('f1' %in% effect) {
-      beta_f1 <- (re$par[10] - re$par[9])/2
-    }
+	
+	if('f1' %in% effect)
+	{
+		beta_f1 <- (re$par[10] - re$par[9])/2
+	}
   
     if('mu0' %in% effect) {
 	      beta_mu <- (re$par[12] - re$par[11])/2
     }
-    
+
     betas <- c(beta_a, beta_b, beta_q, beta_f, beta_f1, beta_mu)
   
     a_hes <- NA
-    if(ahessian == TRUE) {
-	      geno_a_l <- snps_a[match(spm_data$id,gene_data[,1])]
-	      geno_b_l <- snps_b[match(spm_data$id,gene_data[,1])]
-	      geno_q_l <- snps_q[match(spm_data$id,gene_data[,1])]
-	      geno_f_l <- snps_f[match(spm_data$id,gene_data[,1])]
-	      geno_f1_l <- snps_f1[match(spm_data$id,gene_data[,1])]
-	      geno_mu_l <- snps_mu[match(spm_data$id,gene_data[,1])]
-	
-	      a_hes <- hes_loglik_g(re$par,m0,r0,tau,yij,delta,tij, n_j,t0,geno_a_l,geno_b_l,geno_q_l,geno_f_l,geno_mu_l)
-	      a_hes <- a_hes[h_index,h_index]
-    } else {
-	      a_hes <- optim(re$par, lik_con_1d_g, gr_con_1d_g, m0,r0,tau,yij,delta,tij, n_j, snps_a, snps_b, snps_q, snps_f, snps_f1, snps_mu, t0, method = "L-BFGS-B", lower = re$par, upper = re$par, hessian=TRUE)
-	      a_hes <- a_hes$hessian[h_index,h_index]
-    }
+    #if(ahessian == TRUE) {
+	#      geno_a_l <- snps_a[match(spm_data$id,gene_data[,1])]
+	#      geno_b_l <- snps_b[match(spm_data$id,gene_data[,1])]
+	#      geno_q_l <- snps_q[match(spm_data$id,gene_data[,1])]
+	#      geno_f_l <- snps_f[match(spm_data$id,gene_data[,1])]
+	#      geno_mu_l <- snps_mu[match(spm_data$id,gene_data[,1])]
+	#
+	#      a_hes <- hes_loglik_g(re$par,m0,r0,tau,yij,delta,tij, n_j,t0,geno_a_l,geno_b_l,geno_q_l,geno_f_l,geno_mu_l)
+	#      a_hes <- a_hes[h_index,h_index]
+    #} else {
+        if(method.hessian %in% c("CG", "BFGS", "Nelder-Mead", "SANN")) {
+            a_hes <- optim(re$par, lik_con_1d_g, gr_con_1d_g, m0,r0,tau,yij,delta,tij, n_j, snps_a, snps_b, snps_q, snps_f, snps_f1, snps_mu, t0, method = method.hessian, hessian=TRUE)
+        } else {
+	          a_hes <- optim(re$par, lik_con_1d_g, gr_con_1d_g, m0,r0,tau,yij,delta,tij, n_j, snps_a, snps_b, snps_q, snps_f, snps_f1, snps_mu, t0, method = method.hessian, lower = re$par, upper = re$par, hessian=TRUE)
+	      }
+        a_hes <- a_hes$hessian[h_index,h_index]
+    #}
   
     colnames(a_hes) <- name_par
     rownames(a_hes) <- name_par
-    
+  
     ### Estimates ##
     par_re <- matrix(re$par[h_index], 1, length(name_par))
     colnames(par_re) <- name_par
@@ -349,9 +358,9 @@ spm_con_1d_g <- function(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA, f1
       pvalue <- pchisq(chi.sq,1,lower.tail=FALSE)
       betas.coef[4,] <- c(betas[4], stderr, chi.sq, pvalue)
     }
-    
-    if('f1' %in% effect) {
-      stderr <- sqrt(0.25*c(1,-1)%*%fi[c("f1_0", "f1_2"), c("f1_0", "f1_2")]%*%c(1,-1))
+	
+	if('f1' %in% effect) {
+      stderr <- sqrt(0.25*c(1,-1)%*%fi[c("f_10", "f_12"), c("f_10", "f_12")]%*%c(1,-1))
       chi.sq <- betas[5]^2/stderr
       pvalue <- pchisq(chi.sq,1,lower.tail=FALSE)
       betas.coef[5,] <- c(betas[5], stderr, chi.sq, pvalue)

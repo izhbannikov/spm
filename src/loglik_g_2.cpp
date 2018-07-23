@@ -111,7 +111,7 @@ double mu_int_g_2(double a0, double a2, double b0, double b2, double q0, double 
 
 RcppExport SEXP mloglik_g_2(SEXP param, SEXP m0, SEXP r0, SEXP tau, SEXP yij, SEXP delta, SEXP tij, SEXP n_j, SEXP geno_a, SEXP geno_b, SEXP geno_q, SEXP geno_f, SEXP geno_f1, SEXP geno_mu, SEXP t0)
 {
-  
+
 	arma::vec param_c = as<arma::vec>(param); //
 	double lik = 0;
 	double a0 = param_c[0];
@@ -156,7 +156,7 @@ RcppExport SEXP mloglik_g_2(SEXP param, SEXP m0, SEXP r0, SEXP tau, SEXP yij, SE
     double geno_b_i = geno_b_v[i];
     double geno_q_i = geno_q_v[i];
     double geno_f_i = geno_f_v[i];
-    double geno_f1_i = geno_f1_v[i];
+	double geno_f1_i = geno_f1_v[i];
 	double geno_mu_i = geno_mu_v[i];
 
 		for (int j = start; j < end; j++)

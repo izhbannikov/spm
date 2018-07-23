@@ -117,7 +117,9 @@ void d_f_j2_g_2(double a0, double a2, double b0, double b2, double q0, double q2
 	double d_f = (q * (2 * ((2 * (e1 / e6) - e49) * e27 * e28 / e8) - 2 * (e41 - 1)) - e46 * e13 * e16) * e43 / e64;
 	df[6] = d_f*(1 - 0.5*geno_f);
 	df[7] = d_f*0.5*geno_f;
-	df[8] = a * (e17 + q * (2 - 4 * (a * e27 * e28 / e8))) * e43 / (e64 * e6);
+	double d_f1 = a * (e17 + q * (2 - 4 * (a * e27 * e28 / e8))) * e43 / (e64 * e6);
+	df[8] = d_f1*(1 - 0.5*geno_f1);
+	df[9] = d_f1*0.5*geno_f1;
 
 	//return(df);
 
@@ -188,12 +190,14 @@ void d_f_i1_g_2(double a0, double a2, double b0, double b2, double q0, double q2
 	double d_f = 2 * (q *e34 * (2 * (q * (2 * (e1 / e6) - e42) *e25 *e26 / e27) + e29 / e6) / e41);
 	df[6] = d_f*(1 - 0.5*geno_f);
 	df[7] = d_f*0.5*geno_f;
-	df[8] = -(2 * (e66 *(1 + q * (4 * (a *e25 *e26 / e8) - 4) / e17) *e34 / (e41 *e6)));
+	double d_f1 = -(2 * (e66 *(1 + q * (4 * (a *e25 *e26 / e8) - 4) / e17) *e34 / (e41 *e6)));
+	df[8] = d_f1*(1 - 0.5*geno_f1);
+	df[9] = d_f1*0.5*geno_f1; 
 	//df[9] = e35 / e41;
 	double d_mu = e35 / e41;
-	df[9] = d_mu*(1 - 0.5*geno_mu);
-	df[10] = d_mu*0.5*geno_mu;
-	df[11] = mu0 * tau *e35 / e41;
+	df[10] = d_mu*(1 - 0.5*geno_mu);
+	df[11] = d_mu*0.5*geno_mu;
+	df[12] = mu0 * tau *e35 / e41;
 
 	// return(df);
 }
@@ -303,15 +307,17 @@ void dev_mu_int_g_2(double a0, double a2, double b0, double b2, double q0, doubl
 	double d_f = q * (8 * (e16 * e14/e30) + q * (e64 * (64 * e72 + 8 * (e46 * e121 * e73/e70))/e13 - a * e60 * (32 * (e121 * e12) + e93) * e29/e108));
 	df[6] = d_f*(1 - 0.5*geno_f);
 	df[7] = d_f*0.5*geno_f;
-	df[8] = a * q * (q * (e60 * (e93 + 64 * e19) * e29/e108 - a * e64 * (16 * (e46 * e73/(e70 * e5)) + 64 * (e12/e30))/e13) - 8 * (e58 * e14/e30));
+	double d_f1 = a * q * (q * (e60 * (e93 + 64 * e19) * e29/e108 - a * e64 * (16 * (e46 * e73/(e70 * e5)) + 64 * (e12/e30))/e13) - 8 * (e58 * e14/e30));
+	df[8] = d_f1*(1 - 0.5*geno_f1);
+	df[9] = d_f1*0.5*geno_f1; 
 	//df[9] = e115;
 	double d_mu = e115;
-	df[9] = d_mu*(1 - 0.5*geno_mu);
-	df[10] = d_mu*0.5*geno_mu;
-	df[11] = 0;
+	df[10] = d_mu*(1 - 0.5*geno_mu);
+	df[11] = d_mu*0.5*geno_mu;
+	df[12] = 0;
 	if (theta != 0)
 	{
-		df[11] = mu0 * (tij * e97 - (e115 + t0 * e96))/theta;
+		df[12] = mu0 * (tij * e97 - (e115 + t0 * e96))/theta;
 	}
 
 }
@@ -348,9 +354,9 @@ RcppExport SEXP devlik_g_2(SEXP param, SEXP m0, SEXP r0, SEXP tau, SEXP yij, SEX
 	double f2 = param_c(7);
 	double f10 = param_c(8);
 	double f12 = param_c(9);
-	double mu00 = param_c(10);
-	double mu02 = param_c(11);
-	double theta = param_c(12);
+	double mu00 = param_c(9);
+	double mu02 = param_c(10);
+	double theta = param_c(11);
 
 	int i_n = n_v.n_elem;
 	int t_n = m0_v.n_elem;
@@ -389,13 +395,11 @@ RcppExport SEXP devlik_g_2(SEXP param, SEXP m0, SEXP r0, SEXP tau, SEXP yij, SEX
 				re_1[k] = 0;
 			}
 			d_f_j1_g_2(a0, a2, b0, b2, q0, q2, r0_v[j], t_v[j], t0_v[j], geno_a_i, geno_b_i, geno_q_i, re_1);
-			
 			double re_2[10];
 			for (int k = 0; k < 10; k++)
 			{
 				re_2[k] = 0;
 			}
-			
 			d_f_j2_g_2(a0, a2, b0, b2, q0, q2, f0, f2, f10, f12, m0_v[j], r0_v[j], t_v[j], y_v[j], t0_v[j], geno_a_i, geno_b_i, geno_q_i, geno_f_i, geno_f1_i, re_2);
 			double re_4[13];
 			for (int k = 0; k < 13; k++)

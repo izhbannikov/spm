@@ -7,7 +7,8 @@
 spm_con_1d_g(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA,
   f1 = NA, mu0 = NA, theta = NA, effect = c("a"), lower = c(),
   upper = c(), control = list(xtol_rel = 1e-06), global = FALSE,
-  verbose = TRUE, ahessian = FALSE, method = "lbfgs")
+  verbose = TRUE, ahessian = FALSE, method = "lbfgs",
+  method.hessian = "L-BFGS-B")
 }
 \arguments{
 \item{spm_data}{A dataset for the SPM model. See the STPM pacakge for more details about the format.}
@@ -58,10 +59,15 @@ approximate (FALSE) or analytical (TRUE) Hessian is returned.}
 
 \item{method}{Optimization method. 
 Can be one of the following: lbfgs, mlsl, mma, slsqp, tnewton, varmetric.
-Default: lbfgs.}
+Default: \code{lbfgs.}}
+
+\item{method.hessian}{Optimization method for hessian calculation (if ahessian=F).
+Default: \code{L-BFGS-B}.}
 }
 \value{
 est The estimates of the parameters.
+
+hessian The Hessian matrix of the estimates.
 
 hessian The Hessian matrix of the estimates.
 

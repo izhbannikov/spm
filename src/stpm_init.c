@@ -26,9 +26,9 @@ extern SEXP d_f_i1_q0_qff1mtb_g_c(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP
 extern SEXP d_f_i1_q2_qff1mtb_g_c(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP d_f_i1_t_t_g_c(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP devlik(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP devlik_g_2(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP devlik_g_2(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP mloglik(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP mloglik_g_2(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP mloglik_g_2(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP simCont(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP simdata_ND(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP simGenCont(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -52,9 +52,9 @@ static const R_CallMethodDef CallEntries[] = {
   {"d_f_i1_q2_qff1mtb_g_c",      (DL_FUNC) &d_f_i1_q2_qff1mtb_g_c,      21},
   {"d_f_i1_t_t_g_c",             (DL_FUNC) &d_f_i1_t_t_g_c,             21},
   {"devlik",                     (DL_FUNC) &devlik,                      9},
-  {"devlik_g_2",                 (DL_FUNC) &devlik_g_2,                 14},
+  {"devlik_g_2",                 (DL_FUNC) &devlik_g_2,                 15},
   {"mloglik",                    (DL_FUNC) &mloglik,                     9},
-  {"mloglik_g_2",                (DL_FUNC) &mloglik_g_2,                14},
+  {"mloglik_g_2",                (DL_FUNC) &mloglik_g_2,                15},
   {"simCont",                    (DL_FUNC) &simCont,                    16},
   {"simdata_ND",                 (DL_FUNC) &simdata_ND,                 14},
   {"simGenCont",                 (DL_FUNC) &simGenCont,                 25},
