@@ -4,11 +4,11 @@
 \alias{spm_cont_quad_lin}
 \title{Continuous multi-dimensional optimization with quadratic and linear terms}
 \usage{
-spm_cont_quad_lin(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
-  mu0 = 2e-05, theta = 0.08, Q1 = 1e-08, stopifbound = FALSE,
-  lb = NULL, ub = NULL, verbose = FALSE, pinv.tol = 0.01,
-  gomp = FALSE, opts = list(algorithm = "NLOPT_LN_NELDERMEAD", maxeval =
-  100, ftol_rel = 1e-08))
+spm_cont_quad_lin(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 80,
+  b = 5, mu0 = 2e-05, theta = 0.08, Q1 = 1e-08,
+  stopifbound = FALSE, lb = NULL, ub = NULL, verbose = FALSE,
+  pinv.tol = 0.01, gomp = FALSE, opts = list(algorithm =
+  "NLOPT_LN_NELDERMEAD", maxeval = 100, ftol_rel = 1e-08))
 }
 \arguments{
 \item{dat}{A data table.}

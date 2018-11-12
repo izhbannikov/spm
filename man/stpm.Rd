@@ -4,7 +4,6 @@
 \name{stpm}
 \alias{stpm}
 \alias{stpm-package}
-\alias{stpm-package}
 \title{Stochastic Process Model for Analysis of Longitudinal and Time-to-Event Outcomes}
 \description{
 Utilities to estimate parameters of the models with survival functions induced by 

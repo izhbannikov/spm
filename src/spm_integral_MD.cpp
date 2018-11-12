@@ -100,6 +100,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
     int dim = as<int>(k);
     gomp = as<bool>(gomp_);
     
+    
     //Actual data set
     arma::mat dd = as<arma::mat>(dat);  
     double ptol = as<double>(pinv_tol);
@@ -202,7 +203,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
         L += s + exp(0,0);
       } else {
         //double logprobi = log(1.00 - exp(-1.00*mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH)));
-        double logprobi = log(mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH));
+        double logprobi = mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH);
         L += s + logprobi;
       }
     }

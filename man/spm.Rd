@@ -4,12 +4,12 @@
 \alias{spm}
 \title{A central function that estimates Stochastic Process Model parameters a from given dataset.}
 \usage{
-spm(x, model = "discrete", formulas = list(at = "a", f1t = "f1", Qt = "Q",
-  ft = "f", bt = "b", mu0t = "mu0"), start = NULL, tol = NULL,
+spm(x, model = "discrete", formulas = list(at = "a", f1t = "f1", Qt =
+  "Q", ft = "f", bt = "b", mu0t = "mu0"), start = NULL, tol = NULL,
   stopifbound = FALSE, lb = NULL, ub = NULL, pinv.tol = 0.01,
-  theta.range = seq(0.01, 0.2, by = 0.001), verbose = FALSE, gomp = FALSE,
-  opts = list(algorithm = "NLOPT_LN_NELDERMEAD", maxeval = 100, ftol_rel =
-  1e-08))
+  theta.range = seq(0.01, 0.2, by = 0.001), verbose = FALSE,
+  gomp = FALSE, opts = list(algorithm = "NLOPT_LN_NELDERMEAD", maxeval
+  = 100, ftol_rel = 1e-08))
 }
 \arguments{
 \item{x}{A dataset: is the output from prepare_data(...) function and consists of two separate data tables:

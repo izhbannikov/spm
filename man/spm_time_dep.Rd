@@ -4,11 +4,11 @@
 \alias{spm_time_dep}
 \title{A function for the model with time-dependent model parameters.}
 \usage{
-spm_time_dep(x, start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5, mu0
-  = 0.001), frm = list(at = "a", f1t = "f1", Qt = "Q", ft = "f", bt = "b",
-  mu0t = "mu0"), stopifbound = FALSE, lb = NULL, ub = NULL,
-  verbose = FALSE, opts = list(algorithm = "NLOPT_LN_NELDERMEAD", maxeval =
-  100, ftol_rel = 1e-08), lrtest = FALSE)
+spm_time_dep(x, start = list(a = -0.05, f1 = 80, Q = 2e-08, f = 80, b =
+  5, mu0 = 0.001), frm = list(at = "a", f1t = "f1", Qt = "Q", ft = "f",
+  bt = "b", mu0t = "mu0"), stopifbound = FALSE, lb = NULL, ub = NULL,
+  verbose = FALSE, opts = list(algorithm = "NLOPT_LN_NELDERMEAD",
+  maxeval = 100, ftol_rel = 1e-08), lrtest = FALSE)
 }
 \arguments{
 \item{x}{Input data table.}

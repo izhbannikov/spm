@@ -4,8 +4,8 @@
 \alias{make.short.format}
 \title{An internal function which construct short data format from a given long}
 \usage{
-make.short.format(x, col.id = 1, col.status = 2, col.t1 = 3, col.t2 = 4,
-  col.cov = 5)
+make.short.format(x, col.id = 1, col.status = 2, col.t1 = 3,
+  col.t2 = 4, col.cov = 5)
 }
 \arguments{
 \item{x}{Dataset}

@@ -7,8 +7,8 @@
 spm_continuous(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
   mu0 = 2e-05, theta = 0.08, stopifbound = FALSE, lb = NULL,
   ub = NULL, verbose = FALSE, pinv.tol = 0.01, gomp = FALSE,
-  opts = list(algorithm = "NLOPT_LN_NELDERMEAD", maxeval = 100, ftol_rel =
-  1e-08))
+  opts = list(algorithm = "NLOPT_LN_NELDERMEAD", maxeval = 100, ftol_rel
+  = 1e-08), logmu0 = FALSE)
 }
 \arguments{
 \item{dat}{A data table.}
@@ -48,6 +48,9 @@ mu0 = mu0*exp(theta*t).}
 Default value: \code{opt=list(algorithm="NLOPT_LN_NELDERMEAD", 
 maxeval=100, ftol_rel=1e-8)}.
 Please see \code{nloptr} documentation for more information.}
+
+\item{logmu0}{Natural logarith of baseline mortality.
+Default: \code{FALSE}.}
 }
 \value{
 A set of estimated parameters a, f1, Q, f, b, mu0, theta and
