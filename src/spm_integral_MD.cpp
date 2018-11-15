@@ -85,7 +85,7 @@ arma::mat Q(double t, arma::mat QH, double theta) {
 }
 
 
-RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SEXP bh, SEXP fh, SEXP mu0h, SEXP thetah, SEXP k, SEXP pinv_tol, SEXP gomp_) {
+RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SEXP bh, SEXP fh, SEXP mu0h, SEXP thetah, SEXP k, SEXP pinv_tol, SEXP gomp_, SEXP logmu0_) {
     
     long N = as<long>(n); // Number of rows
     long M = as<long>(m); // Number of columns
@@ -99,7 +99,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
     double thetaH  = as<double>(thetah);
     int dim = as<int>(k);
     gomp = as<bool>(gomp_);
-    
+    bool logmu0 = as<bool>(logmu0_);
     
     //Actual data set
     arma::mat dd = as<arma::mat>(dat);  
@@ -144,7 +144,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
       
       //Integration:
       gamma1.zeros(); // set gamma1 to zero matrix
-      double s = h/3.00*(-1.00)*mu(t1, y1, gamma1, fH, f1H, mu0H, thetaH, QH);
+      double s = h/3.00*(-1.00)*mu(t1, y1, gamma1, fH, f1H, logmu0 ? log(mu0H): mu0H, thetaH, QH);
       double t = t1;
       out[0] = y1;
       out[1] = gamma1;
@@ -187,7 +187,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
           }
         }
         
-        s = s + ifactor*h/3.00*(-1.00)*mu(t,out[0],out[1], fH, f1H, mu0H, thetaH, QH);
+        s = s + ifactor*h/3.00*(-1.00)*mu(t,out[0],out[1], fH, f1H, logmu0 ? log(mu0H): mu0H, thetaH, QH);
         
       }
       
@@ -203,7 +203,7 @@ RcppExport SEXP complikMD(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, 
         L += s + exp(0,0);
       } else {
         //double logprobi = log(1.00 - exp(-1.00*mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH)));
-        double logprobi = mu(t2, m2, gamma2, fH, f1H, mu0H, thetaH, QH);
+        double logprobi = mu(t2, m2, gamma2, fH, f1H, logmu0 ? log(mu0H): mu0H, thetaH, QH);
         L += s + logprobi;
       }
     }

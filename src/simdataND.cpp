@@ -70,6 +70,8 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
     for(int l=0; l < k; l++) {
         //y1(l, 0) = Rcpp::rnorm(1, ystart(l,0), pow(epsilon(l,0),0.5))[0];
         y1(l, 0) = Rcpp::rnorm(1, ystart(l,0), epsilon(l,0))[0];
+        //y1(l, 0) = R::rnorm(ystart(l,0), epsilon(l,0));
+        //std::cout << ystart(l,0) << " " << epsilon(l,0) << " " << y1(l, 0) << "\n";
     }
     
     new_person = false;
@@ -86,10 +88,14 @@ RcppExport SEXP simdata_ND(SEXP n, SEXP u_, SEXP R_, SEXP epsilon_, SEXP mu0_, S
         arma::mat eps(k,1);
         
         for(int ii=0; ii < k; ii++) {
-          eps(ii,0) = Rcpp::rnorm(1, 0.0, epsilon(ii,0.0))[0];
+          eps(ii,0) = rnorm(1, 0, epsilon(ii,0.0))[0];
+          //eps(ii,0) = rnorm(1, 0, 1)[0];
           //eps(ii,0) = Rcpp::rnorm(1, 0.0, pow(epsilon(ii,0.0),0.5))[0];
           //eps(ii,0) = R::rnorm(0.0, epsilon(ii,0.0));
+          //std::cout << "!!!" << " " << Rcpp::rnorm(1, 0, epsilon(ii,0.0))[0] << " " << epsilon(ii,0.0) << "\n";
         }
+        
+        //std::cout << "!!!" << " " << rnorm(1, 0, 5) << "\n";
         
         y2 = u + R * y1 + eps;
         new_person = false;

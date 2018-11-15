@@ -10,7 +10,7 @@
   /* .Call calls */
   extern SEXP complik_gen(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP complikGenNonGenetic(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP complikMD(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP complikMD(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP complikMD_linear(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP complikMD_quadratic_linear(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP d_f_i1_a0_abqff1mt_g_c(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -36,7 +36,7 @@ extern SEXP simGenCont(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEX
 static const R_CallMethodDef CallEntries[] = {
   {"complik_gen",                (DL_FUNC) &complik_gen,                23},
   {"complikGenNonGenetic",       (DL_FUNC) &complikGenNonGenetic,       21},
-  {"complikMD",                  (DL_FUNC) &complikMD,                  13},
+  {"complikMD",                  (DL_FUNC) &complikMD,                  14},
   {"complikMD_linear",           (DL_FUNC) &complikMD_linear,           13},
   {"complikMD_quadratic_linear", (DL_FUNC) &complikMD_quadratic_linear, 14},
   {"d_f_i1_a0_abqff1mt_g_c",     (DL_FUNC) &d_f_i1_a0_abqff1mt_g_c,     21},

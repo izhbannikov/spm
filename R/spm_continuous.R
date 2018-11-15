@@ -187,7 +187,7 @@ spm_continuous <- function(dat,
   
   if(mu0 < 0) {mu0 <- 0}
   
-  parameters <- c(t(a), f1, t(Q), f, b, ifelse(logmu0, log(mu0), mu0), theta)
+  parameters <- c(t(a), f1, t(Q), f, b, mu0, theta)
   # Current results:
   #results <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
   results_tmp <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL)
@@ -278,8 +278,10 @@ spm_continuous <- function(dat,
     
     if(stopflag == FALSE) {
       dims <- dim(dat)
-      res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k, pinv.tol, gomp)
+      res <- .Call("complikMD", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, k, pinv.tol, gomp, logmu0)
+      
       assign("results", results_tmp, envir=baseenv())
+      
       iteration <<- iteration + 1
       L.prev <<- res
       
