@@ -83,7 +83,7 @@ prepare_data <- function(x,
         stop("Interval must be integer.")
     }
   
-    if(class(x) == "character")
+    if( is.character(x) )
     {
         if(file_ext(x) == "csv") 
         {
@@ -95,7 +95,7 @@ prepare_data <- function(x,
             stop(paste(x, ":", "unknown file format, it must be csv or sas7bdat."))
         }
     } 
-    else if(class(x) == "data.frame")
+    else if( is.data.frame(x) )
     {
         merged.data <- x
     } else
@@ -203,8 +203,8 @@ prepare_data_cont <- function(merged.data,
             case <- splitted[[iii]][1, col.status.ind]
             t1 <- splitted[[iii]][ 1:(nrows-1), col.age.ind]
             #t2 <- c(splitted[[iii]][ , col.age.ind][-1], tail(splitted[[iii]][ , col.age.event.ind],n=1))
-            t2 <- t1 + 0.01*t1
-            
+            #t2 <- t1 + 0.01*t1
+            t2 <- splitted[[iii]][ , col.age.ind]
         }
         
         tmp.frame <- cbind(id, case, t1, t2)

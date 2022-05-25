@@ -256,27 +256,27 @@ spm.impute <- function(x,
 {
     
     # Check input parameters for correctness
-    if(class(x) != "data.frame") {
+    if(!is.data.frame(x)) {
         stop("Class of dataset must be a 'data.frame'.")
     }
   
     datasets <- list() # To hold imputed datasets
     
-    col.id.ind <- ifelse(class(id)=="character", get.column.index(x, id), id)
+    col.id.ind <- ifelse(is.character(id), get.column.index(x, id), id)
     if(col.id.ind == 0) stop(paste("Column",id, "not found in data table!"))
     
-    col.status.ind <- ifelse(class(case)=="character", get.column.index(x, case), case)
+    col.status.ind <- ifelse(is.character(case), get.column.index(x, case), case)
     if(col.status.ind == 0) stop(paste("Column",case, "not found in data table!"))
     
-    col.age.ind <- ifelse(class(t1)=="character", get.column.index(x, t1), t1)
+    col.age.ind <- ifelse(is.character(t1), get.column.index(x, t1), t1)
     if(col.age.ind == 0) stop(paste("Column",t1, "not found in data table!"))
     
-    col.age.event.ind <- ifelse(class(t2)=="character", get.column.index(x, t2), t2)
+    col.age.event.ind <- ifelse(is.character(t2), get.column.index(x, t2), t2)
     if(col.age.event.ind == 0) stop(paste("Column", t2, "not found in data table!"))
     
     col.covar.ind <- c()
     for(c in covariates) {
-        c.ind <- ifelse(class(c)=="character", get.column.index(x, c), c)
+        c.ind <- ifelse(is.character(c), get.column.index(x, c), c)
         if(c.ind == 0) stop(paste("Column", c, "not found in data table!"))
         col.covar.ind <- c(col.covar.ind, c.ind)
     } 
