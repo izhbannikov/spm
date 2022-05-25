@@ -4,11 +4,24 @@
 \alias{spm_continuous}
 \title{Continuous multi-dimensional optimization}
 \usage{
-spm_continuous(dat, a = -0.05, f1 = 80, Q = 2e-08, f = 80, b = 5,
-  mu0 = 2e-05, theta = 0.08, stopifbound = FALSE, lb = NULL,
-  ub = NULL, verbose = FALSE, pinv.tol = 0.01, gomp = FALSE,
-  opts = list(algorithm = "NLOPT_LN_NELDERMEAD", maxeval = 100, ftol_rel
-  = 1e-08), logmu0 = FALSE)
+spm_continuous(
+  dat,
+  a = -0.05,
+  f1 = 80,
+  Q = 2e-08,
+  f = 80,
+  b = 5,
+  mu0 = 2e-05,
+  theta = 0.08,
+  stopifbound = FALSE,
+  lb = NULL,
+  ub = NULL,
+  verbose = FALSE,
+  pinv.tol = 0.01,
+  gomp = FALSE,
+  opts = list(algorithm = "NLOPT_LN_NELDERMEAD", maxeval = 100, ftol_rel = 1e-08),
+  logmu0 = FALSE
+)
 }
 \arguments{
 \item{dat}{A data table.}
@@ -74,6 +87,7 @@ intervals with different lengths.
 }
 \examples{
 library(stpm)
+set.seed(123)
 #Reading the data:
 data <- simdata_cont(N=2)
 head(data)

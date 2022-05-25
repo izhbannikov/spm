@@ -4,11 +4,26 @@
 \alias{spm_con_1d_g}
 \title{Fitting a 1-D genetic SPM model with constant parameters}
 \usage{
-spm_con_1d_g(spm_data, gene_data, a = NA, b = NA, q = NA, f = NA,
-  f1 = NA, mu0 = NA, theta = NA, effect = c("a"), lower = c(),
-  upper = c(), control = list(xtol_rel = 1e-06), global = FALSE,
-  verbose = TRUE, ahessian = FALSE, method = "lbfgs",
-  method.hessian = "L-BFGS-B")
+spm_con_1d_g(
+  spm_data,
+  gene_data,
+  a = NA,
+  b = NA,
+  q = NA,
+  f = NA,
+  f1 = NA,
+  mu0 = NA,
+  theta = NA,
+  effect = c("a"),
+  lower = c(),
+  upper = c(),
+  control = list(xtol_rel = 1e-06),
+  global = FALSE,
+  verbose = TRUE,
+  ahessian = FALSE,
+  method = "lbfgs",
+  method.hessian = "L-BFGS-B"
+)
 }
 \arguments{
 \item{spm_data}{A dataset for the SPM model. See the STPM pacakge for more details about the format.}

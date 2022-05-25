@@ -6,9 +6,19 @@
 Projections are constructed for a cohort with fixed or 
 normally distributed initial covariates.}
 \usage{
-spm_projection(x, N = 100, ystart = 80, model = "discrete",
-  tstart = 30, tend = 105, dt = 1, sd0 = 1, nobs = NULL,
-  gomp = TRUE, format = "short")
+spm_projection(
+  x,
+  N = 100,
+  ystart = 80,
+  model = "discrete",
+  tstart = 30,
+  tend = 105,
+  dt = 1,
+  sd0 = 1,
+  nobs = NULL,
+  gomp = TRUE,
+  format = "short"
+)
 }
 \arguments{
 \item{x}{A list of parameters from output of the \code{spm(...)} function.}
@@ -52,6 +62,7 @@ normally distributed initial covariates.
 \examples{
 \dontrun{ 
 library(stpm)
+set.seed(123)
 # Setting up the model
 model.par <- list()
 model.par$a <- matrix(c(-0.05, 1e-3, 2e-3, -0.05), nrow=2, ncol=2, byrow=TRUE)

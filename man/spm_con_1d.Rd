@@ -4,10 +4,22 @@
 \alias{spm_con_1d}
 \title{Fitting a 1-D SPM model with constant parameters}
 \usage{
-spm_con_1d(spm_data, a = NA, b = NA, q = NA, f = NA, f1 = NA,
-  mu0 = NA, theta = NA, lower = c(), upper = c(),
-  control = list(xtol_rel = 1e-06), global = FALSE, verbose = TRUE,
-  ahessian = FALSE)
+spm_con_1d(
+  spm_data,
+  a = NA,
+  b = NA,
+  q = NA,
+  f = NA,
+  f1 = NA,
+  mu0 = NA,
+  theta = NA,
+  lower = c(),
+  upper = c(),
+  control = list(xtol_rel = 1e-06),
+  global = FALSE,
+  verbose = TRUE,
+  ahessian = FALSE
+)
 }
 \arguments{
 \item{spm_data}{A dataset for the SPM model. See the STPM package for more details about the format.}

@@ -4,13 +4,35 @@
 \alias{spm_pobs}
 \title{Continuous-time multi-dimensional optimization for SPM with partially observed covariates (multidimensional GenSPM)}
 \usage{
-spm_pobs(x = NULL, y = NULL, aH = -0.05, aL = -0.01, f1H = 60,
-  f1L = 80, QH = 2e-08, QL = 2.5e-08, fH = 60, fL = 80, bH = 4,
-  bL = 5, mu0H = 8e-06, mu0L = 1e-05, thetaH = 0.08,
-  thetaL = 0.1, p = 0.25, stopifbound = FALSE,
-  algorithm = "NLOPT_LN_NELDERMEAD", lb = NULL, ub = NULL,
-  maxeval = 500, verbose = FALSE, pinv.tol = 0.01,
-  mode = "observed", gomp = TRUE, ftol_rel = 1e-06)
+spm_pobs(
+  x = NULL,
+  y = NULL,
+  aH = -0.05,
+  aL = -0.01,
+  f1H = 60,
+  f1L = 80,
+  QH = 2e-08,
+  QL = 2.5e-08,
+  fH = 60,
+  fL = 80,
+  bH = 4,
+  bL = 5,
+  mu0H = 8e-06,
+  mu0L = 1e-05,
+  thetaH = 0.08,
+  thetaL = 0.1,
+  p = 0.25,
+  stopifbound = FALSE,
+  algorithm = "NLOPT_LN_NELDERMEAD",
+  lb = NULL,
+  ub = NULL,
+  maxeval = 500,
+  verbose = FALSE,
+  pinv.tol = 0.01,
+  mode = "observed",
+  gomp = TRUE,
+  ftol_rel = 1e-06
+)
 }
 \arguments{
 \item{x}{A data table with genetic component.}

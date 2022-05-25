@@ -41,15 +41,10 @@ Yashin, A. et al (2007), Health decline, aging and mortality: how are they relat
 Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
 }
 \author{
-I. Y. Zhbannikov, Liang He, K. G. Arbeev, A. I. Yashin.
+I. Y. Zhbannikov, Liang He, K. G. Arbeev, I. Akushevich, A. I. Yashin.
 }
-\keyword{Stochastic}
-\keyword{allostatic}
-\keyword{hazard}
-\keyword{load,}
+\keyword{censoring}
 \keyword{longitudinal}
-\keyword{model,}
-\keyword{process}
-\keyword{quadratic}
-\keyword{studies,}
+\keyword{modeling}
+\keyword{stochastic}
 \keyword{time-to-event}

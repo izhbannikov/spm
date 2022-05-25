@@ -35,6 +35,7 @@
 #'@export
 #'@examples \dontrun{ 
 #'library(stpm)
+#'set.seed(123)
 #'# Setting up the model
 #'model.par <- list()
 #'model.par$a <- matrix(c(-0.05, 1e-3, 2e-3, -0.05), nrow=2, ncol=2, byrow=TRUE)

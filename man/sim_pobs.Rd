@@ -4,11 +4,32 @@
 \alias{sim_pobs}
 \title{Multi-dimension simulation function for data with partially observed covariates (multidimensional GenSPM) with arbitrary intervals}
 \usage{
-sim_pobs(N = 10, aH = -0.05, aL = -0.01, f1H = 60, f1L = 80,
-  QH = 2e-08, QL = 2.5e-08, fH = 60, fL = 80, bH = 4, bL = 5,
-  mu0H = 8e-06, mu0L = 1e-05, thetaH = 0.08, thetaL = 0.1,
-  p = 0.25, ystart = 80, tstart = 30, tend = 105, dt = 1,
-  sd0 = 1, mode = "observed", gomp = FALSE, nobs = NULL)
+sim_pobs(
+  N = 10,
+  aH = -0.05,
+  aL = -0.01,
+  f1H = 60,
+  f1L = 80,
+  QH = 2e-08,
+  QL = 2.5e-08,
+  fH = 60,
+  fL = 80,
+  bH = 4,
+  bL = 5,
+  mu0H = 8e-06,
+  mu0L = 1e-05,
+  thetaH = 0.08,
+  thetaL = 0.1,
+  p = 0.25,
+  ystart = 80,
+  tstart = 30,
+  tend = 105,
+  dt = 1,
+  sd0 = 1,
+  mode = "observed",
+  gomp = FALSE,
+  nobs = NULL
+)
 }
 \arguments{
 \item{N}{Number of individuals.}

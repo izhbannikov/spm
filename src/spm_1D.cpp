@@ -56,7 +56,7 @@ double Q(double t, double QH, double theta) {
 void ode45_simpson(double t1, double t2, double y1, double *out, double &s, double nsteps, 
           double fH, double f1H, double aH, double bH, double QH, double thetaH, double mu0H) {
   
-  double *k1ar, *yfin, *ytmp, *k2ar, *k3ar, *k4ar;
+  double *k1ar, *yfin, *ytmp, *k2ar, *k3ar, *k4ar = NULL;
   k1ar = new double[2];
   yfin = new double[2];
   ytmp = new double[2];
@@ -113,14 +113,15 @@ void ode45_simpson(double t1, double t2, double y1, double *out, double &s, doub
     s = s + ifactor*h/3.00*(-1.00)*mu(t,out[0],out[1], fH, f1H, mu0H, thetaH, QH);
   }
   
-  delete k1ar; 
-  delete yfin;
-  delete ytmp; 
-  delete k2ar;
-  delete k3ar;
-  delete k4ar;  
+  delete[] k1ar; 
+  delete[] yfin;
+  delete[] ytmp; 
+  delete[] k2ar;
+  delete[] k3ar;
+  delete[] k4ar;  
   
 }
+
 
 RcppExport SEXP complik(SEXP dat, SEXP n, SEXP m, SEXP ah, SEXP f1h, SEXP qh, SEXP bh, SEXP fh, SEXP mu0h, SEXP thetah) {
     

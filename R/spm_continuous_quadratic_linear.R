@@ -37,6 +37,7 @@
 #'@export
 #'@examples
 #'library(stpm)
+#'set.seed(123)
 #'#Reading the data:
 #'data <- simdata_cont(N=2)
 #'head(data)
@@ -197,6 +198,7 @@ spm_cont_quad_lin <- function(dat,
     parameters <- c(t(a), f1, t(Q), f, b, mu0, theta, t(Q1))
     # Current results:
     results_tmp <- list(a=NULL, f1=NULL, Q=NULL, f=NULL, b=NULL, mu0=NULL, theta=NULL, Q1=NULL)
+    e <- new.env()
     iteration <- 0
   
     bounds <- list()
@@ -257,7 +259,7 @@ spm_cont_quad_lin <- function(dat,
         if(stopflag == FALSE) {
             dims <- dim(dat)
             res <- .Call("complikMD_quadratic_linear", dat, dims[1], dims[2], a, f1, Q, b, f, mu0, theta, Q1, k, pinv.tol, gomp)
-            assign("results", results_tmp, envir=baseenv())
+            assign("results", results_tmp, envir=e)
             iteration <<- iteration + 1
             L.prev <<- res
       
@@ -284,7 +286,8 @@ spm_cont_quad_lin <- function(dat,
   		            opts = opts,
                   lb = bounds$lower_bound, ub = bounds$upper_bound)
   
-    final_results <- get("results",envir=baseenv())
+    final_results <- get("results",envir=e)
+    #final_results <- results_tmp
     final_results[["status"]] <- ans$status
     final_results[["LogLik"]] <- L.prev
     final_results[["objective"]] <- ans$objective
@@ -301,7 +304,7 @@ spm_cont_quad_lin <- function(dat,
     }
   
     final_results$limit <- limit
-    #assign("results", final_results, envir=baseenv())
+    #assign("results", final_results, envir=e)
     class(final_results) <- "spm.cont.quad.lin"
     invisible(final_results)
 }

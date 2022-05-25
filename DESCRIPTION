@@ -2,9 +2,9 @@ Package: stpm
 Type: Package
 Title: Stochastic Process Model for Analysis of Longitudinal and
         Time-to-Event Outcomes
-Version: 1.7.9
-Date: 2020-11-17
-Author: I. Y. Zhbannikov, Liang He, K. G. Arbeev, I. Akushevich, A. I. Yashin.
+Version: 1.7.11
+Date: 2022-05-25
+Author: I. Zhbannikov, Liang He, K. Arbeev, I. Akushevich, A. Yashin.
 Maintainer: Ilya Y. Zhbannikov <ilya.zhbannikov@duke.edu>
 Description: Utilities to estimate parameters of the models with survival functions 
              induced by stochastic covariates. Miscellaneous functions for data preparation 
@@ -20,6 +20,6 @@ Imports: sas7bdat,stats,nloptr,survival,tools,MASS
 LinkingTo: Rcpp,RcppArmadillo
 Depends: R (>= 2.10), Rcpp (>= 0.11.1)
 VignetteBuilder: knitr
-Suggests: knitr (>= 1.11)
-RoxygenNote: 6.1.0
+Suggests: knitr (>= 1.11), rmarkdown (>= 1.9)
+RoxygenNote: 7.1.1
 NeedsCompilation: yes

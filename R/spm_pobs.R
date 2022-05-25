@@ -291,6 +291,7 @@ spm_pobs <- function(x=NULL, y=NULL,
                       mu0H=NULL, mu0L=NULL,
                       thetaH=NULL, thetaL=NULL,
                       p=NULL)
+  e <- new.env()
   iteration <- 0
   
   bounds <- list()
@@ -461,7 +462,7 @@ spm_pobs <- function(x=NULL, y=NULL,
                      k, pinv.tol, gomp)
       }
       
-      assign("results", results_tmp, envir=baseenv())
+      assign("results", results_tmp, envir=e)
       iteration <<- iteration + 1
       if(verbose) {
         cat("L = ", res,"\n")
@@ -494,7 +495,8 @@ spm_pobs <- function(x=NULL, y=NULL,
          eval_f = maxlik, opts = list("algorithm"=algorithm, "ftol_rel"=ftol_rel, "maxeval"=maxeval),
          lb = bounds$lower_bound, ub = bounds$upper_bound)
   
-  final_results <- get("results",envir=baseenv())
+  final_results <- get("results",envir=e)
+  #final_results <- results_tmp
   
   # Check if any parameter achieved upper/lower limit and report it:
   limit <- FALSE

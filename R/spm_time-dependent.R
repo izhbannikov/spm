@@ -32,6 +32,7 @@
 #'@export
 #'@examples
 #'library(stpm)
+#'set.seed(123)
 #'#Data preparation:
 #'n <- 5
 #'data <- simdata_time_dep(N=n)
@@ -155,7 +156,7 @@ spm_time_dep_internal <- function(x, start, frm, stopifbound, lb, ub, verbose, o
     #                      "NLOPT_LN_SBPLX",
     #                      "NLOPT_LN_BOBYQA", "NLOPT_GN_ISRES")
   
-    
+    e <- new.env()
     #--------------Begin of optimize function-------------------#
     optimize <- function(data, starting_params,  formulas, verbose, 
                          lb, ub, 
@@ -224,7 +225,7 @@ spm_time_dep_internal <- function(x, start, frm, stopifbound, lb, ub, verbose, o
     
         for(p in names(stpar)) {
             results[[p]] <- stpar[p]
-            assign(p, stpar[p], envir=baseenv())
+            assign(p, stpar[p], envir=e)
         }
     
     
@@ -250,7 +251,7 @@ spm_time_dep_internal <- function(x, start, frm, stopifbound, lb, ub, verbose, o
             
       
             for(p in names(stpar)) {
-                assign(p, params[[p]], envir=baseenv())
+                assign(p, params[[p]], envir=e)
                 results[[p]] <<- params[[p]]
                 if(verbose)
                     cat(paste(p, results[[p]]), " ")
@@ -316,7 +317,7 @@ spm_time_dep_internal <- function(x, start, frm, stopifbound, lb, ub, verbose, o
                     }
                 }
         
-                assign("results", results, envir=baseenv())
+                assign("results", results, envir=e)
         
                 iteration <<- iteration + 1
                 L.prev <<- L
@@ -411,8 +412,9 @@ parse_parameters <- function(formulas, parameter, p.const.ind, p.coeff.ind, vari
   #---
   parameters <- trim(unlist(strsplit(formulas[[parameter]],"[\\+\\*\\(\\)]",fixed=F)))
   parameters <- parameters[which(!(parameters %in% c("t","exp")))]
+  ee <- new.env()
   #for(p in parameters) {assign(p,NULL, envir = .GlobalEnv); variables <- c(variables, p);}
-  for(p in parameters) {assign(p,NULL, envir=baseenv()); variables <- c(variables, p);}
+  for(p in parameters) {assign(p,NULL, envir=ee); variables <- c(variables, p);}
   variables <- unique(variables)
   p.constants <- c()
   p.coeffs <- c()

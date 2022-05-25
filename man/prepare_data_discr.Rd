@@ -4,8 +4,16 @@
 \alias{prepare_data_discr}
 \title{Prepares discrete-time dataset.}
 \usage{
-prepare_data_discr(merged.data, interval, col.status.ind, col.id.ind,
-  col.age.ind, col.age.event.ind, col.covar.ind, verbose)
+prepare_data_discr(
+  merged.data,
+  interval,
+  col.status.ind,
+  col.id.ind,
+  col.age.ind,
+  col.age.event.ind,
+  col.covar.ind,
+  verbose
+)
 }
 \arguments{
 \item{merged.data}{a longitudinal study dataset.}

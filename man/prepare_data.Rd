@@ -4,9 +4,16 @@
 \alias{prepare_data}
 \title{Data pre-processing for analysis with stochastic process model methodology.}
 \usage{
-prepare_data(x, col.id = NA, col.status = NA, col.age = NA,
-  col.age.event = NA, covariates = NA, interval = 1,
-  verbose = FALSE)
+prepare_data(
+  x,
+  col.id = NA,
+  col.status = NA,
+  col.age = NA,
+  col.age.event = NA,
+  covariates = NA,
+  interval = 1,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{x}{A path to the file with table of follow-up oservations (longitudinal table). 

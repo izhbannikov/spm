@@ -4,8 +4,16 @@
 \alias{prepare_data_cont}
 \title{Prepares continuouts-time dataset.}
 \usage{
-prepare_data_cont(merged.data, col.status.ind, col.id.ind, col.age.ind,
-  col.age.event.ind, col.covar.ind, verbose, dt)
+prepare_data_cont(
+  merged.data,
+  col.status.ind,
+  col.id.ind,
+  col.age.ind,
+  col.age.event.ind,
+  col.covar.ind,
+  verbose,
+  dt
+)
 }
 \arguments{
 \item{merged.data}{a longitudinal study dataset.}

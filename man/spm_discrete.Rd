@@ -4,8 +4,12 @@
 \alias{spm_discrete}
 \title{Discrete multi-dimensional optimization}
 \usage{
-spm_discrete(dat, theta_range = seq(0.02, 0.2, by = 0.001), tol = NULL,
-  verbose = FALSE)
+spm_discrete(
+  dat,
+  theta_range = seq(0.02, 0.2, by = 0.001),
+  tol = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{dat}{A data table.}

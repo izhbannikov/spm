@@ -4,8 +4,16 @@
 \alias{spm.impute}
 \title{Multiple Data Imputation with SPM}
 \usage{
-spm.impute(x, id = 1, case = 2, t1 = 3, t2 = 3, covariates = 4,
-  minp = 5, theta_range = seq(0.01, 0.2, by = 0.001))
+spm.impute(
+  x,
+  id = 1,
+  case = 2,
+  t1 = 3,
+  t2 = 3,
+  covariates = 4,
+  minp = 5,
+  theta_range = seq(0.01, 0.2, by = 0.001)
+)
 }
 \arguments{
 \item{x}{A longitudinal dataset with missing observations}

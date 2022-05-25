@@ -12,12 +12,11 @@
 #'<DOI: 10.1080/08898480590932296>.
 #'@references Yashin, A. et al (2007), Health decline, aging and mortality: how are they related? 
 #'Biogerontology, 8(3), 291-302.<DOI:10.1007/s10522-006-9073-3>.
-#'@author I. Y. Zhbannikov, Liang He, K. G. Arbeev, A. I. Yashin.
+#'@author I. Y. Zhbannikov, Liang He, K. G. Arbeev, I. Akushevich, A. I. Yashin.
 #'@docType package
 #'@name stpm
 #'@aliases stpm stpm-package
-#'@keywords Stochastic process model, allostatic load, quadratic hazard
-#'longitudinal studies, time-to-event
+#'@keywords stochastic modeling censoring time-to-event longitudinal
 #'@examples \dontrun{ 
 #'library(stpm)
 #'#Prepare data for optimization
