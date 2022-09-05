@@ -321,14 +321,17 @@ As you can see, there is no parameter $f$ in $opt.par$. This is because we set $
 Then, is you want to set the constraints, you must not specify the starting value (parameter $start$) and $lb$/$ub$ for the parameter $f$ (otherwise, the function raises an error):
 
 ```{r}
-
+library(stpm)
+set.seed(12345678)
 n <- 10
-data <- simdata_time_dep(N=n)
-# Temporarily commented below
+data <- simdata_time_dep(N=n, format = "long")
+
 # Estimation:
 opt.par <- spm_time_dep(data, frm = list(at="a", f1t="f1", Qt="Q", ft="0", bt="b", mu0t="mu0"), 
                         start=list(a=-0.05, f1=80, Q=2e-08, b=5, mu0=0.001), 
-                        lb=c(-1, 30, 1e-8, 1, 1e-6), ub=c(0, 120, 5e-8, 10, 1e-2))
+                        lb=c(-1, 30, 1e-8, 1, 1e-6), ub=c(0, 120, 5e-8, 10, 1e-2),
+                        opts=list(maxit=100), 
+                        verbose=F)
 opt.par
 
 ```

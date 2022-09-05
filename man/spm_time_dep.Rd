@@ -12,7 +12,7 @@ spm_time_dep(
   lb = NULL,
   ub = NULL,
   verbose = FALSE,
-  opts = list(algorithm = "NLOPT_LN_NELDERMEAD", maxeval = 100, ftol_rel = 1e-08),
+  opts = NULL,
   lrtest = FALSE
 )
 }

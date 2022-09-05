@@ -45,10 +45,16 @@ spm_time_dep <- function(x,
                                   bt="b", mu0t="mu0"), 
                          stopifbound=FALSE, 
                          lb=NULL, ub=NULL,
-                         verbose=FALSE, opts=list(algorithm="NLOPT_LN_NELDERMEAD", 
-                                                  maxeval=100, ftol_rel=1e-8),
+                         verbose=FALSE, 
+                         opts=NULL,
                          lrtest=FALSE) {
-  
+    
+    if(is.null(opts) | !is.list(opts)) {
+        opts=list(algorithm="NLOPT_LN_NELDERMEAD")
+    } else if(is.null(opts$algorithm)) {
+        opts$algorithm="NLOPT_LN_NELDERMEAD"
+    }
+    
     hypotheses <- c("H01", "H02", "H03", "H04", "H05")
     
     if(is.null(start)) {
@@ -155,8 +161,9 @@ spm_time_dep_internal <- function(x, start, frm, stopifbound, lb, ub, verbose, o
     #                      "NLOPT_LN_NEWUOA_BOUND", "NLOPT_LN_NELDERMEAD",
     #                      "NLOPT_LN_SBPLX",
     #                      "NLOPT_LN_BOBYQA", "NLOPT_GN_ISRES")
-  
+    
     e <- new.env()
+    
     #--------------Begin of optimize function-------------------#
     optimize <- function(data, starting_params,  formulas, verbose, 
                          lb, ub, 
@@ -176,7 +183,7 @@ spm_time_dep_internal <- function(x, start, frm, stopifbound, lb, ub, verbose, o
         bt <- NULL
         mu0t <- NULL
         variables <- c()
-    
+        
         # Assigning parameters:
         p.const.ind <- c()
         p.coeff.ind <- c()
@@ -225,11 +232,19 @@ spm_time_dep_internal <- function(x, start, frm, stopifbound, lb, ub, verbose, o
     
         for(p in names(stpar)) {
             results[[p]] <- stpar[p]
-            assign(p, stpar[p], envir=e)
+            #assign(x=p, value=stpar[p], envir=.GlobalEnv)
+            assign_to_global(what=p,value=stpar[p])
         }
     
     
         comp_func_params <- function(astring, f1string, qstring, fstring, bstring, mu0string) {
+            #at <<- eval(parse(text = paste('at <<- function(t) { return(' , astring , ')}', sep='')))
+            #f1t <<- eval(parse(text = paste('f1t <<- function(t) { return(' , f1string , ')}', sep='')))
+            #Qt <<- eval(parse(text = paste('Qt <<- function(t) { return(' , qstring , ')}', sep='')))
+            #ft <<- eval(parse(text = paste('ft <<- function(t) { return(' , fstring , ')}', sep='')))
+            #bt <<- eval(parse(text = paste('bt <<- function(t) { return(' , fstring , ')}', sep='')))
+            #mu0t <<- eval(parse(text = paste('mu0t <<- function(t) { return(' , mu0string , ')}', sep='')))
+            
             at <<- eval(bquote(function(t) .(parse(text = astring)[[1]])))
             f1t <<- eval(bquote(function(t) .(parse(text = f1string)[[1]]))) 
             Qt <<- eval(bquote(function(t) .(parse(text = qstring)[[1]])))
@@ -251,13 +266,15 @@ spm_time_dep_internal <- function(x, start, frm, stopifbound, lb, ub, verbose, o
             
       
             for(p in names(stpar)) {
-                assign(p, params[[p]], envir=e)
+                #assign(p, params[[p]], envir=e)
+                #assign(p, params[[p]], envir=.GlobalEnv)
+                assign_to_global(what=p,value=params[[p]])
                 results[[p]] <<- params[[p]]
                 if(verbose)
                     cat(paste(p, results[[p]]), " ")
             }
             
-      
+            
             sigma_sq <- function(t1, t2) {
                 # t2 = t_{j}, t1 = t_{j-1}
                 ans <- bt(t1)*(t2-t1)
@@ -317,8 +334,10 @@ spm_time_dep_internal <- function(x, start, frm, stopifbound, lb, ub, verbose, o
                     }
                 }
         
-                assign("results", results, envir=e)
-        
+                #assign("results", results, envir=e)
+                #assign("results", results, envir=.GlobalEnv)
+                assign_to_global(what="results",value=results)
+                
                 iteration <<- iteration + 1
                 L.prev <<- L
         
